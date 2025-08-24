@@ -1,15 +1,39 @@
+// src/features/auth/auth-mock.ts
 import { ILoginService, LoginPayload } from "./auth-service";
 import type { User } from "../../types/auth";
 
-const you: User = { id: "u1", handle: "you", name: "You" };
+// email → handle/name 유틸
+function fromEmail(email: string): Pick<User, "handle" | "name"> {
+  const handle = email.split("@")[0] || "user";
+  const name = handle.charAt(0).toUpperCase() + handle.slice(1);
+  return { handle, name };
+}
+// token ↔ handle 인코딩
+const TOKEN_PREFIX = "mock-";
 
 export const mockAuthService: ILoginService = {
   async login(payload: LoginPayload) {
-    if (!payload.email || !payload.password) throw new Error("이메일/비밀번호를 입력하세요.");
-    return { user: you, accessToken: "mock-" + Math.random().toString(36).slice(2) };
+    const { email, password } = payload;
+    if (!email || !password) throw new Error("이메일/비밀번호를 입력하세요.");
+
+    const { handle, name } = fromEmail(email);
+    const user: User = { id: "u-" + handle, handle, name };
+
+    // 토큰에 handle을 심어두면 새로고침 후 me()에서 복원 가능
+    const accessToken = TOKEN_PREFIX + handle;
+    return { user, accessToken };
   },
-  async logout() { return; },
-  async me(token: string) { return token?.startsWith("mock-") ? you : null; },
+
+  async logout() {
+    // 서버 호출 없으면 비워둬도 됨
+    return;
+  },
+
+  async me(token: string) {
+    if (!token?.startsWith(TOKEN_PREFIX)) return null;
+    const handle = token.slice(TOKEN_PREFIX.length);
+    const name = handle.charAt(0).toUpperCase() + handle.slice(1);
+    const user: User = { id: "u-" + handle, handle, name };
+    return user;
+  },
 };
-// 실제 API 서비스로 교체 필요
-// 예: export const apiAuthService: ILoginService = { ... }

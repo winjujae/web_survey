@@ -1,3 +1,5 @@
+// src/features/posts/posts-context.tsx
+"use client";
 import { createContext, useContext, useMemo, useState } from "react";
 import type { Post } from "../../types/post";
 import { makePosts } from "../../lib/mock";

@@ -1,4 +1,5 @@
-export type SortKey = "hot" | "new" | "top" | "follow";
+//types/post.ts
+export type SortKey = "hot" | "new" | "top" | "follow" | "announce" ;
 
 export type Post = {
   id: string;

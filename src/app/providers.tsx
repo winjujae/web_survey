@@ -1,4 +1,5 @@
-// 모든 Context 묶음
+// src/app/providers.tsx
+"use client";
 import { AuthProvider } from "../features/auth/auth-context";
 import { PostsProvider } from "../features/posts/posts-context";
 

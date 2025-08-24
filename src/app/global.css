@@ -151,13 +151,43 @@
         .cta{display:flex; flex-direction:column; gap:10px; padding:14px}
         .cta p{margin:0; color:var(--muted)}
 
-        .modal{position:fixed; inset:0; display:none; place-items:center; background:rgba(0,0,0,.4); z-index:90}
-        .modal[open]{display:grid}
-        .modal-card{width:min(680px,94vw); background:var(--card); border:1px solid var(--border); border-radius:18px; box-shadow:var(--shadow); padding:16px} /* 축소 */
-        .modal-card h2{margin:0 0 10px}
-        .modal-card .row{display:flex; gap:10px; margin:6px 0} /* 축소 */
-        .modal-card input,.modal-card textarea{width:100%; background:var(--bg-soft); border:1px solid var(--border); border-radius:10px; padding:8px;} /* 축소 */
-        .modal-card textarea{min-height:140px; resize:vertical}
+        /* dialog 전용 (이미 쓰는 규칙에 추가/수정) */
+        dialog.modal {
+          border: 0;
+          padding: 0;
+          background: transparent;
+        }
+        dialog.modal:not([open]) { display: none !important; }
+        dialog.modal[open] {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        dialog.modal::backdrop { background: rgba(0,0,0,.45); }
+
+        /* 카드 크기/스크롤 안정화 */
+        .modal-card {
+          box-sizing: border-box;              /* ★ 중요 */
+          background: var(--surface, #111);
+          border-radius: 12px;
+          box-shadow: 0 10px 30px rgba(0,0,0,.2);
+          width: min(520px, 94vw);             /* 넓이 */
+          max-height: min(80vh, 680px);        /* 높이 제한 */
+          overflow: auto;                      /* 넘치면 내부 스크롤 */
+          padding: 20px;
+        }
+
+        .modal-card .row { display: flex; gap: 10px; margin: 8px 0; }
+        .modal-card input,
+        .modal-card textarea {
+          width: 100%;
+          box-sizing: border-box;              /* ★ 함께 필요 */
+          background: var(--bg-soft);
+          border: 1px solid var(--border);
+          border-radius: 10px;
+          padding: 10px;
+        }
+        .modal-card textarea { min-height: 140px; resize: vertical; }
 
         .bottom-nav{
           display:none; position:fixed; bottom:12px; left:0; right:0; justify-content:center; z-index:60;

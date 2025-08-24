@@ -3,11 +3,12 @@ import type { SortKey, Post } from "../../../types/post";
 import { fmtTimeAgo, escapeHtml, cryptoRandomId } from "../../../lib/utils";
 import { PAGE_SIZE, THEME_KEY } from "../../../lib/constants";
 import { usePosts } from "../posts-context";
+import { useAuth } from "../../auth/auth-context";
 
 /** 외부에서 헤더 우측에 넣을 엘리먼트를 주입(로그인 버튼/아바타) */
 export default function CommunityHome({ headerRight }: { headerRight?: React.ReactNode }) {
   const { posts, setPosts, toggleLike } = usePosts();
-
+  const { user } = useAuth();
   const [currentSort, setCurrentSort] = useState<SortKey>("hot");
   const [page, setPage] = useState(0);
   const [query, setQuery] = useState("");
@@ -74,6 +75,7 @@ export default function CommunityHome({ headerRight }: { headerRight?: React.Rea
           .sort((a, b) => b.hot + b.comments * 3 - (a.hot + a.comments * 3));
       }
       case "follow": return searchedAndTagged.filter((p) => p.isFollowing);
+      case "announce": return searchedAndTagged.filter((p) => p.tags.includes("notice"));
       default: return searchedAndTagged;
     }
   }, [searchedAndTagged, currentSort]);
@@ -125,9 +127,16 @@ export default function CommunityHome({ headerRight }: { headerRight?: React.Rea
     const tags = tagsInput.split(",").map(s => s.trim().toLowerCase()).filter(Boolean).slice(0, 4);
     if (!title) { alert("제목을 입력해 주세요."); return; }
     const newPost: Post = {
-      id: cryptoRandomId(), title, body, author: "you", createdAt: Date.now(),
-      hot: Math.floor(Math.random() * 30) + 1, comments: 0, views: 0,
-      tags: tags.length ? tags : ["notice"], isFollowing: true,
+      id: cryptoRandomId(),
+      title,
+      body,
+      author: user?.handle || user?.name || "you",   // ← 여기!
+      createdAt: Date.now(),
+      hot: Math.floor(Math.random() * 30) + 1,
+      comments: 0,
+      views: 0,
+      tags: tags.length ? tags : ["notice"],
+      isFollowing: true,
     };
     setPosts(prev => [newPost, ...prev]);
     setCurrentSort("new");
@@ -197,7 +206,7 @@ export default function CommunityHome({ headerRight }: { headerRight?: React.Rea
 
         <div className="container">
           <nav className="tabs" role="tablist" aria-label="피드 정렬">
-            {(["hot","new","top","follow"] as SortKey[]).map((key) => (
+            {(["hot","new","top","follow","announce"] as SortKey[]).map((key) => (
               <button
                 key={key} className="tab" role="tab" data-sort={key}
                 aria-selected={currentSort === key} onClick={() => setCurrentSort(key)}
@@ -206,6 +215,7 @@ export default function CommunityHome({ headerRight }: { headerRight?: React.Rea
                 {key === "new" && <>🆕 최신 <small id="count-new">{counts.new}</small></>}
                 {key === "top" && <>🏆 주간 Top <small id="count-top">{counts.top}</small></>}
                 {key === "follow" && <>👥 팔로잉 <small id="count-follow">{counts.follow}</small></>}
+                {key === "announce" && <>📢 공지 </>}
               </button>
             ))}
           </nav>

@@ -1,3 +1,5 @@
+// src/features/auth/auth-context.tsx
+"use client";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { User } from "../../types/auth";
 import type { ILoginService, LoginPayload } from "./auth-service";
@@ -21,7 +23,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const t = localStorage.getItem(AUTH_KEY);
     if (!t) return setState(s => ({ ...s, loading: false }));
-    service.me(t).then(u => setState({ user: u, token: u ? t : null, loading: false }));
+    service.me(t).then(u => setState({ user: u, token: u ? t : null, loading: false }))
+    .catch(() => setState({ user: null, token: null, loading: false }));
+    ;
   }, []);
 
   const login = async (p: LoginPayload) => {

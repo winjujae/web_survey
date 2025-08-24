@@ -91,6 +91,31 @@ export default function CommunityHome({ headerRight }: { headerRight?: React.Rea
     return { hot, new: newer, top, follow };
   }, [searchedAndTagged]);
 
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  const THREE_DAYS = 1000 * 60 * 60 * 24 * 3;
+
+  function formatAbsolute(ts: number) {
+    const d = new Date(ts);
+    const pad = (n: number) => (n < 10 ? `0${n}` : `${n}`);
+    const y = d.getFullYear();
+    const m = pad(d.getMonth() + 1);
+    const day = pad(d.getDate());
+    const hh = pad(d.getHours());
+    const mm = pad(d.getMinutes());
+    return `${y}-${m}-${day} ${hh}:${mm}`; // 예: 2025-08-25 14:32
+  }
+
+  function renderTime(ts: number) {
+    // 1) SSR/초렌더: 항상 절대시간 (Hydration 불일치 방지)
+    if (!mounted) return formatAbsolute(ts);
+    // 2) 마운트 후: 3일 이상이면 절대시간, 아니면 상대시간
+    const age = Date.now() - ts;
+    return age >= THREE_DAYS ? formatAbsolute(ts) : fmtTimeAgo(ts);
+  }
+
+
   /** Page slice */
   const pageSlice = useMemo(() => sorted.slice(0, (page + 1) * PAGE_SIZE), [sorted, page]);
 
@@ -162,7 +187,7 @@ export default function CommunityHome({ headerRight }: { headerRight?: React.Rea
           <div className="avatar mini" aria-hidden>{p.author[0].toUpperCase()}</div>
           <span className="handle">@{p.author}</span>
           <span className="dot" />
-          <time dateTime={new Date(p.createdAt).toISOString()}>{fmtTimeAgo(p.createdAt)}</time>
+          <time dateTime={new Date(p.createdAt).toISOString()}>{renderTime(p.createdAt)}</time>
           <h2 className="title-inline">{escapeHtml(p.title)}</h2>
         </div>
       </article>
@@ -328,7 +353,7 @@ export default function CommunityHome({ headerRight }: { headerRight?: React.Rea
                 <div className="avatar mini" aria-hidden>{selected.author[0].toUpperCase()}</div>
                 <span>@{selected.author}</span>
                 <span className="dot" />
-                <time dateTime={new Date(selected.createdAt).toISOString()}>{fmtTimeAgo(selected.createdAt)}</time>
+                <time dateTime={new Date(selected.createdAt).toISOString()}>{renderTime(selected.createdAt)}</time>
               </div>
               <p style={{ whiteSpace: "pre-wrap", marginTop: 0 }}>{escapeHtml(selected.body)}</p>
               <div className="tags" style={{ marginTop: 12 }}>

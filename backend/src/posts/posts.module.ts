@@ -1,0 +1,29 @@
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { PostsService } from './posts.service';
+import { PostsController } from './posts.controller';
+import { Post } from './entities/post.entity';
+import { User } from '../users/entities/user.entity';
+import { Category } from '../categories/entities/category.entity';
+import { Comment } from '../comments/entities/comment.entity';
+import { Bookmark } from '../bookmarks/entities/bookmark.entity';
+import { Report } from '../reports/entities/report.entity';
+import { AuthModule } from '../auth/auth.module';
+
+@Module({
+  imports: [
+    TypeOrmModule.forFeature([
+      Post,
+      User,
+      Category,
+      Comment,
+      Bookmark,
+      Report,
+    ]),
+    AuthModule,
+  ],
+  controllers: [PostsController],
+  providers: [PostsService],
+  exports: [PostsService],
+})
+export class PostsModule {}

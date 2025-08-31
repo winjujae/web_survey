@@ -15,6 +15,7 @@ import {
   UsePipes,
   ParseUUIDPipe,
 } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery, ApiParam } from '@nestjs/swagger';
 import { PostsService, PostFilters, PaginationOptions } from './posts.service';
 import type { PostFilters as IPostFilters } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -22,6 +23,7 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { User } from '../users/entities/user.entity';
 
+@ApiTags('posts')
 @Controller('api/posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
@@ -29,6 +31,12 @@ export class PostsController {
   @Post()
   @UseGuards(JwtAuthGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: '게시글 작성', description: '새로운 게시글을 작성합니다.' })
+  @ApiResponse({ status: 201, description: '게시글 작성 성공' })
+  @ApiResponse({ status: 400, description: '잘못된 입력 데이터' })
+  @ApiResponse({ status: 401, description: '인증되지 않은 사용자' })
+  @ApiResponse({ status: 404, description: '카테고리를 찾을 수 없음' })
   async create(@Body() createPostDto: CreatePostDto, @Request() req: any) {
     const user = req.user as User;
     const post = await this.postsService.create(createPostDto, user);
@@ -40,6 +48,16 @@ export class PostsController {
   }
 
   @Get()
+  @ApiOperation({ summary: '게시글 목록 조회', description: '게시글 목록을 페이징과 필터링하여 조회합니다.' })
+  @ApiQuery({ name: 'page', required: false, description: '페이지 번호', example: '1' })
+  @ApiQuery({ name: 'limit', required: false, description: '페이지당 항목 수', example: '10' })
+  @ApiQuery({ name: 'sortBy', required: false, description: '정렬 기준', example: 'created_at' })
+  @ApiQuery({ name: 'sortOrder', required: false, description: '정렬 순서', example: 'DESC' })
+  @ApiQuery({ name: 'category_id', required: false, description: '카테고리 ID' })
+  @ApiQuery({ name: 'type', required: false, description: '게시글 타입' })
+  @ApiQuery({ name: 'status', required: false, description: '게시글 상태' })
+  @ApiQuery({ name: 'search', required: false, description: '검색어' })
+  @ApiResponse({ status: 200, description: '게시글 목록 조회 성공' })
   async findAll(
     @Query() filters: IPostFilters,
     @Query('page') page?: string,
@@ -68,6 +86,10 @@ export class PostsController {
   }
 
   @Get(':id')
+  @ApiParam({ name: 'id', description: '게시글 ID', example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiOperation({ summary: '게시글 상세 조회', description: '특정 게시글의 상세 정보를 조회합니다.' })
+  @ApiResponse({ status: 200, description: '게시글 조회 성공' })
+  @ApiResponse({ status: 404, description: '게시글을 찾을 수 없음' })
   async findOne(@Param('id', ParseUUIDPipe) id: string, @Request() req: any) {
     const user = req.user as User;
     const post = await this.postsService.findOne(id, user);

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User, UserRole } from './entities/user.entity';
@@ -105,8 +105,13 @@ export class UsersService {
     });
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+  async update(id: string, updateUserDto: UpdateUserDto, currentUser: User): Promise<User> {
     const user = await this.findOne(id);
+
+    // 본인 또는 관리자 확인
+    if (user.user_id !== currentUser.user_id && currentUser.role !== 'admin') {
+      throw new ForbiddenException('사용자 정보를 수정할 권한이 없습니다.');
+    }
 
     // 닉네임 중복 확인
     if (updateUserDto.nickname !== undefined && updateUserDto.nickname !== user.nickname) {
@@ -127,8 +132,13 @@ export class UsersService {
     return this.findOne(id);
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: string, currentUser: User): Promise<void> {
     const user = await this.findOne(id);
+
+    // 본인 또는 관리자 확인
+    if (user.user_id !== currentUser.user_id && currentUser.role !== 'admin') {
+      throw new ForbiddenException('사용자 계정을 삭제할 권한이 없습니다.');
+    }
 
     // 소프트 삭제
     await this.userRepository.update(id, {

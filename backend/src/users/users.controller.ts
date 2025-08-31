@@ -78,7 +78,7 @@ export class UsersController {
       };
     }
 
-    const user = await this.usersService.update(id, updateUserDto);
+    const user = await this.usersService.update(id, updateUserDto, currentUser);
     return {
       success: true,
       message: '사용자 정보가 성공적으로 수정되었습니다.',
@@ -87,11 +87,11 @@ export class UsersController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param('id', ParseUUIDPipe) id: string) {
-    await this.usersService.remove(id);
+  async remove(@Param('id', ParseUUIDPipe) id: string, @Request() req: any) {
+    const currentUser = req.user as User;
+    await this.usersService.remove(id, currentUser);
     return {
       success: true,
       message: '사용자가 성공적으로 삭제되었습니다.',

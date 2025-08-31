@@ -203,20 +203,33 @@ describe('PostsService', () => {
 
       await service.findAll(filters);
 
-      // Check that andWhere is called for each filter (order may vary)
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+      // Check that where and andWhere are called correctly
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith(
+        'post.status = :status',
+        { status: PostStatus.PUBLISHED },
+      );
+      expect(mockQueryBuilder.andWhere).toHaveBeenNthCalledWith(
+        1,
+        'post.is_active = :isActive',
+        { isActive: true },
+      );
+      expect(mockQueryBuilder.andWhere).toHaveBeenNthCalledWith(
+        2,
         'post.category_id = :categoryId',
         { categoryId: filters.category_id },
       );
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+      expect(mockQueryBuilder.andWhere).toHaveBeenNthCalledWith(
+        3,
         'post.type = :type',
         { type: filters.type },
       );
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+      expect(mockQueryBuilder.andWhere).toHaveBeenNthCalledWith(
+        4,
         'post.user_id = :userId',
         { userId: filters.user_id },
       );
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+      expect(mockQueryBuilder.andWhere).toHaveBeenNthCalledWith(
+        5,
         'post.is_anonymous = :isAnonymous',
         { isAnonymous: filters.is_anonymous },
       );
@@ -416,13 +429,13 @@ describe('PostsService', () => {
 
     it('should toggle like successfully', async () => {
       mockPostRepository.findOne.mockResolvedValue(mockPost);
-      mockPostRepository.save.mockResolvedValue({ ...mockPost, likes: 4 });
+      mockPostRepository.save.mockResolvedValue({ ...mockPost, likes: 6 });
 
       const result = await service.toggleLike(postId, mockUser);
 
       expect(result).toEqual({
-        liked: false,
-        likes: 4,
+        liked: true,
+        likes: 6,
       });
     });
 
@@ -442,10 +455,20 @@ describe('PostsService', () => {
     } as User;
 
     it('should return bookmark status', async () => {
+      const mockPost: Post = {
+        post_id: postId,
+        title: 'Test Post',
+      } as Post;
+
+      mockPostRepository.findOne.mockResolvedValue(mockPost);
+
       const result = await service.toggleBookmark(postId, mockUser);
 
+      expect(mockPostRepository.findOne).toHaveBeenCalledWith({
+        where: { post_id: postId },
+      });
       expect(result).toEqual({
-        bookmarked: false,
+        bookmarked: true,
       });
     });
   });

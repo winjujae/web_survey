@@ -19,6 +19,19 @@ export class AuthService {
   async register(registerDto: RegisterDto): Promise<TokenDto> {
     const { email, password, nickname, bio } = registerDto;
 
+    // 기본 입력 유효성 검증
+    if (!email || !email.includes('@')) {
+      throw new BadRequestException('올바른 이메일 형식을 입력해주세요.');
+    }
+
+    if (!password || password.length < 8) {
+      throw new BadRequestException('비밀번호는 최소 8자 이상이어야 합니다.');
+    }
+
+    if (!nickname || nickname.trim().length === 0) {
+      throw new BadRequestException('닉네임을 입력해주세요.');
+    }
+
     // 이메일 중복 확인
     const existingUser = await this.userRepository.findOne({
       where: [{ email }, { nickname }],
@@ -56,6 +69,15 @@ export class AuthService {
 
   async login(loginDto: LoginDto): Promise<TokenDto> {
     const { email, password } = loginDto;
+
+    // 기본 입력 유효성 검증
+    if (!email || !email.includes('@')) {
+      throw new BadRequestException('올바른 이메일 형식을 입력해주세요.');
+    }
+
+    if (!password || password.trim().length === 0) {
+      throw new BadRequestException('비밀번호를 입력해주세요.');
+    }
 
     const user = await this.userRepository.findOne({
       where: { email, is_active: true },

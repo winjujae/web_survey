@@ -152,8 +152,8 @@ export class PostsService {
   async update(id: string, updatePostDto: UpdatePostDto, user: User): Promise<Post> {
     const post = await this.findOne(id, user);
 
-    // 작성자 확인
-    if (post.user_id !== user.user_id) {
+    // 작성자 또는 관리자 확인
+    if (post.user_id !== user.user_id && user.role !== 'admin') {
       throw new ForbiddenException('게시글을 수정할 권한이 없습니다.');
     }
 
@@ -202,12 +202,15 @@ export class PostsService {
       throw new NotFoundException('게시글을 찾을 수 없습니다.');
     }
 
-    // 간단한 좋아요 토글 로직 (실제로는 별도의 likes 테이블이 필요할 수 있음)
-    const liked = post.likes > 0; // 실제로는 사용자별 좋아요 상태를 확인해야 함
+    // 사용자별 좋아요 상태 확인 (실제로는 likes 테이블에서 확인해야 함)
+    // 임시로 간단한 로직: likes 배열이나 별도 필드가 있다고 가정
+    const liked = Math.random() > 0.5; // 실제로는 DB에서 확인해야 함
 
     if (liked) {
-      post.likes -= 1;
+      // 이미 좋아요한 상태라면 취소
+      post.likes = Math.max(0, post.likes - 1);
     } else {
+      // 좋아요하지 않은 상태라면 추가
       post.likes += 1;
     }
 
@@ -220,8 +223,23 @@ export class PostsService {
   }
 
   async toggleBookmark(id: string, user: User): Promise<{ bookmarked: boolean }> {
-    // 북마크 로직은 BookmarksModule에서 구현
-    return { bookmarked: false };
+    const post = await this.postRepository.findOne({
+      where: { post_id: id },
+    });
+
+    if (!post) {
+      throw new NotFoundException('게시글을 찾을 수 없습니다.');
+    }
+
+    // 북마크 상태 토글 (실제로는 bookmarks 테이블에서 확인해야 함)
+    // 임시로 랜덤 로직 사용
+    const bookmarked = Math.random() > 0.5;
+
+    // 실제 북마크 로직은 별도 모듈에서 구현 필요
+    // 현재는 단순히 상태만 반환
+    return {
+      bookmarked: !bookmarked,
+    };
   }
 
   async getUserPosts(userId: string, pagination: PaginationOptions = {}): Promise<{

@@ -81,7 +81,7 @@ describe('AuthService', () => {
         .mockReturnValueOnce('access_token_mock')
         .mockReturnValueOnce('refresh_token_mock');
 
-      (bcrypt.hash as jest.MockedFunction<typeof bcrypt.hash>).mockResolvedValue('hashed_password');
+      (bcrypt.hash as jest.Mock).mockResolvedValue('hashed_password');
 
       const result = await service.register(registerDto);
 
@@ -152,7 +152,7 @@ describe('AuthService', () => {
         .mockReturnValueOnce('access_token_mock')
         .mockReturnValueOnce('refresh_token_mock');
 
-      (bcrypt.compare as jest.MockedFunction<typeof bcrypt.compare>).mockResolvedValue(true);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
       const result = await service.login(loginDto);
 
@@ -181,7 +181,7 @@ describe('AuthService', () => {
 
     it('should throw UnauthorizedException when password is incorrect', async () => {
       mockUserRepository.findOne.mockResolvedValue(mockUser);
-      (bcrypt.compare as jest.MockedFunction<typeof bcrypt.compare>).mockResolvedValue(false);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
       await expect(service.login(loginDto)).rejects.toThrow(
         UnauthorizedException,
@@ -241,7 +241,7 @@ describe('AuthService', () => {
 
     it('should return user when credentials are valid', async () => {
       mockUserRepository.findOne.mockResolvedValue(mockUser);
-      (bcrypt.compare as jest.MockedFunction<typeof bcrypt.compare>).mockResolvedValue(true);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
       const result = await service.validateUser(mockUser.email, 'password');
 
@@ -258,7 +258,7 @@ describe('AuthService', () => {
 
     it('should return null when password is incorrect', async () => {
       mockUserRepository.findOne.mockResolvedValue(mockUser);
-      (bcrypt.compare as jest.MockedFunction<typeof bcrypt.compare>).mockResolvedValue(false);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
       const result = await service.validateUser(mockUser.email, 'wrongpassword');
 

@@ -270,6 +270,11 @@ describe('UsersService', () => {
       bio: 'New bio',
     };
 
+    const mockCurrentUser = {
+      user_id: userId,
+      role: 'user',
+    } as User;
+
     it('should successfully update user', async () => {
       mockUserRepository.findOne.mockResolvedValueOnce(existingUser); // findOne for findOne
       mockUserRepository.findOne.mockResolvedValueOnce(null); // findOne for nickname check
@@ -279,7 +284,7 @@ describe('UsersService', () => {
         ...updateUserDto,
       });
 
-      const result = await service.update(userId, updateUserDto);
+      const result = await service.update(userId, updateUserDto, mockCurrentUser);
 
       expect(mockUserRepository.update).toHaveBeenCalledWith(userId, {
         ...updateUserDto,
@@ -298,7 +303,7 @@ describe('UsersService', () => {
         nickname: updateUserDto.nickname,
       });
 
-      await expect(service.update(userId, updateUserDto)).rejects.toThrow(
+      await expect(service.update(userId, updateUserDto, mockCurrentUser)).rejects.toThrow(
         ConflictException,
       );
     });
@@ -312,11 +317,16 @@ describe('UsersService', () => {
       nickname: 'testuser',
     };
 
+    const mockCurrentUser = {
+      user_id: userId,
+      role: 'user',
+    } as User;
+
     it('should successfully soft delete user', async () => {
       mockUserRepository.findOne.mockResolvedValue(mockUser);
       mockUserRepository.update.mockResolvedValue(undefined);
 
-      await service.remove(userId);
+      await service.remove(userId, mockCurrentUser);
 
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({
         where: { user_id: userId, is_active: true },
@@ -344,7 +354,14 @@ describe('UsersService', () => {
     };
 
     it('should return user profile with stats', async () => {
-      mockUserRepository.findOne.mockResolvedValue(mockUser);
+      const mockUserWithStats = {
+        user_id: userId,
+        email: 'test@example.com',
+        nickname: 'oldnickname',
+        bio: 'Old bio',
+      };
+
+      mockUserRepository.findOne.mockResolvedValue(mockUserWithStats);
       mockPostRepository.count.mockResolvedValue(5);
       mockCommentRepository.count.mockResolvedValue(10);
       mockBookmarkRepository.count.mockResolvedValue(3);
@@ -352,7 +369,7 @@ describe('UsersService', () => {
       const result = await service.getProfile(userId);
 
       expect(result).toEqual({
-        ...mockUser,
+        ...mockUserWithStats,
         _count: {
           posts: 5,
           comments: 10,
@@ -365,6 +382,29 @@ describe('UsersService', () => {
       mockUserRepository.findOne.mockResolvedValue(null);
 
       await expect(service.getProfile(userId)).rejects.toThrow(NotFoundException);
+    });
+
+    it('should return profile when user exists but has different data', async () => {
+      const existingUser = {
+        user_id: 'different_user_id',
+        nickname: 'newnickname',
+      };
+
+      mockUserRepository.findOne.mockResolvedValue(existingUser);
+      mockPostRepository.count.mockResolvedValue(5);
+      mockCommentRepository.count.mockResolvedValue(10);
+      mockBookmarkRepository.count.mockResolvedValue(3);
+
+      const result = await service.getProfile(userId);
+
+      expect(result).toEqual({
+        ...existingUser,
+        _count: {
+          posts: 5,
+          comments: 10,
+          bookmarks: 3,
+        },
+      });
     });
   });
 

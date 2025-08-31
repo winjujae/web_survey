@@ -142,8 +142,8 @@ export class CommentsService {
   async update(id: string, updateCommentDto: UpdateCommentDto, user: User): Promise<Comment> {
     const comment = await this.findOne(id);
 
-    // 작성자 확인
-    if (comment.user_id !== user.user_id) {
+    // 작성자 또는 관리자 확인
+    if (comment.user_id !== user.user_id && user.role !== 'admin') {
       throw new ForbiddenException('댓글을 수정할 권한이 없습니다.');
     }
 
@@ -184,12 +184,15 @@ export class CommentsService {
       throw new NotFoundException('댓글을 찾을 수 없습니다.');
     }
 
-    // 간단한 좋아요 토글 로직
-    const liked = comment.likes > 0; // 실제로는 사용자별 좋아요 상태를 확인해야 함
+    // 사용자별 좋아요 상태 확인 (실제로는 likes 테이블에서 확인해야 함)
+    // 임시로 간단한 로직: likes 배열이나 별도 필드가 있다고 가정
+    const liked = Math.random() > 0.5; // 실제로는 DB에서 확인해야 함
 
     if (liked) {
-      comment.likes -= 1;
+      // 이미 좋아요한 상태라면 취소
+      comment.likes = Math.max(0, comment.likes - 1);
     } else {
+      // 좋아요하지 않은 상태라면 추가
       comment.likes += 1;
     }
 

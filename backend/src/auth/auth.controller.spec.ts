@@ -5,6 +5,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { TokenDto } from './dto/token.dto';
 import { User, UserRole } from '../users/entities/user.entity';
+import { BadRequestException } from '@nestjs/common';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -64,6 +65,39 @@ describe('AuthController', () => {
       expect(mockAuthService.register).toHaveBeenCalledWith(registerDto);
       expect(result).toEqual(mockTokenDto);
     });
+
+    it('should throw BadRequestException for invalid email format', async () => {
+      const invalidRegisterDto = {
+        ...registerDto,
+        email: 'invalid-email',
+      };
+
+      mockAuthService.register.mockRejectedValue(new BadRequestException('올바른 이메일 형식을 입력해주세요.'));
+
+      await expect(controller.register(invalidRegisterDto)).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw BadRequestException for weak password', async () => {
+      const invalidRegisterDto = {
+        ...registerDto,
+        password: '123',
+      };
+
+      mockAuthService.register.mockRejectedValue(new BadRequestException('비밀번호는 최소 8자 이상이어야 합니다.'));
+
+      await expect(controller.register(invalidRegisterDto)).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw BadRequestException for empty nickname', async () => {
+      const invalidRegisterDto = {
+        ...registerDto,
+        nickname: '',
+      };
+
+      mockAuthService.register.mockRejectedValue(new BadRequestException('닉네임을 입력해주세요.'));
+
+      await expect(controller.register(invalidRegisterDto)).rejects.toThrow(BadRequestException);
+    });
   });
 
   describe('login', () => {
@@ -90,6 +124,28 @@ describe('AuthController', () => {
 
       expect(mockAuthService.login).toHaveBeenCalledWith(loginDto);
       expect(result).toEqual(mockTokenDto);
+    });
+
+    it('should throw BadRequestException for invalid email format', async () => {
+      const invalidLoginDto = {
+        ...loginDto,
+        email: 'invalid-email',
+      };
+
+      mockAuthService.login.mockRejectedValue(new BadRequestException('올바른 이메일 형식을 입력해주세요.'));
+
+      await expect(controller.login(invalidLoginDto)).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw BadRequestException for empty password', async () => {
+      const invalidLoginDto = {
+        ...loginDto,
+        password: '',
+      };
+
+      mockAuthService.login.mockRejectedValue(new BadRequestException('비밀번호를 입력해주세요.'));
+
+      await expect(controller.login(invalidLoginDto)).rejects.toThrow(BadRequestException);
     });
   });
 

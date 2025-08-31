@@ -156,7 +156,7 @@ describe('UsersController', () => {
 
       const result = await controller.update(userId, updateUserDto, mockRequest);
 
-      expect(mockUsersService.update).toHaveBeenCalledWith(userId, updateUserDto);
+      expect(mockUsersService.update).toHaveBeenCalledWith(userId, updateUserDto, mockCurrentUser);
       expect(result).toEqual({
         success: true,
         message: '사용자 정보가 성공적으로 수정되었습니다.',
@@ -167,17 +167,32 @@ describe('UsersController', () => {
 
   describe('remove', () => {
     const userId = '123e4567-e89b-12d3-a456-426614174000';
+    const mockCurrentUser: User = {
+      user_id: userId,
+      email: 'test@example.com',
+      nickname: 'testuser',
+      role: UserRole.USER,
+    } as User;
 
     it('should remove a user', async () => {
       mockUsersService.remove.mockResolvedValue(undefined);
+      const mockRequest = { user: mockCurrentUser };
 
-      const result = await controller.remove(userId);
+      const result = await controller.remove(userId, mockRequest);
 
-      expect(mockUsersService.remove).toHaveBeenCalledWith(userId);
+      expect(mockUsersService.remove).toHaveBeenCalledWith(userId, mockCurrentUser);
       expect(result).toEqual({
         success: true,
         message: '사용자가 성공적으로 삭제되었습니다.',
       });
+    });
+
+    it('should handle req.user undefined', async () => {
+      mockUsersService.remove.mockResolvedValue(undefined);
+      const mockRequest = { user: undefined };
+
+      // req.user가 undefined일 때는 런타임 에러가 발생해야 함
+      await expect(controller.remove(userId, mockRequest)).rejects.toThrow();
     });
   });
 
@@ -268,7 +283,7 @@ describe('UsersController', () => {
     it('should return user posts with pagination', async () => {
       mockUsersService.getUserPosts.mockResolvedValue(mockPostsData);
 
-      const result = await controller.getUserPosts(userId, 1, 10);
+      const result = await controller.getUserPosts(userId, '1', '10');
 
       expect(mockUsersService.getUserPosts).toHaveBeenCalledWith(userId, 1, 10);
       expect(result).toEqual({
@@ -306,7 +321,7 @@ describe('UsersController', () => {
     it('should return user comments with pagination', async () => {
       mockUsersService.getUserComments.mockResolvedValue(mockCommentsData);
 
-      const result = await controller.getUserComments(userId, 1, 10);
+      const result = await controller.getUserComments(userId, '1', '10');
 
       expect(mockUsersService.getUserComments).toHaveBeenCalledWith(userId, 1, 10);
       expect(result).toEqual({

@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToMany,
+} from 'typeorm';
 import { Review } from '../../reviews/entities/review.entity';
 
 export enum ProductCategory {
@@ -8,7 +15,7 @@ export enum ProductCategory {
   HAIR_GROWTH_SUPPLEMENT = 'hair_growth_supplement',
   HAIR_TRANSPLANT_PRODUCT = 'hair_transplant_product',
   HAIR_ACCESSORY = 'hair_accessory',
-  OTHER = 'other'
+  OTHER = 'other',
 }
 
 @Entity('products')
@@ -21,7 +28,7 @@ export class Product {
 
   @Column({
     type: 'enum',
-    enum: ProductCategory
+    enum: ProductCategory,
   })
   category: ProductCategory;
 
@@ -68,6 +75,6 @@ export class Product {
   updated_at: Date;
 
   // Relations
-  @OneToMany(() => Review, review => review.product)
+  @OneToMany(() => Review, (review) => review.product)
   reviews: Review[];
 }

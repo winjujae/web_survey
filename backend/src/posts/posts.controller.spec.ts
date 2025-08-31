@@ -75,7 +75,10 @@ describe('PostsController', () => {
 
       const result = await controller.create(createPostDto, mockRequest);
 
-      expect(mockPostsService.create).toHaveBeenCalledWith(createPostDto, mockUser);
+      expect(mockPostsService.create).toHaveBeenCalledWith(
+        createPostDto,
+        mockUser,
+      );
       expect(result).toEqual({
         success: true,
         message: '게시글이 성공적으로 생성되었습니다.',
@@ -115,14 +118,23 @@ describe('PostsController', () => {
     it('should return posts with default query', async () => {
       mockPostsService.findAll.mockResolvedValue(mockPostsData);
 
-      const result = await controller.findAll({}, undefined, undefined, undefined, undefined);
+      const result = await controller.findAll(
+        {},
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+      );
 
-      expect(mockPostsService.findAll).toHaveBeenCalledWith({}, {
-        page: 1,
-        limit: 10,
-        sortBy: 'created_at',
-        sortOrder: 'DESC',
-      });
+      expect(mockPostsService.findAll).toHaveBeenCalledWith(
+        {},
+        {
+          page: 1,
+          limit: 10,
+          sortBy: 'created_at',
+          sortOrder: 'DESC',
+        },
+      );
       expect(result).toEqual({
         success: true,
         data: mockPostsData.posts,
@@ -151,17 +163,20 @@ describe('PostsController', () => {
         limit: 20,
       });
 
-      const result = await controller.findAll(filters, page, limit, sortBy, sortOrder);
-
-      expect(mockPostsService.findAll).toHaveBeenCalledWith(
+      const result = await controller.findAll(
         filters,
-        {
-          page: 2,
-          limit: 20,
-          sortBy: 'likes',
-          sortOrder: 'DESC',
-        },
+        page,
+        limit,
+        sortBy,
+        sortOrder,
       );
+
+      expect(mockPostsService.findAll).toHaveBeenCalledWith(filters, {
+        page: 2,
+        limit: 20,
+        sortBy: 'likes',
+        sortOrder: 'DESC',
+      });
       expect(result).toEqual({
         success: true,
         data: mockPostsData.posts,
@@ -232,9 +247,17 @@ describe('PostsController', () => {
       const mockRequest = { user: mockUser };
       mockPostsService.update.mockResolvedValue(mockPost);
 
-      const result = await controller.update(postId, updatePostDto, mockRequest);
+      const result = await controller.update(
+        postId,
+        updatePostDto,
+        mockRequest,
+      );
 
-      expect(mockPostsService.update).toHaveBeenCalledWith(postId, updatePostDto, mockUser);
+      expect(mockPostsService.update).toHaveBeenCalledWith(
+        postId,
+        updatePostDto,
+        mockUser,
+      );
       expect(result).toEqual({
         success: true,
         message: '게시글이 성공적으로 수정되었습니다.',
@@ -277,7 +300,10 @@ describe('PostsController', () => {
 
       const result = await controller.toggleLike(postId, mockRequest);
 
-      expect(mockPostsService.toggleLike).toHaveBeenCalledWith(postId, mockUser);
+      expect(mockPostsService.toggleLike).toHaveBeenCalledWith(
+        postId,
+        mockUser,
+      );
       expect(result).toEqual({
         success: true,
         message: '게시글을 좋아요했습니다.',
@@ -302,7 +328,10 @@ describe('PostsController', () => {
 
       const result = await controller.toggleBookmark(postId, mockRequest);
 
-      expect(mockPostsService.toggleBookmark).toHaveBeenCalledWith(postId, mockUser);
+      expect(mockPostsService.toggleBookmark).toHaveBeenCalledWith(
+        postId,
+        mockUser,
+      );
       expect(result).toEqual({
         success: true,
         message: '게시글을 북마크했습니다.',
@@ -330,7 +359,11 @@ describe('PostsController', () => {
     it('should return user posts', async () => {
       mockPostsService.getUserPosts.mockResolvedValue(mockPostsData);
 
-      const result = await controller.getUserPosts(userId, undefined, undefined);
+      const result = await controller.getUserPosts(
+        userId,
+        undefined,
+        undefined,
+      );
 
       expect(mockPostsService.getUserPosts).toHaveBeenCalledWith(userId, {
         page: 1,

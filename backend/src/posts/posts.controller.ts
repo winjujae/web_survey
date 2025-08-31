@@ -15,7 +15,14 @@ import {
   UsePipes,
   ParseUUIDPipe,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery, ApiParam } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiQuery,
+  ApiParam,
+} from '@nestjs/swagger';
 import { PostsService, PostFilters, PaginationOptions } from './posts.service';
 import type { PostFilters as IPostFilters } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -32,7 +39,10 @@ export class PostsController {
   @UseGuards(JwtAuthGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: '게시글 작성', description: '새로운 게시글을 작성합니다.' })
+  @ApiOperation({
+    summary: '게시글 작성',
+    description: '새로운 게시글을 작성합니다.',
+  })
   @ApiResponse({ status: 201, description: '게시글 작성 성공' })
   @ApiResponse({ status: 400, description: '잘못된 입력 데이터' })
   @ApiResponse({ status: 401, description: '인증되지 않은 사용자' })
@@ -48,12 +58,39 @@ export class PostsController {
   }
 
   @Get()
-  @ApiOperation({ summary: '게시글 목록 조회', description: '게시글 목록을 페이징과 필터링하여 조회합니다.' })
-  @ApiQuery({ name: 'page', required: false, description: '페이지 번호', example: '1' })
-  @ApiQuery({ name: 'limit', required: false, description: '페이지당 항목 수', example: '10' })
-  @ApiQuery({ name: 'sortBy', required: false, description: '정렬 기준', example: 'created_at' })
-  @ApiQuery({ name: 'sortOrder', required: false, description: '정렬 순서', example: 'DESC' })
-  @ApiQuery({ name: 'category_id', required: false, description: '카테고리 ID' })
+  @ApiOperation({
+    summary: '게시글 목록 조회',
+    description: '게시글 목록을 페이징과 필터링하여 조회합니다.',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: '페이지 번호',
+    example: '1',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: '페이지당 항목 수',
+    example: '10',
+  })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    description: '정렬 기준',
+    example: 'created_at',
+  })
+  @ApiQuery({
+    name: 'sortOrder',
+    required: false,
+    description: '정렬 순서',
+    example: 'DESC',
+  })
+  @ApiQuery({
+    name: 'category_id',
+    required: false,
+    description: '카테고리 ID',
+  })
   @ApiQuery({ name: 'type', required: false, description: '게시글 타입' })
   @ApiQuery({ name: 'status', required: false, description: '게시글 상태' })
   @ApiQuery({ name: 'search', required: false, description: '검색어' })
@@ -86,8 +123,15 @@ export class PostsController {
   }
 
   @Get(':id')
-  @ApiParam({ name: 'id', description: '게시글 ID', example: '123e4567-e89b-12d3-a456-426614174000' })
-  @ApiOperation({ summary: '게시글 상세 조회', description: '특정 게시글의 상세 정보를 조회합니다.' })
+  @ApiParam({
+    name: 'id',
+    description: '게시글 ID',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiOperation({
+    summary: '게시글 상세 조회',
+    description: '특정 게시글의 상세 정보를 조회합니다.',
+  })
   @ApiResponse({ status: 200, description: '게시글 조회 성공' })
   @ApiResponse({ status: 404, description: '게시글을 찾을 수 없음' })
   async findOne(@Param('id', ParseUUIDPipe) id: string, @Request() req: any) {
@@ -130,24 +174,34 @@ export class PostsController {
 
   @Post(':id/like')
   @UseGuards(JwtAuthGuard)
-  async toggleLike(@Param('id', ParseUUIDPipe) id: string, @Request() req: any) {
+  async toggleLike(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Request() req: any,
+  ) {
     const user = req.user as User;
     const result = await this.postsService.toggleLike(id, user);
     return {
       success: true,
-      message: result.liked ? '게시글을 좋아요했습니다.' : '게시글 좋아요를 취소했습니다.',
+      message: result.liked
+        ? '게시글을 좋아요했습니다.'
+        : '게시글 좋아요를 취소했습니다.',
       data: result,
     };
   }
 
   @Post(':id/bookmark')
   @UseGuards(JwtAuthGuard)
-  async toggleBookmark(@Param('id', ParseUUIDPipe) id: string, @Request() req: any) {
+  async toggleBookmark(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Request() req: any,
+  ) {
     const user = req.user as User;
     const result = await this.postsService.toggleBookmark(id, user);
     return {
       success: true,
-      message: result.bookmarked ? '게시글을 북마크했습니다.' : '게시글 북마크를 취소했습니다.',
+      message: result.bookmarked
+        ? '게시글을 북마크했습니다.'
+        : '게시글 북마크를 취소했습니다.',
       data: result,
     };
   }

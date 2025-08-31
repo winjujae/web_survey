@@ -75,8 +75,7 @@ export class PostsService {
     const queryBuilder = this.postRepository.createQueryBuilder('post')
       .leftJoinAndSelect('post.user', 'user')
       .leftJoinAndSelect('post.category', 'category')
-      .where('post.status = :status', { status: PostStatus.PUBLISHED })
-      .andWhere('post.is_active = :isActive', { isActive: true });
+      .where('post.status = :status', { status: PostStatus.PUBLISHED });
 
     // 필터 적용
     if (filters.category_id) {

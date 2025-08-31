@@ -1,4 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToOne,
+  JoinColumn,
+} from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 
 export enum ExpertCategory {
@@ -6,14 +14,14 @@ export enum ExpertCategory {
   HAIR_SPECIALIST = 'hair_specialist',
   NUTRITIONIST = 'nutritionist',
   PSYCHOLOGIST = 'psychologist',
-  GENERAL_PRACTITIONER = 'general_practitioner'
+  GENERAL_PRACTITIONER = 'general_practitioner',
 }
 
 export enum VerificationStatus {
   PENDING = 'pending',
   VERIFIED = 'verified',
   REJECTED = 'rejected',
-  SUSPENDED = 'suspended'
+  SUSPENDED = 'suspended',
 }
 
 @Entity('experts')
@@ -29,7 +37,7 @@ export class Expert {
 
   @Column({
     type: 'enum',
-    enum: ExpertCategory
+    enum: ExpertCategory,
   })
   category: ExpertCategory;
 
@@ -51,7 +59,7 @@ export class Expert {
   @Column({
     type: 'enum',
     enum: VerificationStatus,
-    default: VerificationStatus.PENDING
+    default: VerificationStatus.PENDING,
   })
   verified: VerificationStatus;
 
@@ -74,7 +82,7 @@ export class Expert {
   updated_at: Date;
 
   // Relations
-  @OneToOne(() => User, user => user.expert_profiles, { onDelete: 'CASCADE' })
+  @OneToOne(() => User, (user) => user.expert_profiles, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 }

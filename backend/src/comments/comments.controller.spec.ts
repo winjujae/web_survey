@@ -71,7 +71,10 @@ describe('CommentsController', () => {
 
       const result = await controller.create(createCommentDto, mockRequest);
 
-      expect(mockCommentsService.create).toHaveBeenCalledWith(createCommentDto, mockUser);
+      expect(mockCommentsService.create).toHaveBeenCalledWith(
+        createCommentDto,
+        mockUser,
+      );
       expect(result).toEqual({
         success: true,
         message: '댓글이 성공적으로 생성되었습니다.',
@@ -101,14 +104,23 @@ describe('CommentsController', () => {
     it('should return comments with default query', async () => {
       mockCommentsService.findAll.mockResolvedValue(mockCommentsData);
 
-      const result = await controller.findAll({}, undefined, undefined, undefined, undefined);
+      const result = await controller.findAll(
+        {},
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+      );
 
-      expect(mockCommentsService.findAll).toHaveBeenCalledWith({}, {
-        page: 1,
-        limit: 10,
-        sortBy: 'created_at',
-        sortOrder: 'ASC',
-      });
+      expect(mockCommentsService.findAll).toHaveBeenCalledWith(
+        {},
+        {
+          page: 1,
+          limit: 10,
+          sortBy: 'created_at',
+          sortOrder: 'ASC',
+        },
+      );
       expect(result).toEqual({
         success: true,
         data: mockCommentsData.comments,
@@ -137,17 +149,20 @@ describe('CommentsController', () => {
         limit: 20,
       });
 
-      const result = await controller.findAll(filters, page, limit, sortBy, sortOrder);
-
-      expect(mockCommentsService.findAll).toHaveBeenCalledWith(
+      const result = await controller.findAll(
         filters,
-        {
-          page: 2,
-          limit: 20,
-          sortBy: 'likes',
-          sortOrder: 'DESC',
-        },
+        page,
+        limit,
+        sortBy,
+        sortOrder,
       );
+
+      expect(mockCommentsService.findAll).toHaveBeenCalledWith(filters, {
+        page: 2,
+        limit: 20,
+        sortBy: 'likes',
+        sortOrder: 'DESC',
+      });
       expect(result).toEqual({
         success: true,
         data: mockCommentsData.comments,
@@ -208,9 +223,17 @@ describe('CommentsController', () => {
       const mockRequest = { user: mockUser };
       mockCommentsService.update.mockResolvedValue(mockComment);
 
-      const result = await controller.update(commentId, updateCommentDto, mockRequest);
+      const result = await controller.update(
+        commentId,
+        updateCommentDto,
+        mockRequest,
+      );
 
-      expect(mockCommentsService.update).toHaveBeenCalledWith(commentId, updateCommentDto, mockUser);
+      expect(mockCommentsService.update).toHaveBeenCalledWith(
+        commentId,
+        updateCommentDto,
+        mockUser,
+      );
       expect(result).toEqual({
         success: true,
         message: '댓글이 성공적으로 수정되었습니다.',
@@ -232,7 +255,10 @@ describe('CommentsController', () => {
 
       await controller.remove(commentId, mockRequest);
 
-      expect(mockCommentsService.remove).toHaveBeenCalledWith(commentId, mockUser);
+      expect(mockCommentsService.remove).toHaveBeenCalledWith(
+        commentId,
+        mockUser,
+      );
     });
   });
 
@@ -253,7 +279,10 @@ describe('CommentsController', () => {
 
       const result = await controller.toggleLike(commentId, mockRequest);
 
-      expect(mockCommentsService.toggleLike).toHaveBeenCalledWith(commentId, mockUser);
+      expect(mockCommentsService.toggleLike).toHaveBeenCalledWith(
+        commentId,
+        mockUser,
+      );
       expect(result).toEqual({
         success: true,
         message: '댓글을 좋아요했습니다.',
@@ -281,7 +310,11 @@ describe('CommentsController', () => {
     it('should return post comments', async () => {
       mockCommentsService.getPostComments.mockResolvedValue(mockCommentsData);
 
-      const result = await controller.getPostComments(postId, undefined, undefined);
+      const result = await controller.getPostComments(
+        postId,
+        undefined,
+        undefined,
+      );
 
       expect(mockCommentsService.getPostComments).toHaveBeenCalledWith(postId, {
         page: 1,
@@ -350,7 +383,11 @@ describe('CommentsController', () => {
     it('should return user comments', async () => {
       mockCommentsService.getUserComments.mockResolvedValue(mockCommentsData);
 
-      const result = await controller.getUserComments(userId, undefined, undefined);
+      const result = await controller.getUserComments(
+        userId,
+        undefined,
+        undefined,
+      );
 
       expect(mockCommentsService.getUserComments).toHaveBeenCalledWith(userId, {
         page: 1,
@@ -391,7 +428,9 @@ describe('CommentsController', () => {
 
       const result = await controller.getCommentReplies(commentId);
 
-      expect(mockCommentsService.getCommentReplies).toHaveBeenCalledWith(commentId);
+      expect(mockCommentsService.getCommentReplies).toHaveBeenCalledWith(
+        commentId,
+      );
       expect(result).toEqual({
         success: true,
         data: mockReplies,

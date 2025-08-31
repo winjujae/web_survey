@@ -1,4 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  OneToMany,
+  JoinColumn,
+} from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Comment } from '../../comments/entities/comment.entity';
 import { Bookmark } from '../../bookmarks/entities/bookmark.entity';
@@ -9,7 +18,7 @@ export enum PostStatus {
   DRAFT = 'draft',
   PUBLISHED = 'published',
   ARCHIVED = 'archived',
-  DELETED = 'deleted'
+  DELETED = 'deleted',
 }
 
 export enum PostType {
@@ -17,7 +26,7 @@ export enum PostType {
   ANONYMOUS = 'anonymous',
   HOSPITAL = 'hospital',
   PRODUCT = 'product',
-  EXPERT_QNA = 'expert_qna'
+  EXPERT_QNA = 'expert_qna',
 }
 
 @Entity('posts')
@@ -43,14 +52,14 @@ export class Post {
   @Column({
     type: 'enum',
     enum: PostStatus,
-    default: PostStatus.PUBLISHED
+    default: PostStatus.PUBLISHED,
   })
   status: PostStatus;
 
   @Column({
     type: 'enum',
     enum: PostType,
-    default: PostType.GENERAL
+    default: PostType.GENERAL,
   })
   type: PostType;
 
@@ -76,20 +85,20 @@ export class Post {
   updated_at: Date;
 
   // Relations
-  @ManyToOne(() => User, user => user.posts, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, (user) => user.posts, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @ManyToOne(() => Category, category => category.posts, { nullable: true })
+  @ManyToOne(() => Category, (category) => category.posts, { nullable: true })
   @JoinColumn({ name: 'category_id' })
   category: Category;
 
-  @OneToMany(() => Comment, comment => comment.post)
+  @OneToMany(() => Comment, (comment) => comment.post)
   comments: Comment[];
 
-  @OneToMany(() => Bookmark, bookmark => bookmark.post)
+  @OneToMany(() => Bookmark, (bookmark) => bookmark.post)
   bookmarks: Bookmark[];
 
-  @OneToMany(() => Report, report => report.post)
+  @OneToMany(() => Report, (report) => report.post)
   reports: Report[];
 }

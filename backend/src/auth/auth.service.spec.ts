@@ -86,7 +86,10 @@ describe('AuthService', () => {
       const result = await service.register(registerDto);
 
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({
-        where: [{ email: registerDto.email }, { nickname: registerDto.nickname }],
+        where: [
+          { email: registerDto.email },
+          { nickname: registerDto.nickname },
+        ],
       });
       expect(mockUserRepository.create).toHaveBeenCalledWith({
         email: registerDto.email,
@@ -116,7 +119,10 @@ describe('AuthService', () => {
         ConflictException,
       );
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({
-        where: [{ email: registerDto.email }, { nickname: registerDto.nickname }],
+        where: [
+          { email: registerDto.email },
+          { nickname: registerDto.nickname },
+        ],
       });
     });
 
@@ -251,7 +257,10 @@ describe('AuthService', () => {
     it('should return null when user not found', async () => {
       mockUserRepository.findOne.mockResolvedValue(null);
 
-      const result = await service.validateUser('nonexistent@example.com', 'password');
+      const result = await service.validateUser(
+        'nonexistent@example.com',
+        'password',
+      );
 
       expect(result).toBeNull();
     });
@@ -260,7 +269,10 @@ describe('AuthService', () => {
       mockUserRepository.findOne.mockResolvedValue(mockUser);
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
-      const result = await service.validateUser(mockUser.email, 'wrongpassword');
+      const result = await service.validateUser(
+        mockUser.email,
+        'wrongpassword',
+      );
 
       expect(result).toBeNull();
     });

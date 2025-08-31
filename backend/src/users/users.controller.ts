@@ -163,7 +163,11 @@ export class UsersController {
     const pageNum = page ? parseInt(page, 10) : 1;
     const limitNum = limit ? parseInt(limit, 10) : 10;
 
-    const result = await this.usersService.getUserPosts(user.user_id, pageNum, limitNum);
+    const result = await this.usersService.getUserPosts(
+      user.user_id,
+      pageNum,
+      limitNum,
+    );
     return {
       success: true,
       data: result.posts,
@@ -182,7 +186,11 @@ export class UsersController {
     const pageNum = page ? parseInt(page, 10) : 1;
     const limitNum = limit ? parseInt(limit, 10) : 10;
 
-    const result = await this.usersService.getUserComments(user.user_id, pageNum, limitNum);
+    const result = await this.usersService.getUserComments(
+      user.user_id,
+      pageNum,
+      limitNum,
+    );
     return {
       success: true,
       data: result.comments,
@@ -201,7 +209,11 @@ export class UsersController {
     const pageNum = page ? parseInt(page, 10) : 1;
     const limitNum = limit ? parseInt(limit, 10) : 10;
 
-    const result = await this.usersService.getUserBookmarks(user.user_id, pageNum, limitNum);
+    const result = await this.usersService.getUserBookmarks(
+      user.user_id,
+      pageNum,
+      limitNum,
+    );
     return {
       success: true,
       data: result.bookmarks,
@@ -237,7 +249,11 @@ export class UsersController {
     const pageNum = page ? parseInt(page, 10) : 1;
     const limitNum = limit ? parseInt(limit, 10) : 10;
 
-    const result = await this.usersService.getUserComments(id, pageNum, limitNum);
+    const result = await this.usersService.getUserComments(
+      id,
+      pageNum,
+      limitNum,
+    );
     return {
       success: true,
       data: result.comments,

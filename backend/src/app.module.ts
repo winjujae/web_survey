@@ -23,7 +23,6 @@ import { ReviewsModule } from './reviews/reviews.module';
 
 // Database Module
 import { DatabaseModule } from './database/database.module';
-import { DatabaseService } from './database/database.service';
 
 @Module({
   imports: [
@@ -44,6 +43,6 @@ import { DatabaseService } from './database/database.service';
     DatabaseModule,
   ],
   controllers: [AppController],
-  providers: [AppService, DatabaseService],
+  providers: [AppService],
 })
 export class AppModule {}

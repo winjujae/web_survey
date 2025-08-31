@@ -1,4 +1,9 @@
-import { Injectable, ConflictException, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcryptjs';
@@ -84,13 +89,17 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new UnauthorizedException('이메일 또는 비밀번호가 올바르지 않습니다.');
+      throw new UnauthorizedException(
+        '이메일 또는 비밀번호가 올바르지 않습니다.',
+      );
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
-      throw new UnauthorizedException('이메일 또는 비밀번호가 올바르지 않습니다.');
+      throw new UnauthorizedException(
+        '이메일 또는 비밀번호가 올바르지 않습니다.',
+      );
     }
 
     const tokens = await this.generateTokens(user);
@@ -144,7 +153,16 @@ export class AuthService {
   async getProfile(user: User): Promise<User> {
     const foundUser = await this.userRepository.findOne({
       where: { user_id: user.user_id },
-      select: ['user_id', 'email', 'nickname', 'bio', 'avatar_url', 'role', 'created_at', 'updated_at'],
+      select: [
+        'user_id',
+        'email',
+        'nickname',
+        'bio',
+        'avatar_url',
+        'role',
+        'created_at',
+        'updated_at',
+      ],
     });
 
     if (!foundUser) {

@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import 'dotenv/config'
+import 'dotenv/config';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -10,7 +10,9 @@ async function bootstrap() {
   // Swagger 설정
   const config = new DocumentBuilder()
     .setTitle('탈모 커뮤니티 플랫폼 API')
-    .setDescription('탈모로 고민하는 사람들이 정보를 공유하고 소통할 수 있는 커뮤니티 플랫폼 API')
+    .setDescription(
+      '탈모로 고민하는 사람들이 정보를 공유하고 소통할 수 있는 커뮤니티 플랫폼 API',
+    )
     .setVersion('1.0')
     .addTag('auth', '인증 관련 API')
     .addTag('users', '사용자 관리 API')

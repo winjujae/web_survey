@@ -1,11 +1,19 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Product } from '../../products/entities/product.entity';
 import { Hospital } from '../../hospitals/entities/hospital.entity';
 
 export enum ReviewType {
   PRODUCT = 'product',
-  HOSPITAL = 'hospital'
+  HOSPITAL = 'hospital',
 }
 
 @Entity('reviews')
@@ -24,7 +32,7 @@ export class Review {
 
   @Column({
     type: 'enum',
-    enum: ReviewType
+    enum: ReviewType,
   })
   type: ReviewType;
 
@@ -56,15 +64,15 @@ export class Review {
   updated_at: Date;
 
   // Relations
-  @ManyToOne(() => User, user => user.reviews, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, (user) => user.reviews, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @ManyToOne(() => Product, product => product.reviews, { nullable: true })
+  @ManyToOne(() => Product, (product) => product.reviews, { nullable: true })
   @JoinColumn({ name: 'product_id' })
   product: Product;
 
-  @ManyToOne(() => Hospital, hospital => hospital.reviews, { nullable: true })
+  @ManyToOne(() => Hospital, (hospital) => hospital.reviews, { nullable: true })
   @JoinColumn({ name: 'hospital_id' })
   hospital: Hospital;
 }

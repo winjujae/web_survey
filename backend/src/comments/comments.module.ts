@@ -10,12 +10,7 @@ import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      Comment,
-      User,
-      Post,
-      Report,
-    ]),
+    TypeOrmModule.forFeature([Comment, User, Post, Report]),
     AuthModule,
   ],
   controllers: [CommentsController],

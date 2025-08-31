@@ -15,7 +15,10 @@ export interface RefreshTokenPayload {
 }
 
 @Injectable()
-export class RefreshTokenStrategy extends PassportStrategy(Strategy, 'refresh-token') {
+export class RefreshTokenStrategy extends PassportStrategy(
+  Strategy,
+  'refresh-token',
+) {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
@@ -24,16 +27,22 @@ export class RefreshTokenStrategy extends PassportStrategy(Strategy, 'refresh-to
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request) => {
-          const refreshToken = request?.cookies?.refreshToken || request?.body?.refreshToken;
+          const refreshToken =
+            request?.cookies?.refreshToken || request?.body?.refreshToken;
           return refreshToken;
         },
       ]),
       ignoreExpiration: false,
-      secretOrKey: configService.get<string>('JWT_REFRESH_SECRET') || configService.get<string>('JWT_SECRET', 'fallback-secret'),
+      secretOrKey:
+        configService.get<string>('JWT_REFRESH_SECRET') ||
+        configService.get<string>('JWT_SECRET', 'fallback-secret'),
     });
   }
 
-  async validate(request: Request, payload: RefreshTokenPayload): Promise<User> {
+  async validate(
+    request: Request,
+    payload: RefreshTokenPayload,
+  ): Promise<User> {
     const { sub: user_id } = payload;
     const user = await this.userRepository.findOne({
       where: { user_id, is_active: true },

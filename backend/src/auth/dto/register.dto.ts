@@ -1,4 +1,11 @@
-import { IsEmail, IsString, MinLength, MaxLength, Matches, IsOptional } from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  MinLength,
+  MaxLength,
+  Matches,
+  IsOptional,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class RegisterDto {
@@ -18,12 +25,9 @@ export class RegisterDto {
   @IsString({ message: '비밀번호는 문자열이어야 합니다.' })
   @MinLength(8, { message: '비밀번호는 최소 8자 이상이어야 합니다.' })
   @MaxLength(50, { message: '비밀번호는 최대 50자까지 가능합니다.' })
-  @Matches(
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
-    {
-      message: '비밀번호는 대소문자, 숫자, 특수문자를 포함해야 합니다.',
-    },
-  )
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, {
+    message: '비밀번호는 대소문자, 숫자, 특수문자를 포함해야 합니다.',
+  })
   password: string;
 
   @ApiProperty({

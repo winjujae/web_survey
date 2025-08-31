@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Comment, CommentStatus } from './entities/comment.entity';
@@ -32,7 +37,10 @@ export class CommentsService {
     private postRepository: Repository<Post>,
   ) {}
 
-  async create(createCommentDto: CreateCommentDto, user: User): Promise<Comment> {
+  async create(
+    createCommentDto: CreateCommentDto,
+    user: User,
+  ): Promise<Comment> {
     const { post_id, parent_comment_id, ...commentData } = createCommentDto;
 
     // 게시글 존재 확인
@@ -69,7 +77,10 @@ export class CommentsService {
     return this.commentRepository.save(comment);
   }
 
-  async findAll(filters: CommentFilters = {}, pagination: PaginationOptions = {}): Promise<{
+  async findAll(
+    filters: CommentFilters = {},
+    pagination: PaginationOptions = {},
+  ): Promise<{
     comments: Comment[];
     total: number;
     page: number;
@@ -80,10 +91,11 @@ export class CommentsService {
       page = 1,
       limit = 10,
       sortBy = 'created_at',
-      sortOrder = 'ASC'
+      sortOrder = 'ASC',
     } = pagination;
 
-    const queryBuilder = this.commentRepository.createQueryBuilder('comment')
+    const queryBuilder = this.commentRepository
+      .createQueryBuilder('comment')
       .leftJoinAndSelect('comment.user', 'user')
       .leftJoinAndSelect('comment.post', 'post')
       .leftJoinAndSelect('comment.replies', 'replies')
@@ -92,15 +104,21 @@ export class CommentsService {
 
     // 필터 적용
     if (filters.post_id) {
-      queryBuilder.andWhere('comment.post_id = :postId', { postId: filters.post_id });
+      queryBuilder.andWhere('comment.post_id = :postId', {
+        postId: filters.post_id,
+      });
     }
 
     if (filters.user_id) {
-      queryBuilder.andWhere('comment.user_id = :userId', { userId: filters.user_id });
+      queryBuilder.andWhere('comment.user_id = :userId', {
+        userId: filters.user_id,
+      });
     }
 
     if (filters.status) {
-      queryBuilder.andWhere('comment.status = :status', { status: filters.status });
+      queryBuilder.andWhere('comment.status = :status', {
+        status: filters.status,
+      });
     }
 
     if (filters.parent_only) {
@@ -139,7 +157,11 @@ export class CommentsService {
     return comment;
   }
 
-  async update(id: string, updateCommentDto: UpdateCommentDto, user: User): Promise<Comment> {
+  async update(
+    id: string,
+    updateCommentDto: UpdateCommentDto,
+    user: User,
+  ): Promise<Comment> {
     const comment = await this.findOne(id);
 
     // 작성자 또는 관리자 확인
@@ -175,7 +197,10 @@ export class CommentsService {
     });
   }
 
-  async toggleLike(id: string, user: User): Promise<{ liked: boolean; likes: number }> {
+  async toggleLike(
+    id: string,
+    user: User,
+  ): Promise<{ liked: boolean; likes: number }> {
     const comment = await this.commentRepository.findOne({
       where: { comment_id: id },
     });
@@ -204,30 +229,30 @@ export class CommentsService {
     };
   }
 
-  async getPostComments(postId: string, pagination: PaginationOptions = {}): Promise<{
+  async getPostComments(
+    postId: string,
+    pagination: PaginationOptions = {},
+  ): Promise<{
     comments: Comment[];
     total: number;
     page: number;
     limit: number;
     totalPages: number;
   }> {
-    return this.findAll(
-      { post_id: postId, parent_only: true },
-      pagination,
-    );
+    return this.findAll({ post_id: postId, parent_only: true }, pagination);
   }
 
-  async getUserComments(userId: string, pagination: PaginationOptions = {}): Promise<{
+  async getUserComments(
+    userId: string,
+    pagination: PaginationOptions = {},
+  ): Promise<{
     comments: Comment[];
     total: number;
     page: number;
     limit: number;
     totalPages: number;
   }> {
-    return this.findAll(
-      { user_id: userId },
-      pagination,
-    );
+    return this.findAll({ user_id: userId }, pagination);
   }
 
   async getCommentReplies(commentId: string): Promise<Comment[]> {

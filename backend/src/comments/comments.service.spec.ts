@@ -7,7 +7,11 @@ import { Post, PostStatus } from '../posts/entities/post.entity';
 import { User } from '../users/entities/user.entity';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
-import { NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import {
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
 
 describe('CommentsService', () => {
   let service: CommentsService;
@@ -51,7 +55,9 @@ describe('CommentsService', () => {
     }).compile();
 
     service = module.get<CommentsService>(CommentsService);
-    commentRepository = module.get<Repository<Comment>>(getRepositoryToken(Comment));
+    commentRepository = module.get<Repository<Comment>>(
+      getRepositoryToken(Comment),
+    );
     userRepository = module.get<Repository<User>>(getRepositoryToken(User));
     postRepository = module.get<Repository<Post>>(getRepositoryToken(Post));
   });

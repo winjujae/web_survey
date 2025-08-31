@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToMany,
+} from 'typeorm';
 import { Post } from '../../posts/entities/post.entity';
 
 export enum CategoryType {
@@ -8,7 +15,7 @@ export enum CategoryType {
   EXPERT_QNA = 'expert_qna',
   HAIR_LOSS = 'hair_loss',
   TREATMENT = 'treatment',
-  LIFESTYLE = 'lifestyle'
+  LIFESTYLE = 'lifestyle',
 }
 
 @Entity('categories')
@@ -25,7 +32,7 @@ export class Category {
   @Column({
     type: 'enum',
     enum: CategoryType,
-    default: CategoryType.GENERAL
+    default: CategoryType.GENERAL,
   })
   type: CategoryType;
 
@@ -48,6 +55,6 @@ export class Category {
   updated_at: Date;
 
   // Relations
-  @OneToMany(() => Post, post => post.category)
+  @OneToMany(() => Post, (post) => post.category)
   posts: Post[];
 }

@@ -15,7 +15,11 @@ import {
   UsePipes,
   ParseUUIDPipe,
 } from '@nestjs/common';
-import { CommentsService, CommentFilters, PaginationOptions } from './comments.service';
+import {
+  CommentsService,
+  CommentFilters,
+  PaginationOptions,
+} from './comments.service';
 import type { CommentFilters as ICommentFilters } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
@@ -29,7 +33,10 @@ export class CommentsController {
   @Post()
   @UseGuards(JwtAuthGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
-  async create(@Body() createCommentDto: CreateCommentDto, @Request() req: any) {
+  async create(
+    @Body() createCommentDto: CreateCommentDto,
+    @Request() req: any,
+  ) {
     const user = req.user as User;
     const comment = await this.commentsService.create(createCommentDto, user);
     return {
@@ -85,7 +92,11 @@ export class CommentsController {
     @Request() req: any,
   ) {
     const user = req.user as User;
-    const comment = await this.commentsService.update(id, updateCommentDto, user);
+    const comment = await this.commentsService.update(
+      id,
+      updateCommentDto,
+      user,
+    );
     return {
       success: true,
       message: '댓글이 성공적으로 수정되었습니다.',
@@ -107,12 +118,17 @@ export class CommentsController {
 
   @Post(':id/like')
   @UseGuards(JwtAuthGuard)
-  async toggleLike(@Param('id', ParseUUIDPipe) id: string, @Request() req: any) {
+  async toggleLike(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Request() req: any,
+  ) {
     const user = req.user as User;
     const result = await this.commentsService.toggleLike(id, user);
     return {
       success: true,
-      message: result.liked ? '댓글을 좋아요했습니다.' : '댓글 좋아요를 취소했습니다.',
+      message: result.liked
+        ? '댓글을 좋아요했습니다.'
+        : '댓글 좋아요를 취소했습니다.',
       data: result,
     };
   }
@@ -130,7 +146,10 @@ export class CommentsController {
       sortOrder: 'ASC',
     };
 
-    const result = await this.commentsService.getPostComments(postId, pagination);
+    const result = await this.commentsService.getPostComments(
+      postId,
+      pagination,
+    );
     return {
       success: true,
       data: result.comments,
@@ -156,7 +175,10 @@ export class CommentsController {
       sortOrder: 'DESC',
     };
 
-    const result = await this.commentsService.getUserComments(userId, pagination);
+    const result = await this.commentsService.getUserComments(
+      userId,
+      pagination,
+    );
     return {
       success: true,
       data: result.comments,

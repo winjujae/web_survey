@@ -1,4 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 
 export enum NotificationType {
@@ -9,7 +17,7 @@ export enum NotificationType {
   POST_BOOKMARK = 'post_bookmark',
   REPORT_RESOLVED = 'report_resolved',
   EXPERT_ANSWER = 'expert_answer',
-  SYSTEM = 'system'
+  SYSTEM = 'system',
 }
 
 @Entity('notifications')
@@ -22,7 +30,7 @@ export class Notification {
 
   @Column({
     type: 'enum',
-    enum: NotificationType
+    enum: NotificationType,
   })
   type: NotificationType;
 
@@ -51,7 +59,7 @@ export class Notification {
   updated_at: Date;
 
   // Relations
-  @ManyToOne(() => User, user => user.notifications, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, (user) => user.notifications, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 }

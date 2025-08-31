@@ -1,4 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  OneToMany,
+  JoinColumn,
+} from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Post } from '../../posts/entities/post.entity';
 import { Report } from '../../reports/entities/report.entity';
@@ -6,7 +15,7 @@ import { Report } from '../../reports/entities/report.entity';
 export enum CommentStatus {
   ACTIVE = 'active',
   HIDDEN = 'hidden',
-  DELETED = 'deleted'
+  DELETED = 'deleted',
 }
 
 @Entity('comments')
@@ -29,7 +38,7 @@ export class Comment {
   @Column({
     type: 'enum',
     enum: CommentStatus,
-    default: CommentStatus.ACTIVE
+    default: CommentStatus.ACTIVE,
   })
   status: CommentStatus;
 
@@ -49,21 +58,21 @@ export class Comment {
   updated_at: Date;
 
   // Relations
-  @ManyToOne(() => Post, post => post.comments, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Post, (post) => post.comments, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'post_id' })
   post: Post;
 
-  @ManyToOne(() => User, user => user.comments, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, (user) => user.comments, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @ManyToOne(() => Comment, comment => comment.replies, { nullable: true })
+  @ManyToOne(() => Comment, (comment) => comment.replies, { nullable: true })
   @JoinColumn({ name: 'parent_comment_id' })
   parent_comment: Comment;
 
-  @OneToMany(() => Comment, comment => comment.parent_comment)
+  @OneToMany(() => Comment, (comment) => comment.parent_comment)
   replies: Comment[];
 
-  @OneToMany(() => Report, report => report.comment)
+  @OneToMany(() => Report, (report) => report.comment)
   reports: Report[];
 }

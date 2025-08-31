@@ -70,8 +70,12 @@ describe('UsersService', () => {
     service = module.get<UsersService>(UsersService);
     userRepository = module.get<Repository<User>>(getRepositoryToken(User));
     postRepository = module.get<Repository<Post>>(getRepositoryToken(Post));
-    commentRepository = module.get<Repository<Comment>>(getRepositoryToken(Comment));
-    bookmarkRepository = module.get<Repository<Bookmark>>(getRepositoryToken(Bookmark));
+    commentRepository = module.get<Repository<Comment>>(
+      getRepositoryToken(Comment),
+    );
+    bookmarkRepository = module.get<Repository<Bookmark>>(
+      getRepositoryToken(Bookmark),
+    );
   });
 
   afterEach(() => {
@@ -99,7 +103,10 @@ describe('UsersService', () => {
       const result = await service.create(createUserDto);
 
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({
-        where: [{ email: createUserDto.email }, { nickname: createUserDto.nickname }],
+        where: [
+          { email: createUserDto.email },
+          { nickname: createUserDto.nickname },
+        ],
       });
       expect(mockUserRepository.create).toHaveBeenCalledWith({
         password: createUserDto.password,
@@ -159,7 +166,15 @@ describe('UsersService', () => {
       const result = await service.findAll();
 
       expect(mockUserRepository.find).toHaveBeenCalledWith({
-        select: ['user_id', 'email', 'nickname', 'role', 'is_active', 'created_at', 'updated_at'],
+        select: [
+          'user_id',
+          'email',
+          'nickname',
+          'role',
+          'is_active',
+          'created_at',
+          'updated_at',
+        ],
         where: { is_active: true },
       });
       expect(result).toEqual(mockUsers);
@@ -186,7 +201,16 @@ describe('UsersService', () => {
 
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({
         where: { user_id: userId, is_active: true },
-        select: ['user_id', 'email', 'nickname', 'bio', 'avatar_url', 'role', 'created_at', 'updated_at'],
+        select: [
+          'user_id',
+          'email',
+          'nickname',
+          'bio',
+          'avatar_url',
+          'role',
+          'created_at',
+          'updated_at',
+        ],
       });
       expect(result).toEqual(mockUser);
     });
@@ -284,7 +308,11 @@ describe('UsersService', () => {
         ...updateUserDto,
       });
 
-      const result = await service.update(userId, updateUserDto, mockCurrentUser);
+      const result = await service.update(
+        userId,
+        updateUserDto,
+        mockCurrentUser,
+      );
 
       expect(mockUserRepository.update).toHaveBeenCalledWith(userId, {
         ...updateUserDto,
@@ -303,9 +331,9 @@ describe('UsersService', () => {
         nickname: updateUserDto.nickname,
       });
 
-      await expect(service.update(userId, updateUserDto, mockCurrentUser)).rejects.toThrow(
-        ConflictException,
-      );
+      await expect(
+        service.update(userId, updateUserDto, mockCurrentUser),
+      ).rejects.toThrow(ConflictException);
     });
   });
 
@@ -330,7 +358,16 @@ describe('UsersService', () => {
 
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({
         where: { user_id: userId, is_active: true },
-        select: ['user_id', 'email', 'nickname', 'bio', 'avatar_url', 'role', 'created_at', 'updated_at'],
+        select: [
+          'user_id',
+          'email',
+          'nickname',
+          'bio',
+          'avatar_url',
+          'role',
+          'created_at',
+          'updated_at',
+        ],
       });
       expect(mockUserRepository.update).toHaveBeenCalledWith(userId, {
         is_active: false,
@@ -381,7 +418,9 @@ describe('UsersService', () => {
     it('should throw NotFoundException when user not found', async () => {
       mockUserRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.getProfile(userId)).rejects.toThrow(NotFoundException);
+      await expect(service.getProfile(userId)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should return profile when user exists but has different data', async () => {
@@ -427,7 +466,9 @@ describe('UsersService', () => {
       };
 
       mockPostRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder);
-      mockCommentRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder);
+      mockCommentRepository.createQueryBuilder.mockReturnValue(
+        mockQueryBuilder,
+      );
       mockQueryBuilder.getRawOne.mockResolvedValueOnce({ total: '25' }); // post likes
       mockQueryBuilder.getRawOne.mockResolvedValueOnce({ total: '30' }); // comment likes
 

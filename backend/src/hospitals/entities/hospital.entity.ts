@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToMany,
+} from 'typeorm';
 import { Review } from '../../reviews/entities/review.entity';
 
 @Entity('hospitals')
@@ -55,6 +62,6 @@ export class Hospital {
   updated_at: Date;
 
   // Relations
-  @OneToMany(() => Review, review => review.hospital)
+  @OneToMany(() => Review, (review) => review.hospital)
   reviews: Review[];
 }

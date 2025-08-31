@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, ConflictException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User, UserRole } from './entities/user.entity';
@@ -75,7 +80,15 @@ export class UsersService {
 
   async findAll(): Promise<User[]> {
     return this.userRepository.find({
-      select: ['user_id', 'email', 'nickname', 'role', 'is_active', 'created_at', 'updated_at'],
+      select: [
+        'user_id',
+        'email',
+        'nickname',
+        'role',
+        'is_active',
+        'created_at',
+        'updated_at',
+      ],
       where: { is_active: true },
     });
   }
@@ -83,7 +96,16 @@ export class UsersService {
   async findOne(id: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { user_id: id, is_active: true },
-      select: ['user_id', 'email', 'nickname', 'bio', 'avatar_url', 'role', 'created_at', 'updated_at'],
+      select: [
+        'user_id',
+        'email',
+        'nickname',
+        'bio',
+        'avatar_url',
+        'role',
+        'created_at',
+        'updated_at',
+      ],
     });
 
     if (!user) {
@@ -105,7 +127,11 @@ export class UsersService {
     });
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto, currentUser: User): Promise<User> {
+  async update(
+    id: string,
+    updateUserDto: UpdateUserDto,
+    currentUser: User,
+  ): Promise<User> {
     const user = await this.findOne(id);
 
     // 본인 또는 관리자 확인
@@ -114,7 +140,10 @@ export class UsersService {
     }
 
     // 닉네임 중복 확인
-    if (updateUserDto.nickname !== undefined && updateUserDto.nickname !== user.nickname) {
+    if (
+      updateUserDto.nickname !== undefined &&
+      updateUserDto.nickname !== user.nickname
+    ) {
       const existingUser = await this.userRepository.findOne({
         where: { nickname: updateUserDto.nickname },
       });
@@ -150,7 +179,17 @@ export class UsersService {
   async getProfile(userId: string): Promise<UserProfile> {
     const user = await this.userRepository.findOne({
       where: { user_id: userId, is_active: true },
-      select: ['user_id', 'email', 'nickname', 'bio', 'avatar_url', 'role', 'is_active', 'created_at', 'updated_at'],
+      select: [
+        'user_id',
+        'email',
+        'nickname',
+        'bio',
+        'avatar_url',
+        'role',
+        'is_active',
+        'created_at',
+        'updated_at',
+      ],
     });
 
     if (!user) {
@@ -159,8 +198,12 @@ export class UsersService {
 
     // 사용자 통계 계산
     const [postsCount, commentsCount, bookmarksCount] = await Promise.all([
-      this.postRepository.count({ where: { user_id: userId, status: PostStatus.PUBLISHED } }),
-      this.commentRepository.count({ where: { user_id: userId, status: CommentStatus.ACTIVE } }),
+      this.postRepository.count({
+        where: { user_id: userId, status: PostStatus.PUBLISHED },
+      }),
+      this.commentRepository.count({
+        where: { user_id: userId, status: CommentStatus.ACTIVE },
+      }),
       this.bookmarkRepository.count({ where: { user_id: userId } }),
     ]);
 
@@ -180,8 +223,12 @@ export class UsersService {
 
     // 전체 통계
     const [totalPosts, totalComments, totalBookmarks] = await Promise.all([
-      this.postRepository.count({ where: { user_id: userId, status: PostStatus.PUBLISHED } }),
-      this.commentRepository.count({ where: { user_id: userId, status: CommentStatus.ACTIVE } }),
+      this.postRepository.count({
+        where: { user_id: userId, status: PostStatus.PUBLISHED },
+      }),
+      this.commentRepository.count({
+        where: { user_id: userId, status: CommentStatus.ACTIVE },
+      }),
       this.bookmarkRepository.count({ where: { user_id: userId } }),
     ]);
 
@@ -336,7 +383,7 @@ export class UsersService {
     });
 
     return {
-      bookmarks: bookmarks.map(bookmark => bookmark.post),
+      bookmarks: bookmarks.map((bookmark) => bookmark.post),
       pagination: {
         currentPage: page,
         totalPages: Math.ceil(total / limit),

@@ -7,7 +7,11 @@ import { User, UserRole } from '../users/entities/user.entity';
 import { Category } from '../categories/entities/category.entity';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import {
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
 
 describe('PostsService', () => {
   let service: PostsService;
@@ -54,7 +58,9 @@ describe('PostsService', () => {
     service = module.get<PostsService>(PostsService);
     postRepository = module.get<Repository<Post>>(getRepositoryToken(Post));
     userRepository = module.get<Repository<User>>(getRepositoryToken(User));
-    categoryRepository = module.get<Repository<Category>>(getRepositoryToken(Category));
+    categoryRepository = module.get<Repository<Category>>(
+      getRepositoryToken(Category),
+    );
   });
 
   afterEach(() => {

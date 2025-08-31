@@ -72,9 +72,13 @@ describe('AuthController', () => {
         email: 'invalid-email',
       };
 
-      mockAuthService.register.mockRejectedValue(new BadRequestException('올바른 이메일 형식을 입력해주세요.'));
+      mockAuthService.register.mockRejectedValue(
+        new BadRequestException('올바른 이메일 형식을 입력해주세요.'),
+      );
 
-      await expect(controller.register(invalidRegisterDto)).rejects.toThrow(BadRequestException);
+      await expect(controller.register(invalidRegisterDto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw BadRequestException for weak password', async () => {
@@ -83,9 +87,13 @@ describe('AuthController', () => {
         password: '123',
       };
 
-      mockAuthService.register.mockRejectedValue(new BadRequestException('비밀번호는 최소 8자 이상이어야 합니다.'));
+      mockAuthService.register.mockRejectedValue(
+        new BadRequestException('비밀번호는 최소 8자 이상이어야 합니다.'),
+      );
 
-      await expect(controller.register(invalidRegisterDto)).rejects.toThrow(BadRequestException);
+      await expect(controller.register(invalidRegisterDto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw BadRequestException for empty nickname', async () => {
@@ -94,9 +102,13 @@ describe('AuthController', () => {
         nickname: '',
       };
 
-      mockAuthService.register.mockRejectedValue(new BadRequestException('닉네임을 입력해주세요.'));
+      mockAuthService.register.mockRejectedValue(
+        new BadRequestException('닉네임을 입력해주세요.'),
+      );
 
-      await expect(controller.register(invalidRegisterDto)).rejects.toThrow(BadRequestException);
+      await expect(controller.register(invalidRegisterDto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -132,9 +144,13 @@ describe('AuthController', () => {
         email: 'invalid-email',
       };
 
-      mockAuthService.login.mockRejectedValue(new BadRequestException('올바른 이메일 형식을 입력해주세요.'));
+      mockAuthService.login.mockRejectedValue(
+        new BadRequestException('올바른 이메일 형식을 입력해주세요.'),
+      );
 
-      await expect(controller.login(invalidLoginDto)).rejects.toThrow(BadRequestException);
+      await expect(controller.login(invalidLoginDto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw BadRequestException for empty password', async () => {
@@ -143,9 +159,13 @@ describe('AuthController', () => {
         password: '',
       };
 
-      mockAuthService.login.mockRejectedValue(new BadRequestException('비밀번호를 입력해주세요.'));
+      mockAuthService.login.mockRejectedValue(
+        new BadRequestException('비밀번호를 입력해주세요.'),
+      );
 
-      await expect(controller.login(invalidLoginDto)).rejects.toThrow(BadRequestException);
+      await expect(controller.login(invalidLoginDto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -245,7 +265,10 @@ describe('AuthController', () => {
 
       const result = await controller.updateProfile(mockRequest, updateData);
 
-      expect(mockAuthService.updateProfile).toHaveBeenCalledWith(mockUser, updateData);
+      expect(mockAuthService.updateProfile).toHaveBeenCalledWith(
+        mockUser,
+        updateData,
+      );
       expect(result).toEqual(updatedUser);
     });
   });

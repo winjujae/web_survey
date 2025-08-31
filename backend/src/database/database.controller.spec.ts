@@ -53,7 +53,9 @@ describe('DatabaseController', () => {
 
       const result = await controller.getTable();
 
-      expect(mockDatabaseService.getTable).toHaveBeenCalledWith('playing_with_neon');
+      expect(mockDatabaseService.getTable).toHaveBeenCalledWith(
+        'playing_with_neon',
+      );
       expect(result).toEqual(mockTableData);
     });
   });

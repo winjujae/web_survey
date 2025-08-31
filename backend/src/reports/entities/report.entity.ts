@@ -1,4 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Post } from '../../posts/entities/post.entity';
 import { Comment } from '../../comments/entities/comment.entity';
@@ -9,14 +17,14 @@ export enum ReportReason {
   INAPPROPRIATE_CONTENT = 'inappropriate_content',
   HATE_SPEECH = 'hate_speech',
   MISLEADING = 'misleading',
-  OTHER = 'other'
+  OTHER = 'other',
 }
 
 export enum ReportStatus {
   PENDING = 'pending',
   REVIEWED = 'reviewed',
   RESOLVED = 'resolved',
-  DISMISSED = 'dismissed'
+  DISMISSED = 'dismissed',
 }
 
 @Entity('reports')
@@ -35,7 +43,7 @@ export class Report {
 
   @Column({
     type: 'enum',
-    enum: ReportReason
+    enum: ReportReason,
   })
   reason: ReportReason;
 
@@ -45,7 +53,7 @@ export class Report {
   @Column({
     type: 'enum',
     enum: ReportStatus,
-    default: ReportStatus.PENDING
+    default: ReportStatus.PENDING,
   })
   status: ReportStatus;
 
@@ -59,15 +67,15 @@ export class Report {
   updated_at: Date;
 
   // Relations
-  @ManyToOne(() => User, user => user.reports, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, (user) => user.reports, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @ManyToOne(() => Post, post => post.reports, { nullable: true })
+  @ManyToOne(() => Post, (post) => post.reports, { nullable: true })
   @JoinColumn({ name: 'post_id' })
   post: Post;
 
-  @ManyToOne(() => Comment, comment => comment.reports, { nullable: true })
+  @ManyToOne(() => Comment, (comment) => comment.reports, { nullable: true })
   @JoinColumn({ name: 'comment_id' })
   comment: Comment;
 }

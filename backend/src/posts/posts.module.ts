@@ -12,14 +12,7 @@ import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      Post,
-      User,
-      Category,
-      Comment,
-      Bookmark,
-      Report,
-    ]),
+    TypeOrmModule.forFeature([Post, User, Category, Comment, Bookmark, Report]),
     AuthModule,
   ],
   controllers: [PostsController],

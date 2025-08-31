@@ -12,9 +12,10 @@ const dbProvider = {
   provide: 'POSTGRES_POOL',
   useValue: sql,
 };
+
 @Module({
   providers: [dbProvider, DatabaseService],
-  exports: [dbProvider],
+  exports: [dbProvider, DatabaseService],
   controllers: [DatabaseController],
 })
 export class DatabaseModule {}

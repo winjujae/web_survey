@@ -10,12 +10,7 @@ import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      User,
-      Post,
-      Comment,
-      Bookmark,
-    ]),
+    TypeOrmModule.forFeature([User, Post, Comment, Bookmark]),
     AuthModule,
   ],
   controllers: [UsersController],

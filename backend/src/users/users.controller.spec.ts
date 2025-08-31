@@ -154,9 +154,17 @@ describe('UsersController', () => {
       mockUsersService.update.mockResolvedValue(mockUser);
       const mockRequest = { user: mockCurrentUser };
 
-      const result = await controller.update(userId, updateUserDto, mockRequest);
+      const result = await controller.update(
+        userId,
+        updateUserDto,
+        mockRequest,
+      );
 
-      expect(mockUsersService.update).toHaveBeenCalledWith(userId, updateUserDto, mockCurrentUser);
+      expect(mockUsersService.update).toHaveBeenCalledWith(
+        userId,
+        updateUserDto,
+        mockCurrentUser,
+      );
       expect(result).toEqual({
         success: true,
         message: '사용자 정보가 성공적으로 수정되었습니다.',
@@ -180,7 +188,10 @@ describe('UsersController', () => {
 
       const result = await controller.remove(userId, mockRequest);
 
-      expect(mockUsersService.remove).toHaveBeenCalledWith(userId, mockCurrentUser);
+      expect(mockUsersService.remove).toHaveBeenCalledWith(
+        userId,
+        mockCurrentUser,
+      );
       expect(result).toEqual({
         success: true,
         message: '사용자가 성공적으로 삭제되었습니다.',
@@ -323,7 +334,11 @@ describe('UsersController', () => {
 
       const result = await controller.getUserComments(userId, '1', '10');
 
-      expect(mockUsersService.getUserComments).toHaveBeenCalledWith(userId, 1, 10);
+      expect(mockUsersService.getUserComments).toHaveBeenCalledWith(
+        userId,
+        1,
+        10,
+      );
       expect(result).toEqual({
         success: true,
         data: mockCommentsData.comments,
@@ -372,9 +387,17 @@ describe('UsersController', () => {
       const mockRequest = { user: mockUser };
       mockUsersService.getUserBookmarks.mockResolvedValue(mockBookmarksData);
 
-      const result = await controller.getMyBookmarks(mockRequest, undefined, undefined);
+      const result = await controller.getMyBookmarks(
+        mockRequest,
+        undefined,
+        undefined,
+      );
 
-      expect(mockUsersService.getUserBookmarks).toHaveBeenCalledWith(mockUser.user_id, 1, 10);
+      expect(mockUsersService.getUserBookmarks).toHaveBeenCalledWith(
+        mockUser.user_id,
+        1,
+        10,
+      );
       expect(result).toEqual({
         success: true,
         data: mockBookmarksData.bookmarks,
@@ -382,6 +405,4 @@ describe('UsersController', () => {
       });
     });
   });
-
-
 });

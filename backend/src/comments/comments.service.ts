@@ -11,6 +11,8 @@ import { Post, PostStatus } from '../posts/entities/post.entity';
 import { User } from '../users/entities/user.entity';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
+import { AuditService, AuditAction, AuditResource } from '../common/services/audit.service';
+import { Like, LikeType, LikeValue } from '../posts/entities/like.entity';
 
 export interface CommentFilters {
   post_id?: string;
@@ -35,6 +37,9 @@ export class CommentsService {
     private userRepository: Repository<User>,
     @InjectRepository(Post)
     private postRepository: Repository<Post>,
+    @InjectRepository(Like)
+    private likeRepository: Repository<Like>,
+    private auditService: AuditService,
   ) {}
 
   async create(
@@ -74,7 +79,19 @@ export class CommentsService {
       parent_comment_id,
     });
 
-    return this.commentRepository.save(comment);
+    const savedComment = await this.commentRepository.save(comment);
+
+    // 감사 로그 기록
+    await this.auditService.logCommentAction(
+      user.user_id,
+      AuditAction.CREATE,
+      savedComment.comment_id,
+      undefined,
+      { content: savedComment.content, post_id: savedComment.post_id },
+      { parent_comment_id },
+    );
+
+    return savedComment;
   }
 
   async findAll(
@@ -209,24 +226,64 @@ export class CommentsService {
       throw new NotFoundException('댓글을 찾을 수 없습니다.');
     }
 
-    // 사용자별 좋아요 상태 확인 (실제로는 likes 테이블에서 확인해야 함)
-    // 임시로 간단한 로직: likes 배열이나 별도 필드가 있다고 가정
-    const liked = Math.random() > 0.5; // 실제로는 DB에서 확인해야 함
+    // 기존 좋아요 확인
+    const existingLike = await this.likeRepository.findOne({
+      where: {
+        user_id: user.user_id,
+        comment_id: id,
+        type: LikeType.COMMENT,
+      },
+    });
 
-    if (liked) {
+    if (existingLike) {
       // 이미 좋아요한 상태라면 취소
-      comment.likes = Math.max(0, comment.likes - 1);
+      await this.likeRepository.remove(existingLike);
+
+      // 감사 로그 기록 (좋아요 취소)
+      await this.auditService.logCommentAction(
+        user.user_id,
+        AuditAction.COMMENT_LIKE,
+        id,
+        { liked: true },
+        { liked: false },
+        { action: 'unlike' },
+      );
+
+      const likeCount = await this.likeRepository.count({
+        where: { comment_id: id, type: LikeType.COMMENT, value: LikeValue.LIKE },
+      });
+      return {
+        liked: false,
+        likes: likeCount,
+      };
     } else {
       // 좋아요하지 않은 상태라면 추가
-      comment.likes += 1;
+      const like = this.likeRepository.create({
+        user_id: user.user_id,
+        comment_id: id,
+        type: LikeType.COMMENT,
+        value: LikeValue.LIKE,
+      });
+      await this.likeRepository.save(like);
+
+      // 감사 로그 기록 (좋아요 추가)
+      await this.auditService.logCommentAction(
+        user.user_id,
+        AuditAction.COMMENT_LIKE,
+        id,
+        { liked: false },
+        { liked: true },
+        { action: 'like' },
+      );
+
+      const likeCount = await this.likeRepository.count({
+        where: { comment_id: id, type: LikeType.COMMENT, value: LikeValue.LIKE },
+      });
+      return {
+        liked: true,
+        likes: likeCount,
+      };
     }
-
-    await this.commentRepository.save(comment);
-
-    return {
-      liked: !liked,
-      likes: comment.likes,
-    };
   }
 
   async getPostComments(

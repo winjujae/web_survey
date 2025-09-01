@@ -1,11 +1,14 @@
 import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like, SelectQueryBuilder } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Post, PostStatus, PostType } from './entities/post.entity';
 import { User } from '../users/entities/user.entity';
 import { Category } from '../categories/entities/category.entity';
+import { Like, LikeType, LikeValue } from './entities/like.entity';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { AuditService, AuditAction, AuditResource } from '../common/services/audit.service';
+import { escapeSqlLike, safeParseInt, safeSubstring } from '../common/utils/security.utils';
 
 export interface PostFilters {
   category_id?: string;
@@ -32,6 +35,9 @@ export class PostsService {
     private userRepository: Repository<User>,
     @InjectRepository(Category)
     private categoryRepository: Repository<Category>,
+    @InjectRepository(Like)
+    private likeRepository: Repository<Like>,
+    private auditService: AuditService,
   ) {}
 
   async create(createPostDto: CreatePostDto, user: User): Promise<Post> {
@@ -55,7 +61,19 @@ export class PostsService {
       category_id: category?.category_id,
     });
 
-    return this.postRepository.save(post);
+    const savedPost = await this.postRepository.save(post);
+
+    // 감사 로그 기록
+    await this.auditService.logPostAction(
+      user.user_id,
+      AuditAction.CREATE,
+      savedPost.post_id,
+      undefined,
+      { title: savedPost.title, content: savedPost.content },
+      { category_id: category?.category_id },
+    );
+
+    return savedPost;
   }
 
   async findAll(filters: PostFilters = {}, pagination: PaginationOptions = {}): Promise<{
@@ -65,12 +83,13 @@ export class PostsService {
     limit: number;
     totalPages: number;
   }> {
-    const {
-      page = 1,
-      limit = 10,
-      sortBy = 'created_at',
-      sortOrder = 'DESC'
-    } = pagination;
+    // 안전한 페이지네이션 파라미터 처리
+    const page = Math.max(1, safeParseInt(pagination.page, 1));
+    const limit = Math.min(100, Math.max(1, safeParseInt(pagination.limit, 10))); // 최대 100개 제한
+    const sortBy = ['created_at', 'updated_at', 'likes', 'view_count'].includes(pagination.sortBy)
+      ? pagination.sortBy
+      : 'created_at';
+    const sortOrder = pagination.sortOrder === 'ASC' ? 'ASC' : 'DESC';
 
     const queryBuilder = this.postRepository.createQueryBuilder('post')
       .leftJoinAndSelect('post.user', 'user')
@@ -99,10 +118,15 @@ export class PostsService {
     }
 
     if (filters.search) {
-      queryBuilder.andWhere(
-        '(post.title ILIKE :search OR post.content ILIKE :search)',
-        { search: `%${filters.search}%` },
-      );
+      // SQL injection 방지를 위한 안전한 검색어 처리
+      const sanitizedSearch = escapeSqlLike(filters.search);
+
+      if (sanitizedSearch.length > 0) {
+        queryBuilder.andWhere(
+          '(post.title ILIKE :search OR post.content ILIKE :search)',
+          { search: `%${sanitizedSearch}%` },
+        );
+      }
     }
 
     // 정렬
@@ -201,24 +225,64 @@ export class PostsService {
       throw new NotFoundException('게시글을 찾을 수 없습니다.');
     }
 
-    // 사용자별 좋아요 상태 확인 (실제로는 likes 테이블에서 확인해야 함)
-    // 임시로 간단한 로직: likes 배열이나 별도 필드가 있다고 가정
-    const liked = Math.random() > 0.5; // 실제로는 DB에서 확인해야 함
+    // 기존 좋아요 확인
+    const existingLike = await this.likeRepository.findOne({
+      where: {
+        user_id: user.user_id,
+        post_id: id,
+        type: LikeType.POST,
+      },
+    });
 
-    if (liked) {
+    if (existingLike) {
       // 이미 좋아요한 상태라면 취소
-      post.likes = Math.max(0, post.likes - 1);
+      await this.likeRepository.remove(existingLike);
+
+      // 감사 로그 기록 (좋아요 취소)
+      await this.auditService.logPostAction(
+        user.user_id,
+        AuditAction.POST_LIKE,
+        id,
+        { liked: true },
+        { liked: false },
+        { action: 'unlike' },
+      );
+
+      const likeCount = await this.likeRepository.count({
+        where: { post_id: id, type: LikeType.POST, value: LikeValue.LIKE },
+      });
+      return {
+        liked: false,
+        likes: likeCount,
+      };
     } else {
       // 좋아요하지 않은 상태라면 추가
-      post.likes += 1;
+      const like = this.likeRepository.create({
+        user_id: user.user_id,
+        post_id: id,
+        type: LikeType.POST,
+        value: LikeValue.LIKE,
+      });
+      await this.likeRepository.save(like);
+
+      // 감사 로그 기록 (좋아요 추가)
+      await this.auditService.logPostAction(
+        user.user_id,
+        AuditAction.POST_LIKE,
+        id,
+        { liked: false },
+        { liked: true },
+        { action: 'like' },
+      );
+
+      const likeCount = await this.likeRepository.count({
+        where: { post_id: id, type: LikeType.POST, value: LikeValue.LIKE },
+      });
+      return {
+        liked: true,
+        likes: likeCount,
+      };
     }
-
-    await this.postRepository.save(post);
-
-    return {
-      liked: !liked,
-      likes: post.likes,
-    };
   }
 
   async toggleBookmark(id: string, user: User): Promise<{ bookmarked: boolean }> {

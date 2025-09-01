@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeORMConfig } from './configs/typeorm.config';
 import { ConfigModule } from '@nestjs/config';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 // Auth Module
 import { AuthModule } from './auth/auth.module';
@@ -24,10 +25,17 @@ import { ReviewsModule } from './reviews/reviews.module';
 // Database Module
 import { DatabaseModule } from './database/database.module';
 
+// Common Module
+import { CommonModule } from './common/common.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot(typeORMConfig),
+    ThrottlerModule.forRoot({
+      ttl: 60, // 1분
+      limit: 10, // 1분에 10회 요청
+    }),
     AuthModule,
     UsersModule,
     PostsModule,
@@ -41,6 +49,7 @@ import { DatabaseModule } from './database/database.module';
     ProductsModule,
     ReviewsModule,
     DatabaseModule,
+    CommonModule,
   ],
   controllers: [AppController],
   providers: [AppService],

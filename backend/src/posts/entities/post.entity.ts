@@ -63,10 +63,10 @@ export class Post {
   })
   type: PostType;
 
-  @Column({ default: 0 })
+  // 좋아요 수는 Like 엔티티에서 계산 (읽기 전용)
   likes: number;
 
-  @Column({ default: 0 })
+  // 싫어요 수는 Like 엔티티에서 계산 (읽기 전용)
   dislikes: number;
 
   @Column({ default: 0 })
@@ -101,4 +101,7 @@ export class Post {
 
   @OneToMany(() => Report, (report) => report.post)
   reports: Report[];
+
+  @OneToMany(() => Like, (like) => like.post)
+  likes: Like[];
 }

@@ -11,6 +11,7 @@ import {
 import { User } from '../../users/entities/user.entity';
 import { Post } from '../../posts/entities/post.entity';
 import { Report } from '../../reports/entities/report.entity';
+import { Like } from '../../posts/entities/like.entity';
 
 export enum CommentStatus {
   ACTIVE = 'active',
@@ -75,4 +76,7 @@ export class Comment {
 
   @OneToMany(() => Report, (report) => report.comment)
   reports: Report[];
+
+  @OneToMany(() => Like, (like) => like.comment)
+  likes: Like[];
 }

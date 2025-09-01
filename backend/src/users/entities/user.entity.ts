@@ -120,4 +120,7 @@ export class User {
 
   @OneToMany(() => Expert, (expert) => expert.user)
   expert_profiles: Expert[];
+
+  @OneToMany(() => Like, (like) => like.user)
+  likes: Like[];
 }

@@ -58,7 +58,7 @@ export class CreateCommentDto {
   @MinLength(1, { message: '댓글 내용은 최소 1자 이상이어야 합니다.' })
   @MaxLength(1000, { message: '댓글 내용은 최대 1000자까지 가능합니다.' })
   @IsNotForbidden({ message: '댓글 내용에 금지된 단어가 포함되어 있습니다.' })
-  @Sanitize() // XSS 방지
+  @Sanitize(String) // XSS 방지 및 타입 변환
   content: string;
 
   @IsOptional()
@@ -75,6 +75,6 @@ export class CreateCommentDto {
   @MaxLength(20, { message: '익명 닉네임은 최대 20자까지 가능합니다.' })
   @Matches(/^[a-zA-Z0-9가-힣_]+$/, { message: '익명 닉네임은 한글, 영문, 숫자, 언더스코어만 사용할 수 있습니다.' })
   @IsNotForbidden({ message: '익명 닉네임에 금지된 단어가 포함되어 있습니다.' })
-  @Sanitize() // XSS 방지
+  @Sanitize(String) // XSS 방지 및 타입 변환
   anonymous_nickname?: string;
 }

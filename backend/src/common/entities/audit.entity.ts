@@ -57,8 +57,8 @@ export class AuditLog {
   @Column({ type: 'json', nullable: true, comment: '변경 후 데이터' })
   new_values?: any;
 
-  @Column({ nullable: true, comment: '추가 메타데이터' })
-  metadata?: string;
+  @Column({ type: 'json', nullable: true, comment: '추가 메타데이터' })
+  metadata?: any;
 
   @Column({ nullable: true, comment: '클라이언트 IP 주소' })
   ip_address?: string;

@@ -13,6 +13,7 @@ import { Comment } from '../../comments/entities/comment.entity';
 import { Bookmark } from '../../bookmarks/entities/bookmark.entity';
 import { Report } from '../../reports/entities/report.entity';
 import { Category } from '../../categories/entities/category.entity';
+import { Like } from './like.entity';
 
 export enum PostStatus {
   DRAFT = 'draft',
@@ -64,7 +65,7 @@ export class Post {
   type: PostType;
 
   // 좋아요 수는 Like 엔티티에서 계산 (읽기 전용)
-  likes: number;
+  likes_count: number;
 
   // 싫어요 수는 Like 엔티티에서 계산 (읽기 전용)
   dislikes: number;

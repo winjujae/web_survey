@@ -31,7 +31,7 @@ export class AuditService {
         resource_id: resourceId,
         old_values: oldValues,
         new_values: newValues,
-        metadata: metadata ? JSON.stringify(metadata) : null,
+        metadata: metadata || null,
         ip_address: ipAddress,
         user_agent: userAgent,
       });
@@ -188,3 +188,5 @@ export class AuditService {
     });
   }
 }
+
+export { AuditAction, AuditResource };

@@ -86,7 +86,8 @@ export class PostsService {
     // 안전한 페이지네이션 파라미터 처리
     const page = Math.max(1, safeParseInt(pagination.page, 1));
     const limit = Math.min(100, Math.max(1, safeParseInt(pagination.limit, 10))); // 최대 100개 제한
-    const sortBy = ['created_at', 'updated_at', 'likes', 'view_count'].includes(pagination.sortBy)
+    const validSortFields = ['created_at', 'updated_at', 'likes', 'view_count'];
+    const sortBy = (pagination.sortBy && validSortFields.includes(pagination.sortBy))
       ? pagination.sortBy
       : 'created_at';
     const sortOrder = pagination.sortOrder === 'ASC' ? 'ASC' : 'DESC';
@@ -122,10 +123,10 @@ export class PostsService {
       const sanitizedSearch = escapeSqlLike(filters.search);
 
       if (sanitizedSearch.length > 0) {
-        queryBuilder.andWhere(
-          '(post.title ILIKE :search OR post.content ILIKE :search)',
+      queryBuilder.andWhere(
+        '(post.title ILIKE :search OR post.content ILIKE :search)',
           { search: `%${sanitizedSearch}%` },
-        );
+      );
       }
     }
 
@@ -278,10 +279,10 @@ export class PostsService {
       const likeCount = await this.likeRepository.count({
         where: { post_id: id, type: LikeType.POST, value: LikeValue.LIKE },
       });
-      return {
+    return {
         liked: true,
         likes: likeCount,
-      };
+    };
     }
   }
 

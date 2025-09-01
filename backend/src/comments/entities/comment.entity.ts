@@ -44,7 +44,7 @@ export class Comment {
   status: CommentStatus;
 
   @Column({ default: 0 })
-  likes: number;
+  likes_count: number;
 
   @Column({ default: true })
   is_anonymous: boolean;

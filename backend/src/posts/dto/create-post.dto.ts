@@ -15,7 +15,8 @@ import {
   registerDecorator,
   ValidationArguments,
 } from 'class-validator';
-import { Transform, Sanitize } from 'class-sanitizer';
+import { Sanitize } from 'class-sanitizer';
+import { Transform } from 'class-transformer';
 import { PostType } from '../entities/post.entity';
 
 // 금지어 목록
@@ -61,7 +62,7 @@ export class CreatePostDto {
   @MaxLength(200, { message: '제목은 최대 200자까지 가능합니다.' })
   @Matches(/^[^<>&"']*$/, { message: '제목에 특수문자 <>&"\'가 포함될 수 없습니다.' })
   @IsNotForbidden({ message: '제목에 금지된 단어가 포함되어 있습니다.' })
-  @Sanitize() // XSS 방지
+  @Sanitize(String) // XSS 방지 및 타입 변환
   title: string;
 
   @IsString({ message: '내용은 문자열이어야 합니다.' })
@@ -69,7 +70,7 @@ export class CreatePostDto {
   @MinLength(1, { message: '내용은 최소 1자 이상이어야 합니다.' })
   @MaxLength(10000, { message: '내용은 최대 10000자까지 가능합니다.' })
   @IsNotForbidden({ message: '내용에 금지된 단어가 포함되어 있습니다.' })
-  @Sanitize() // XSS 방지
+  @Sanitize(String) // XSS 방지 및 타입 변환
   content: string;
 
   @IsOptional()
@@ -100,6 +101,6 @@ export class CreatePostDto {
   @MaxLength(20, { message: '익명 닉네임은 최대 20자까지 가능합니다.' })
   @Matches(/^[a-zA-Z0-9가-힣_]+$/, { message: '익명 닉네임은 한글, 영문, 숫자, 언더스코어만 사용할 수 있습니다.' })
   @IsNotForbidden({ message: '익명 닉네임에 금지된 단어가 포함되어 있습니다.' })
-  @Sanitize() // XSS 방지
+  @Sanitize(String) // XSS 방지 및 타입 변환
   anonymous_nickname?: string;
 }

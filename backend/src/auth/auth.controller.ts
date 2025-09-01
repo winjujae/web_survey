@@ -15,7 +15,7 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { Throttle } from '@nestjs/throttler';
+
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -29,7 +29,6 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  @Throttle({ default: { limit: 3, ttl: 60000 } }) // 1분에 3회 제한
   @ApiOperation({
     summary: '회원가입',
     description: '새로운 사용자를 등록합니다.',
@@ -42,7 +41,6 @@ export class AuthController {
   }
 
   @Post('login')
-  @Throttle({ default: { limit: 5, ttl: 300000 } }) // 5분에 5회 제한
   @ApiOperation({
     summary: '로그인',
     description: '이메일과 비밀번호로 로그인합니다.',

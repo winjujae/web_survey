@@ -15,7 +15,7 @@ import {
   UsePipes,
   ParseUUIDPipe,
 } from '@nestjs/common';
-import { Throttle } from '@nestjs/throttler';
+
 import {
   CommentsService,
   CommentFilters,
@@ -33,7 +33,6 @@ export class CommentsController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  @Throttle({ default: { limit: 10, ttl: 3600000 } }) // 1시간에 10개 댓글 제한
   @UsePipes(new ValidationPipe({ transform: true }))
   async create(
     @Body() createCommentDto: CreateCommentDto,

@@ -23,7 +23,7 @@ import {
   ApiQuery,
   ApiParam,
 } from '@nestjs/swagger';
-import { Throttle } from '@nestjs/throttler';
+
 import { PostsService, PostFilters, PaginationOptions } from './posts.service';
 import type { PostFilters as IPostFilters } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -38,7 +38,6 @@ export class PostsController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  @Throttle({ default: { limit: 5, ttl: 3600000 } }) // 1시간에 5개 게시글 제한
   @UsePipes(new ValidationPipe({ transform: true }))
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({

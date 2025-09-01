@@ -10,11 +10,13 @@ import { Bookmark } from '../bookmarks/entities/bookmark.entity';
 import { Report } from '../reports/entities/report.entity';
 import { Like } from './entities/like.entity';
 import { AuthModule } from '../auth/auth.module';
+import { CommonModule } from '../common/common.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Post, User, Category, Comment, Bookmark, Report, Like]),
     AuthModule,
+    CommonModule,
   ],
   controllers: [PostsController],
   providers: [PostsService],

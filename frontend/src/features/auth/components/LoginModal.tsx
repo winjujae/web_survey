@@ -1,4 +1,4 @@
-// LoginModal.tsx (dialog 버전)
+//src/features/auth/components/LoginModal.tsx
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../auth-context";
@@ -8,6 +8,7 @@ export default function LoginModal({ open, onClose }: { open: boolean; onClose: 
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [err, setErr] = useState("");
+  const [loading, setLoading] = useState(false);
   const ref = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -26,26 +27,38 @@ export default function LoginModal({ open, onClose }: { open: boolean; onClose: 
       className="modal"
       aria-modal="true"
       aria-labelledby="loginTitle"
-      onClick={(e) => {
-        // 배경(=dialog 자신)을 클릭한 경우만 닫기
-        if (e.target === ref.current) onClose();
-      }}
+      onClick={(e) => { if (e.target === ref.current) onClose(); }}
     >
       <div className="modal-card" onClick={(e) => e.stopPropagation()}>
         <h2 id="loginTitle">로그인</h2>
-        <div className="row"><input placeholder="이메일" value={email} onChange={e => setEmail(e.target.value)} /></div>
-        <div className="row"><input type="password" placeholder="비밀번호" value={pw} onChange={e => setPw(e.target.value)} /></div>
         {err && <p style={{ color: "var(--danger)" }}>{err}</p>}
-        <div className="row" style={{ justifyContent: "flex-end", gap: 8 }}>
-          <button className="btn" onClick={onClose}>취소</button>
-          <button
-            className="btn btn-primary"
-            onClick={async () => {
-              try { await login({ email, password: pw }); onClose(); }
-              catch (e: any) { setErr(e.message ?? "로그인 실패"); }
-            }}
-          >확인</button>
-        </div>
+        <form
+          onSubmit={async (e) => {
+            e.preventDefault();
+            try {
+              setLoading(true);
+              await login({ email, password: pw });
+              onClose();
+            } catch (e: any) {
+              setErr(e.message ?? "로그인 실패");
+            } finally {
+              setLoading(false);
+            }
+          }}
+        >
+          <div className="row">
+            <input placeholder="이메일" value={email} onChange={e => setEmail(e.target.value)} autoFocus />
+          </div>
+          <div className="row">
+            <input type="password" placeholder="비밀번호" value={pw} onChange={e => setPw(e.target.value)} />
+          </div>
+          <div className="row" style={{ justifyContent: "flex-end", gap: 8 }}>
+            <button type="button" className="btn" onClick={onClose} disabled={loading}>취소</button>
+            <button type="submit" className="btn btn-primary" disabled={loading}>
+              {loading ? "로그인 중…" : "확인"}
+            </button>
+          </div>
+        </form>
       </div>
     </dialog>
   );

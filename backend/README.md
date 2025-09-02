@@ -26,7 +26,7 @@ NestJS + TypeScript + TypeORM + Neon 기반의 종합적인 탈모 커뮤니티 
 - **Database**: PostgreSQL (Neon), TypeORM
 - **Authentication**: JWT, Passport.js
 - **Validation**: class-validator, class-transformer
-- **Documentation**: Swagger (추후 추가 예정)
+- **Documentation**: Swagger 
 
 ## 🚀 설치 및 실행
 
@@ -264,19 +264,3 @@ src/
 - **Railway**: 풀스택 배포
 - **AWS**: 확장성 있는 배포
 - **Docker**: 컨테이너화 배포
-
-## 🤝 기여
-
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📝 라이선스
-
-이 프로젝트는 MIT 라이선스를 따릅니다.
-
-## 📞 문의
-
-프로젝트 관련 문의사항은 이슈를 통해 남겨주세요.

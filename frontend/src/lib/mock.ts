@@ -1,33 +1,55 @@
-import { DEMO_AUTHORS, DEMO_TAGS, LOREM } from "./constants";
-import { cryptoRandomId, shuffle } from "./utils";
-import type { Post } from "../types/post";
+// src/lib/mock.ts
+import type { Board } from "@/types/board";
+import type { Post } from "@/types/post";
 
-export function sampleTitle(i: number) {
-  const t = [
-    "2025 프론트엔드 트렌드 요약","React 상태관리, 이 조합이 답이었다",
-    "디자이너 없이도 예쁜 UI 만드는 법","개발자 커리어: 연봉보다 중요한 것",
-    "AI로 사이드프로젝트 0→1","CSS만으로 스켈레톤 로딩 구현하기",
-    "Next.js 성능 체크리스트","스타트업에서 살아남기",
-    "웹 접근성, 진짜 최소 가이드","디자인 토큰으로 팀 정렬하기",
-  ];
-  return t[i % t.length] + ` #${(i % 100) + 1}`;
-}
+export const boards: Board[] = [
+  { id: "talk",           slug: "talk",      title: "소통하기" },
+  { id: "treatment",      slug: "treatment", title: "치료/약 정보" },
+  { id: "reviews",        slug: "reviews",   title: "후기/리뷰" },
+  { id: "clinics",        slug: "clinics",   title: "지역 병원/클리닉" },
+];
 
-export function makePosts(n = 60): Post[] {
-  const now = Date.now();
-  const arr: Post[] = [];
-  for (let i = 0; i < n; i++) {
-    const id = cryptoRandomId();
-    const createdAt = now - i * 3600_000 * (0.5 + Math.random() * 12);
-    const hot = Math.floor(Math.max(0, 200 - i * 1.5) + Math.random() * 120);
-    const comments = Math.floor(Math.random() * 50);
-    const views = hot * 5 + Math.floor(Math.random() * 500);
-    const author = DEMO_AUTHORS[Math.floor(Math.random() * DEMO_AUTHORS.length)];
-    const pickTags = shuffle([...DEMO_TAGS]).slice(0, 1 + Math.floor(Math.random() * 3));
-    arr.push({
-      id, title: sampleTitle(i), body: LOREM, author, createdAt, hot, comments, views,
-      tags: pickTags, isFollowing: Math.random() > 0.6,
-    });
+// “치료/약 정보”에서 제공할 태그 프리셋(왼쪽 메뉴용)
+export const treatmentTags = [
+  { key: "finasteride", label: "피나스테리드" },
+  { key: "dutasteride", label: "두타스테리드" },
+  { key: "minoxidil",   label: "미녹시딜" },
+  { key: "supplement",  label: "영양제/기타" },
+  { key: "lifestyle",   label: "생활관리" },
+];
+
+export const posts: Post[] = Array.from({ length: 24 }).map((_, i) => ({
+  id: String(i + 1),
+  // ✨ 이제 진짜 게시판 id만 사용 (상위만)
+  boardId: i % 2 ? "treatment" : "reviews",
+  title: `샘플 포스트 ${i + 1}`,
+  excerpt: "간단 요약이 이곳에 들어갑니다. 내용 일부…",
+  author: i % 3 ? "자라매니저" : "디자인얍",
+  createdAt: new Date(Date.now() - i * 3600_000).toISOString(),
+  // ✨ 하위 분류는 태그로만
+  tags: i % 2
+    ? ["피나스테리드", "부작용"]
+    : ["모발이식", "후기"],
+  likes: Math.floor(Math.random() * 50),
+  views: 1000 + i * 37,
+  body: "상세 본문 예시입니다.",
+}));
+
+export const getBoards = () => boards;
+export const getBoardBySlug = (slug: string) =>
+  boards.find(b => b.slug === slug || b.id === slug);
+
+export const getPosts = (limit = 20) =>
+  posts.slice(0, limit);
+
+// 단일 게시판에서 tag(옵션)로 필터링
+export const getPostsByBoard = (boardId: string, limit = 20, tag?: string) => {
+  let list = posts.filter(p => p.boardId === boardId);
+  if (tag) {
+    const lower = tag.toLowerCase();
+    list = list.filter(p => p.tags?.some(t => t.toLowerCase().includes(lower)));
   }
-  return arr.sort((a, b) => b.createdAt - a.createdAt);
-}
+  return list.slice(0, limit);
+};
+
+export const getPost = (id: string) => posts.find(p => p.id === id);

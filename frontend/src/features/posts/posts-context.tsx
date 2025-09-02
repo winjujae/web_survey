@@ -1,28 +1,210 @@
 // src/features/posts/posts-context.tsx
 "use client";
-import { createContext, useContext, useMemo, useState } from "react";
-import type { Post } from "../../types/post";
-import { makePosts } from "../../lib/mock";
+
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import type { Post } from "@/types/post";
+import { getPosts } from "@/lib/mock";
+
+/** 정렬 키 */
+export type SortKey = "new" | "hot";
+
+/** 새 글 입력 타입 (폼에서 사용) */
+export type NewPostInput = {
+  boardId: string;
+  title: string;
+  body: string;
+  tags?: string[];
+  author: string;          // 현재 로그인 사용자 이름/핸들
+};
 
 type Ctx = {
+  /** 원본 전체 목록 */
   posts: Post[];
-  setPosts: React.Dispatch<React.SetStateAction<Post[]>>;
+  /** 검색/정렬 적용 결과 */
+  items: Post[];
+  /** 검색어 */
+  query: string;
+  /** 정렬 키 */
+  sort: SortKey;
+
+  /** 검색어 변경 */
+  setQuery: (q: string) => void;
+  /** 정렬 변경 */
+  setSort: (s: SortKey) => void;
+
+  /** 좋아요 토글(옵티미스틱) */
   toggleLike: (id: string) => void;
+  /** 투표(1=업, -1=다운, 옵티미스틱) */
+  vote: (id: string, dir: 1 | -1) => void;
+
+  /** 새 글 추가(목 데이터용, 서버 붙이면 API로 대체) → 새 글 id 반환 */
+  addPost: (input: NewPostInput) => string;
+
+  /** (선택) 조회수 증가 */
+  incView: (id: string) => void;
 };
 
 const PostsCtx = createContext<Ctx | null>(null);
 
 export function PostsProvider({ children }: { children: React.ReactNode }) {
-  const [posts, setPosts] = useState<Post[]>(() => makePosts());
+  // 초기 데이터 (서버/DB 붙이면 교체)
+  const [posts, setPosts] = useState<Post[]>(() => getPosts(80));
 
-  const toggleLike = (id: string) =>
+  const [query, setQuery] = useState("");
+  const [sort, setSort] = useState<SortKey>("new");
+
+  /* ───────────────── URL <-> 상태 동기화 ───────────────── */
+
+  // 최초 마운트 시 URL → state
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const sp = new URLSearchParams(window.location.search);
+    const q = sp.get("q");
+    const s = sp.get("sort") as SortKey | null;
+    if (q) setQuery(q);
+    if (s === "hot" || s === "new") setSort(s);
+  }, []);
+
+  // state → URL (replaceState로 히스토리 오염 최소화)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const sp = new URLSearchParams(window.location.search);
+    query ? sp.set("q", query) : sp.delete("q");
+    sort ? sp.set("sort", sort) : sp.delete("sort");
+    const qs = sp.toString();
+    const url = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
+    window.history.replaceState(null, "", url);
+  }, [query, sort]);
+
+  /* ───────────────── 액션들(좋아요/싫어요/조회수/추가) ───────────────── */
+
+  const toggleLike = (id: string) => {
     setPosts(prev =>
-      prev.map(p =>
-        p.id === id ? { ...p, hot: p.liked ? p.hot - 1 : p.hot + 1, liked: !p.liked } : p
-      )
+      prev.map(p => {
+        if (p.id !== id) return p;
+        const liked = !p.liked;
+        const likes = (p.likes ?? 0) + (liked ? 1 : -1);
+        return { ...p, liked, likes };
+      })
     );
+  };
 
-  const value = useMemo(() => ({ posts, setPosts, toggleLike }), [posts]);
+  const vote = (id: string, dir: 1 | -1) => {
+    setPosts(prev =>
+      prev.map(p => {
+        if (p.id !== id) return p;
+        if (dir > 0) {
+          // 업보트
+          return {
+            ...p,
+            likes: (p.likes ?? 0) + 1,
+            liked: true,
+            // 업보트 시 다운보트 표시를 해제하고 싶다면:
+            disliked: false,
+          };
+        } else {
+          // 다운보트
+          return {
+            ...p,
+            dislikes: (p.dislikes ?? 0) + 1,
+            disliked: true,
+            // 다운보트 시 업보트 표시를 해제하고 싶다면:
+            liked: false,
+            likes: p.liked ? Math.max((p.likes ?? 0) - 1, 0) : (p.likes ?? 0),
+          };
+        }
+      })
+    );
+  };
+
+  const incView = (id: string) => {
+    setPosts(prev =>
+      prev.map(p => (p.id === id ? { ...p, views: (p.views ?? 0) + 1 } : p))
+    );
+  };
+
+  const addPost = (input: NewPostInput) => {
+    const id = String(Date.now()); // 데모용 id. 실제로는 서버에서 발급받음.
+    const createdAt = new Date().toISOString();
+    const excerpt = input.body.slice(0, 120);
+
+    const newPost: Post = {
+      id,
+      boardId: input.boardId,
+      title: input.title,
+      body: input.body,
+      author: input.author,
+      createdAt,
+      tags: input.tags ?? [],
+      views: 0,
+      likes: 0,
+      dislikes: 0,
+      liked: false,
+      disliked: false,
+      excerpt,
+    };
+
+    setPosts(prev => [newPost, ...prev]);
+    return id;
+  };
+
+  /* ───────────────── 정렬/검색 파이프 ───────────────── */
+
+  // 인기 점수(시간 감쇠 포함)
+  const hotScore = (p: Post) => {
+    const up = p.likes ?? 0;
+    const down = p.dislikes ?? 0;
+    const score = Math.max(up - down, 0);
+    const order = Math.log10(Math.max(score, 1));
+    const epoch = 1_700_000_000; // 고정 기준(초)
+    const t = (Date.parse(p.createdAt) / 1000) - epoch;
+    // 5일 하프라이프 느낌으로 시간 가중
+    return order + t / (60 * 60 * 24 * 5);
+  };
+
+  const items = useMemo(() => {
+    let list = posts;
+
+    // 검색(간단 스코어링)
+    const q = query.trim().toLowerCase();
+    if (q) {
+      const score = (p: Post) =>
+        (p.title.toLowerCase().includes(q) ? 3 : 0) +
+        ((p.excerpt ?? "").toLowerCase().includes(q) ? 2 : 0) +
+        (p.tags?.some(t => t.toLowerCase().includes(q)) ? 1 : 0);
+
+      list = list
+        .map(p => ({ p, s: score(p) }))
+        .filter(x => x.s > 0)
+        .sort((a, b) => b.s - a.s)
+        .map(x => x.p);
+    }
+
+    // 정렬
+    if (sort === "new") {
+      list = [...list].sort(
+        (a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt)
+      );
+    } else {
+      list = [...list].sort((a, b) => hotScore(b) - hotScore(a));
+    }
+
+    return list;
+  }, [posts, query, sort]);
+
+  const value: Ctx = {
+    posts,
+    items,
+    query,
+    sort,
+    setQuery,
+    setSort,
+    toggleLike,
+    vote,
+    addPost,
+    incView,
+  };
+
   return <PostsCtx.Provider value={value}>{children}</PostsCtx.Provider>;
 }
 

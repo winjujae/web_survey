@@ -1,7 +1,7 @@
-// src/features/auth/auth-context.tsx
+///src/features/auth/auth-context.tsx
 "use client";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import type { User } from "../../types/auth";
+import type { User } from "@/types/auth";
 import type { ILoginService, LoginPayload } from "./auth-service";
 import { mockAuthService } from "./auth-mock";
 
@@ -17,15 +17,15 @@ type Ctx = AuthState & {
 const AuthCtx = createContext<Ctx | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const service: ILoginService = mockAuthService; // 나중에 실제 API로 교체
+  const service: ILoginService = mockAuthService; // TODO: 실제 API로 교체
   const [state, setState] = useState<AuthState>({ user: null, token: null, loading: true });
 
   useEffect(() => {
-    const t = localStorage.getItem(AUTH_KEY);
+    const t = typeof window !== "undefined" ? localStorage.getItem(AUTH_KEY) : null;
     if (!t) return setState(s => ({ ...s, loading: false }));
-    service.me(t).then(u => setState({ user: u, token: u ? t : null, loading: false }))
-    .catch(() => setState({ user: null, token: null, loading: false }));
-    ;
+    service.me(t)
+      .then(u => setState({ user: u, token: u ? t : null, loading: false }))
+      .catch(() => setState({ user: null, token: null, loading: false }));
   }, []);
 
   const login = async (p: LoginPayload) => {
@@ -49,5 +49,3 @@ export function useAuth() {
   if (!v) throw new Error("useAuth must be used within AuthProvider");
   return v;
 }
-// AuthProvider를 앱 최상단에 배치 필요
-// 예: <AuthProvider><App /></AuthProvider>

@@ -12,13 +12,11 @@ import { Post } from '../../posts/entities/post.entity';
 import { PostTag } from './post-tag.entity';
 
 @Entity('tags')
-@Index(['name'], { unique: true })
 export class Tag {
   @PrimaryGeneratedColumn('uuid')
   tag_id: string;
 
   @Column({ length: 50, unique: true })
-  @Index()
   name: string;
 
   @Column({ type: 'text', nullable: true })

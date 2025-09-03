@@ -4,12 +4,12 @@ import { TagsService } from './tags.service';
 import { TagsController } from './tags.controller';
 import { Tag } from './entities/tag.entity';
 import { PostTag } from './entities/post-tag.entity';
-import { AnalyticsModule } from '../analytics/analytics.module';
+import { CommonModule } from '../common/common.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Tag, PostTag]),
-    AnalyticsModule,
+    CommonModule,
   ],
   controllers: [TagsController],
   providers: [TagsService],

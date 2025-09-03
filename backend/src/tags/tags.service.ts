@@ -3,7 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In, Not } from 'typeorm';
 import { Tag } from './entities/tag.entity';
 import { PostTag } from './entities/post-tag.entity';
-import { Post } from '../posts/entities/post.entity';
+import { AnalyticsService } from '../analytics/analytics.service';
+import { SearchType } from '../analytics/entities/search-log.entity';
+import { PostsService } from '../posts/posts.service';
 
 export interface TagRanking {
   tag_id: string;
@@ -19,8 +21,7 @@ export class TagsService {
     private tagRepository: Repository<Tag>,
     @InjectRepository(PostTag)
     private postTagRepository: Repository<PostTag>,
-    @InjectRepository(Post)
-    private postRepository: Repository<Post>,
+    private analyticsService: AnalyticsService,
   ) {}
 
   // 태그 생성
@@ -80,28 +81,47 @@ export class TagsService {
   }
 
   // 태그 검색
-  async searchTags(query: string, limit: number = 10): Promise<Tag[]> {
-    return this.tagRepository
+  async searchTags(query: string, limit: number = 10, userId?: string, ip?: string): Promise<Tag[]> {
+    const tags = await this.tagRepository
       .createQueryBuilder('tag')
       .where('tag.is_active = :isActive', { isActive: true })
       .andWhere('tag.name ILIKE :query', { query: `%${query}%` })
       .orderBy('tag.usage_count', 'DESC')
       .limit(limit)
       .getMany();
+
+    // 태그 검색 로깅 (비동기)
+    if (tags.length > 0) {
+      setImmediate(() => {
+        this.analyticsService.logSearch(
+          query,
+          SearchType.TAG,
+          userId,
+          tags.length,
+          ip
+        );
+      });
+    }
+
+    return tags;
   }
 
   // 태그별 게시물 조회
   async getPostsByTag(tagId: string, page: number = 1, limit: number = 10) {
     const tag = await this.findOne(tagId);
 
-    const [posts, total] = await this.postRepository
-      .createQueryBuilder('post')
-      .innerJoin('post.tags', 'tag', 'tag.tag_id = :tagId', { tagId })
+    // 직접 쿼리로 구현 (순환 참조 방지)
+    const offset = (page - 1) * limit;
+
+    const [posts, total] = await this.postTagRepository
+      .createQueryBuilder('pt')
+      .innerJoin('pt.post', 'post')
       .leftJoinAndSelect('post.user', 'user')
       .leftJoinAndSelect('post.category', 'category')
-      .where('post.status = :status', { status: 'published' })
+      .where('pt.tag_id = :tagId', { tagId })
+      .andWhere('post.status = :status', { status: 'published' })
       .orderBy('post.created_at', 'DESC')
-      .skip((page - 1) * limit)
+      .skip(offset)
       .take(limit)
       .getManyAndCount();
 
@@ -135,14 +155,6 @@ export class TagsService {
 
   // 게시물에 태그 추가
   async addTagsToPost(postId: string, tagNames: string[]): Promise<void> {
-    const post = await this.postRepository.findOne({
-      where: { post_id: postId },
-    });
-
-    if (!post) {
-      throw new NotFoundException('게시물을 찾을 수 없습니다.');
-    }
-
     // 태그들을 생성하거나 조회
     const tags: Tag[] = [];
     for (const tagName of tagNames) {

@@ -6,6 +6,7 @@ import {
   Param,
   Query,
   UseGuards,
+  Req,
   ParseUUIDPipe,
   HttpStatus,
   HttpCode,
@@ -21,6 +22,15 @@ import {
 
 import { TagsService, TagRanking } from './tags.service';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
+
+// Express Request 타입 확장
+declare module 'express' {
+  interface Request {
+    ip?: string;
+  }
+}
+
+import type { Request } from 'express';
 
 class CreateTagDto {
   name: string;
@@ -87,11 +97,15 @@ export class TagsController {
   @ApiResponse({ status: 200, description: '태그 검색 성공' })
   async searchTags(
     @Query('q') query: string,
+    @Req() request: Request,
     @Query('limit') limit?: string,
   ) {
+    const user = request.user as any;
     const tags = await this.tagsService.searchTags(
       query,
       limit ? parseInt(limit, 10) : 10,
+      user?.user_id,
+      request.ip,
     );
     return {
       success: true,

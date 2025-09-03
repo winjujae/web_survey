@@ -8,7 +8,7 @@ import {
   Delete,
   Query,
   UseGuards,
-  Request,
+  Req,
   HttpStatus,
   HttpCode,
   ValidationPipe,
@@ -30,6 +30,14 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { User } from '../users/entities/user.entity';
+// Express Request 타입 확장
+declare module 'express' {
+  interface Request {
+    ip?: string;
+  }
+}
+
+import type { Request } from 'express';
 
 @ApiTags('posts')
 @Controller('api/posts')
@@ -48,7 +56,7 @@ export class PostsController {
   @ApiResponse({ status: 400, description: '잘못된 입력 데이터' })
   @ApiResponse({ status: 401, description: '인증되지 않은 사용자' })
   @ApiResponse({ status: 404, description: '카테고리를 찾을 수 없음' })
-  async create(@Body() createPostDto: CreatePostDto, @Request() req: any) {
+  async create(@Body() createPostDto: CreatePostDto, @Req() req: any) {
     const user = req.user as User;
     const post = await this.postsService.create(createPostDto, user);
     return {
@@ -99,6 +107,7 @@ export class PostsController {
   @ApiResponse({ status: 200, description: '게시글 목록 조회 성공' })
   async findAll(
     @Query() filters: IPostFilters,
+    @Req() request: Request,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
     @Query('sortBy') sortBy?: string,
@@ -118,7 +127,7 @@ export class PostsController {
       processedFilters.tags = tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
     }
 
-    const result = await this.postsService.findAll(processedFilters, pagination);
+    const result = await this.postsService.findAll(processedFilters, pagination, request.ip);
     return {
       success: true,
       data: result.posts,
@@ -143,7 +152,7 @@ export class PostsController {
   })
   @ApiResponse({ status: 200, description: '게시글 조회 성공' })
   @ApiResponse({ status: 404, description: '게시글을 찾을 수 없음' })
-  async findOne(@Param('id', ParseUUIDPipe) id: string, @Request() req: any) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string, @Req() req: any) {
     const user = req.user as User;
     const post = await this.postsService.findOne(id, user);
     return {
@@ -158,7 +167,7 @@ export class PostsController {
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updatePostDto: UpdatePostDto,
-    @Request() req: any,
+    @Req() req: any,
   ) {
     const user = req.user as User;
     const post = await this.postsService.update(id, updatePostDto, user);
@@ -172,7 +181,7 @@ export class PostsController {
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param('id', ParseUUIDPipe) id: string, @Request() req: any) {
+  async remove(@Param('id', ParseUUIDPipe) id: string, @Req() req: any) {
     const user = req.user as User;
     await this.postsService.remove(id, user);
     return {
@@ -185,7 +194,7 @@ export class PostsController {
   @UseGuards(JwtAuthGuard)
   async toggleLike(
     @Param('id', ParseUUIDPipe) id: string,
-    @Request() req: any,
+    @Req() req: any,
   ) {
     const user = req.user as User;
     const result = await this.postsService.toggleLike(id, user);
@@ -202,7 +211,7 @@ export class PostsController {
   @UseGuards(JwtAuthGuard)
   async toggleBookmark(
     @Param('id', ParseUUIDPipe) id: string,
-    @Request() req: any,
+    @Req() req: any,
   ) {
     const user = req.user as User;
     const result = await this.postsService.toggleBookmark(id, user);
@@ -244,6 +253,7 @@ export class PostsController {
   @Get('search/:keyword')
   async searchPosts(
     @Param('keyword') keyword: string,
+    @Req() request: Request,
     @Query() filters: Omit<IPostFilters, 'search'>,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
@@ -258,6 +268,7 @@ export class PostsController {
     const result = await this.postsService.findAll(
       { ...filters, search: keyword },
       pagination,
+      request.ip,
     );
 
     return {

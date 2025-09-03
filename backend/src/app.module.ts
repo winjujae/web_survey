@@ -30,6 +30,7 @@ import { CommonModule } from './common/common.module';
 
 // Tags Module
 import { TagsModule } from './tags/tags.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { TagsModule } from './tags/tags.module';
     DatabaseModule,
     CommonModule,
     TagsModule,
+    AnalyticsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

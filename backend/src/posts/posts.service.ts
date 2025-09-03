@@ -9,6 +9,8 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { AuditService, AuditAction, AuditResource } from '../common/services/audit.service';
 import { TagsService } from '../tags/tags.service';
+import { AnalyticsService } from '../analytics/analytics.service';
+import { SearchType } from '../analytics/entities/search-log.entity';
 import { escapeSqlLike, safeParseInt, safeSubstring } from '../common/utils/security.utils';
 
 export interface PostFilters {
@@ -41,6 +43,7 @@ export class PostsService {
     private likeRepository: Repository<Like>,
     private auditService: AuditService,
     private tagsService: TagsService,
+    private analyticsService: AnalyticsService,
   ) {}
 
   async create(createPostDto: CreatePostDto, user: User): Promise<Post> {
@@ -84,7 +87,7 @@ export class PostsService {
     return savedPost;
   }
 
-  async findAll(filters: PostFilters = {}, pagination: PaginationOptions = {}): Promise<{
+  async findAll(filters: PostFilters = {}, pagination: PaginationOptions = {}, ip?: string): Promise<{
     posts: Post[];
     total: number;
     page: number;
@@ -156,6 +159,19 @@ export class PostsService {
     const [posts, total] = await queryBuilder.getManyAndCount();
     const totalPages = Math.ceil(total / limit);
 
+    // 검색어 로깅 (비동기)
+    if (filters.search && total > 0) {
+      setImmediate(() => {
+        this.analyticsService.logSearch(
+          filters.search!,
+          SearchType.POST,
+          filters.user_id,
+          total,
+          ip
+        );
+      });
+    }
+
     return {
       posts,
       total,
@@ -197,7 +213,7 @@ export class PostsService {
       throw new ForbiddenException('게시글을 수정할 권한이 없습니다.');
     }
 
-    const { category_id, ...updateData } = updatePostDto;
+    const { category_id, tags, ...updateData } = updatePostDto;
 
     // 카테고리 확인
     if (category_id) {
@@ -214,6 +230,16 @@ export class PostsService {
       category_id,
       updated_at: new Date(),
     });
+
+    // 태그 처리 (수정 시)
+    if (tags !== undefined) {
+      if (tags && tags.length > 0) {
+        await this.tagsService.addTagsToPost(id, tags);
+      } else {
+        // 태그를 모두 제거하는 경우
+        await this.tagsService.removeTagsFromPost(id, []);
+      }
+    }
 
     return this.findOne(id, user);
   }

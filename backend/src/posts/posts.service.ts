@@ -8,6 +8,7 @@ import { Like, LikeType, LikeValue } from './entities/like.entity';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { AuditService, AuditAction, AuditResource } from '../common/services/audit.service';
+import { TagsService } from '../tags/tags.service';
 import { escapeSqlLike, safeParseInt, safeSubstring } from '../common/utils/security.utils';
 
 export interface PostFilters {
@@ -17,6 +18,7 @@ export interface PostFilters {
   search?: string;
   user_id?: string;
   is_anonymous?: boolean;
+  tags?: string[]; // 태그 필터링을 위한 필드 추가
 }
 
 export interface PaginationOptions {
@@ -38,10 +40,11 @@ export class PostsService {
     @InjectRepository(Like)
     private likeRepository: Repository<Like>,
     private auditService: AuditService,
+    private tagsService: TagsService,
   ) {}
 
   async create(createPostDto: CreatePostDto, user: User): Promise<Post> {
-    const { category_id, ...postData } = createPostDto;
+    const { category_id, tags, ...postData } = createPostDto;
 
     // 카테고리 확인
     let category: Category | null = null;
@@ -63,13 +66,18 @@ export class PostsService {
 
     const savedPost = await this.postRepository.save(post);
 
+    // 태그 처리
+    if (tags && tags.length > 0) {
+      await this.tagsService.addTagsToPost(savedPost.post_id, tags);
+    }
+
     // 감사 로그 기록
     await this.auditService.logPostAction(
       user.user_id,
       AuditAction.CREATE,
       savedPost.post_id,
       undefined,
-      { title: savedPost.title, content: savedPost.content },
+      { title: savedPost.title, content: savedPost.content, tags },
       { category_id: category?.category_id },
     );
 
@@ -95,6 +103,7 @@ export class PostsService {
     const queryBuilder = this.postRepository.createQueryBuilder('post')
       .leftJoinAndSelect('post.user', 'user')
       .leftJoinAndSelect('post.category', 'category')
+      .leftJoinAndSelect('post.tags', 'tag')
       .where('post.status = :status', { status: PostStatus.PUBLISHED });
 
     // 필터 적용
@@ -118,16 +127,23 @@ export class PostsService {
       });
     }
 
-    if (filters.search) {
+        if (filters.search) {
       // SQL injection 방지를 위한 안전한 검색어 처리
       const sanitizedSearch = escapeSqlLike(filters.search);
 
       if (sanitizedSearch.length > 0) {
       queryBuilder.andWhere(
         '(post.title ILIKE :search OR post.content ILIKE :search)',
-          { search: `%${sanitizedSearch}%` },
+        { search: `%${sanitizedSearch}%` },
       );
       }
+    }
+
+    // 태그 필터링
+    if (filters.tags && filters.tags.length > 0) {
+      queryBuilder.andWhere('tag.name IN (:...tagNames)', {
+        tagNames: filters.tags,
+      });
     }
 
     // 정렬

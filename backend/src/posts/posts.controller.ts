@@ -95,6 +95,7 @@ export class PostsController {
   @ApiQuery({ name: 'type', required: false, description: '게시글 타입' })
   @ApiQuery({ name: 'status', required: false, description: '게시글 상태' })
   @ApiQuery({ name: 'search', required: false, description: '검색어' })
+  @ApiQuery({ name: 'tags', required: false, description: '태그 필터링 (쉼표로 구분)', example: '#탈모케어,#샴푸' })
   @ApiResponse({ status: 200, description: '게시글 목록 조회 성공' })
   async findAll(
     @Query() filters: IPostFilters,
@@ -102,6 +103,7 @@ export class PostsController {
     @Query('limit') limit?: string,
     @Query('sortBy') sortBy?: string,
     @Query('sortOrder') sortOrder?: string,
+    @Query('tags') tags?: string,
   ) {
     const pagination: PaginationOptions = {
       page: page ? parseInt(page, 10) : 1,
@@ -110,7 +112,13 @@ export class PostsController {
       sortOrder: (sortOrder as PaginationOptions['sortOrder']) || 'DESC',
     };
 
-    const result = await this.postsService.findAll(filters, pagination);
+    // 태그 필터링 처리
+    const processedFilters = { ...filters };
+    if (tags) {
+      processedFilters.tags = tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+    }
+
+    const result = await this.postsService.findAll(processedFilters, pagination);
     return {
       success: true,
       data: result.posts,

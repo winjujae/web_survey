@@ -15,6 +15,10 @@ import { Report } from '../../reports/entities/report.entity';
 import { Category } from '../../categories/entities/category.entity';
 import { Like } from './like.entity';
 
+// Tag 관련 임포트
+import { Tag } from '../../tags/entities/tag.entity';
+import { PostTag } from '../../tags/entities/post-tag.entity';
+
 export enum PostStatus {
   DRAFT = 'draft',
   PUBLISHED = 'published',
@@ -105,4 +109,16 @@ export class Post {
 
   @OneToMany(() => Like, (like) => like.post)
   likes: Like[];
+
+  // Tag 관계
+  @ManyToMany(() => Tag, tag => tag.posts)
+  @JoinTable({
+    name: 'post_tags',
+    joinColumn: { name: 'post_id', referencedColumnName: 'post_id' },
+    inverseJoinColumn: { name: 'tag_id', referencedColumnName: 'tag_id' }
+  })
+  tags: Tag[];
+
+  @OneToMany(() => PostTag, postTag => postTag.post)
+  post_tags: PostTag[];
 }

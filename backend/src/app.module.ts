@@ -28,6 +28,9 @@ import { DatabaseModule } from './database/database.module';
 // Common Module
 import { CommonModule } from './common/common.module';
 
+// Tags Module
+import { TagsModule } from './tags/tags.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -47,6 +50,7 @@ import { CommonModule } from './common/common.module';
     ReviewsModule,
     DatabaseModule,
     CommonModule,
+    TagsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

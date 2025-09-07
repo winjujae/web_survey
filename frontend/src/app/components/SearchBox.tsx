@@ -1,3 +1,4 @@
+//src/app/components/SearchBox.tsx
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { usePosts } from "@/features/posts/posts-context";

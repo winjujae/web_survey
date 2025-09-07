@@ -67,7 +67,7 @@ export default function PostDetail({ post }: { post: any }) {
           }
         />
         <h3 className={cmtStyles.sectionTitle}>댓글 보기</h3>
-        <Comments postId={data.id} initial={data.comments ?? []} />
+        <Comments postId={data.id} comments={data.comments ?? []} />
       </section>
     </article>
   );

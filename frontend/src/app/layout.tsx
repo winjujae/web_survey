@@ -7,7 +7,8 @@ import UserBadge from "./components/UserBadge";
 import SearchBox from "./components/SearchBox";
 import WriteButton from "./components/WriteButton";
 import RightDock from "./components/RightDock";
-import { useUIStore } from "@/stores/useUIStore";
+import { useUIStore } from "@/stores/useUIStore"
+import Image from "next/image";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -17,8 +18,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <header className="header">
             <div className="container header-inner">
               <Link href="/" className="logo">
-                <span className="logo-badge">J</span>
-                자라머니
+                <Image
+                  src="/favicon.ico"    // ✅ public/favicon.ico
+                  alt="자라머니 로고"
+                  width={32}
+                  height={32}
+                />
+                <span className="logo-text">자라머니</span>
               </Link>
 
               <SearchBox />

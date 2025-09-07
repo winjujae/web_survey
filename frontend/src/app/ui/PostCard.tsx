@@ -22,7 +22,7 @@ export default function PostCard({ post }: { post: Post }) {
   const { query, toggleLike } = usePosts();
   const guard = useAuthGuard();
 
-  const liked = !!post.liked;
+  const liked = !!post.likes;
   const likes = post.likes ?? 0;
 
   return (
@@ -35,17 +35,14 @@ export default function PostCard({ post }: { post: Post }) {
         <time dateTime={post.createdAt}>
           {new Date(post.createdAt).toLocaleString("ko-KR", { hour12: false })}
         </time>
-
-        {/* 제목은 링크 + 검색 하이라이트 */}
-        <Link className="title-inline" href={`/posts/${post.id}`}>
-          {highlight(post.title, query)}
-        </Link>
       </div>
 
       {/* 요약(검색 하이라이트 적용) */}
-      {post.excerpt && (
-        <p className="excerpt" style={{ marginTop: 6 }}>
-          {highlight(post.excerpt, query)}
+      {post.title && (
+        <p>
+          <Link className="title-inline" href={`/posts/${post.id}`}>
+          {highlight(post.title, query)}
+        </Link>
         </p>
       )}
 

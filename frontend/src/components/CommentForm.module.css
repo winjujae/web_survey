@@ -1,0 +1,69 @@
+/* src/components/CommentForm.module.css */
+
+/* 세로 스택: 입력창 위, 버튼 아래 */
+.form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  width: 100%;
+}
+
+.inputWrap {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+/* 5줄 고정 + 넘치면 스크롤 */
+.textarea {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  line-height: 1.6;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+  outline: none;
+  font-size: 14px;
+
+  height: calc(1.6em * 5 + 20px);
+  max-height: calc(1.6em * 5 + 20px);
+  overflow-y: auto;
+  resize: none;
+
+  transition: box-shadow .15s ease, border-color .15s ease;
+}
+.textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 8px 24px rgba(79,70,229,0.12);
+}
+
+/* 버튼 행: 오른쪽 정렬 */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* 보라색 버튼 + 흰 글자 */
+.submit {
+  height: 40px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #6d5efc, #7c3aed);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 12px 28px rgba(124, 58, 237, 0.22);
+  transition: transform .05s ease, box-shadow .15s ease, opacity .15s ease;
+}
+.submit:hover  { box-shadow: 0 12px 32px rgba(124,58,237,.28); }
+.submit:active { transform: translateY(1px); }
+.submit:disabled { opacity: .6; cursor: not-allowed; }
+
+.error {
+  color: var(--danger);
+  font-size: 13px;
+}

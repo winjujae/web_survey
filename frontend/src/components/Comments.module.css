@@ -1,0 +1,70 @@
+/* src/components/Comments.module.css */
+
+.list {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+
+  list-style: none;
+  padding-left: 0;
+  margin-left: 0;
+}
+
+.item {
+  display: block;
+  width: 100%;
+  list-style: none;
+  margin-left: 0;
+}
+
+.bubble {
+  max-width: 100%;                 /* ✅ 바깥 폭 넘지 않기 */
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 10px 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+}
+
+.meta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+.name { color: #111; font-weight: 700; }
+
+/* 본문: 줄바꿈 + 긴단어/URL도 강제 줄바꿈 */
+.body {
+  white-space: pre-wrap;
+  line-height: 1.6;
+  font-size: 14px;
+  overflow-wrap: anywhere;          /* ✅ 핵심 */
+  word-break: break-word;
+}
+
+/* 3줄 클램프 (기본) */
+.bodyClamped {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+
+  /* ✅ 표준 속성도 같이 써주기 */
+  line-clamp: 3;
+
+  overflow: hidden;
+}
+
+/* 토글 버튼 */
+.moreBtn {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--primary);
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}

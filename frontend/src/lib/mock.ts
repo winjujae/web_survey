@@ -53,3 +53,55 @@ export const getPostsByBoard = (boardId: string, limit = 20, tag?: string) => {
 };
 
 export const getPost = (id: string) => posts.find(p => p.id === id);
+
+// src/lib/mock.ts (기존 내용 하단에 추가)
+import type { Comment } from "@/types/post";
+
+let _autoId = 1000;
+
+export function addPost(input: {
+  title: string;
+  body?: string;
+  boardId?: string;
+  tags?: string[];
+  authorId?: string;
+}) {
+  const id = String(++_autoId);
+  const now = new Date().toISOString();
+  const post: Post = {
+    id,
+    boardId: input.boardId ?? "talk",
+    title: input.title,
+    excerpt: input.body?.slice(0, 80),
+    author: input.authorId ?? "익명",
+    createdAt: now,
+    tags: input.tags ?? [],
+    likes: 0,
+    views: 0,
+    body: input.body ?? "",
+    comments: [],
+  };
+  posts.unshift(post);
+  return post;
+}
+
+export function addComment(postId: string, userId: string, body: string) {
+  const p = posts.find(p => p.id === postId);
+  if (!p) return null;
+  const c: Comment = {
+    id: String(++_autoId),
+    userId,
+    body,
+    createdAt: new Date().toISOString(),
+  };
+  (p.comments ??= []).push(c);
+  return c;
+}
+
+export function toggleLike(postId: string, _userId: string) {
+  // 데모: 사용자별 중복 체크 없이 +1
+  const p = posts.find(p => p.id === postId);
+  if (!p) return null;
+  p.likes = Math.max(0, (p.likes ?? 0) + 1);
+  return { liked: true, count: p.likes };
+}

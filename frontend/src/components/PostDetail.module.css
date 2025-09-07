@@ -1,0 +1,113 @@
+/* 카드 컨테이너 */
+.wrapper {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.04);
+}
+
+/* 헤더(작성자/시간) */
+.head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.handle {
+  color: #111;
+  font-weight: 600;
+  text-decoration: none;
+}
+.dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--muted);
+  display: inline-block;
+  margin: 0 6px;
+}
+
+/* 제목/메타 */
+.title {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.25;
+  margin: 12px 0 6px;
+}
+.meta {
+  font-size: 13px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 구분선 */
+.hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 16px 0;
+}
+
+/* 본문 */
+.body {
+  white-space: pre-wrap;
+  line-height: 1.7;
+  font-size: 16px;
+}
+
+/* 태그 칩 */
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;               /* 아래로 내려오던 기본 마진 제거 */
+}
+
+
+.tag {
+  font-size: 12px;
+  padding: 4px 10px;
+  background: #f3f4f6;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: #374151;
+}
+
+/* 액션 영역(좋아요 버튼 등) */
+.actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+}
+
+/* 댓글 섹션 */
+.comments {
+  margin-top: 20px;
+}
+.comments h3 {
+  font-size: 16px;
+  margin: 0 0 12px 0;
+}
+
+/* 반응형 */
+@media (max-width: 520px) {
+  .topRow { align-items: stretch; }
+  .tags   { justify-content: flex-start; }
+}
+
+/* 제목/메타(왼쪽) + 태그(오른쪽) */
+.topRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;         /* 좁으면 태그가 아래로 내려감 */
+}
+.titleMeta {
+  flex: 1 1 auto;
+  min-width: 0;
+}

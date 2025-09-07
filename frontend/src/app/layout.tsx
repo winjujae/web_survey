@@ -7,6 +7,7 @@ import UserBadge from "./components/UserBadge";
 import SearchBox from "./components/SearchBox";
 import WriteButton from "./components/WriteButton";
 import RightDock from "./components/RightDock";
+import { useUIStore } from "@/stores/useUIStore";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

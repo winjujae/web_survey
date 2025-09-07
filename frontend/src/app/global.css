@@ -301,3 +301,108 @@
 
           /* actions */
           .form__actions{ display:flex; justify-content:flex-end; gap:8px; margin-top:8px; }
+
+
+
+          /* === Right floating dock === */
+          .dock-fab {
+            position: fixed;
+            right: 16px;
+            bottom: 16px;
+            z-index: 60;
+
+            height: 44px;
+            padding: 0 14px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #6d5efc, #7c3aed);
+            color: #fff;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 10px 24px rgba(124,58,237,.25);
+          }
+          .dock-fab:active { transform: translateY(1px); }
+
+          .dock-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(17, 24, 39, 0.28); /* 약간 어둡게 */
+            z-index: 50;
+          }
+
+          .dock-panel {
+            position: fixed;
+            top: 72px;                /* 헤더 아래로 시작 (헤더 높이에 맞춰 조절) */
+            right: 16px;
+            bottom: 16px;
+            width: min(340px, 92vw);
+            max-height: calc(100vh - 88px);
+            z-index: 70;
+
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0,0,0,.18);
+
+            transform: translateX(120%);
+            opacity: .0;
+            transition: transform .22s ease, opacity .18s ease;
+            overflow: hidden; /* 둥근 모서리 유지 */
+          }
+
+          .dock-panel.is-open {
+            transform: translateX(0);
+            opacity: 1;
+          }
+
+          .dock-inner {
+            height: 100%;
+            display: grid;
+            grid-template-rows: auto 1fr;
+          }
+
+          .dock-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 12px;
+            border-bottom: 1px solid var(--border);
+            background: #fafafa;
+          }
+
+          .dock-close {
+            border: none;
+            background: transparent;
+            font-size: 18px;
+            line-height: 1;
+            padding: 6px 8px;
+            cursor: pointer;
+          }
+
+          .dock-inner .panel {
+            margin: 12px;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: #fff;
+          }
+
+          .dock-inner .trend a {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 0;
+            text-decoration: none;
+            color: inherit;
+          }
+
+          /* 작은 화면에서: 버튼만 보이고, 열면 백드롭으로 전체 덮기 */
+          @media (max-width: 640px) {
+            .dock-panel {
+              top: 64px;
+              right: 0;
+              left: 0;
+              width: auto;
+              margin: 0 10px;
+            }
+          }

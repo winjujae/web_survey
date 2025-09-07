@@ -22,7 +22,7 @@ export const posts: Post[] = Array.from({ length: 24 }).map((_, i) => ({
   id: String(i + 1),
   // ✨ 이제 진짜 게시판 id만 사용 (상위만)
   boardId: i % 2 ? "treatment" : "reviews",
-  title: `샘플 포스트 ${i + 1}`,
+  title: `병원 후기 ${i + 1}`,
   excerpt: "간단 요약이 이곳에 들어갑니다. 내용 일부…",
   author: i % 3 ? "자라매니저" : "디자인얍",
   createdAt: new Date(Date.now() - i * 3600_000).toISOString(),
@@ -32,7 +32,7 @@ export const posts: Post[] = Array.from({ length: 24 }).map((_, i) => ({
     : ["모발이식", "후기"],
   likes: Math.floor(Math.random() * 50),
   views: 1000 + i * 37,
-  body: "상세 본문 예시입니다.",
+  body: "본문 예시입니다. 일단 공지를 띄워놨으니 많이들 참여해주세요!",
 }));
 
 export const getBoards = () => boards;

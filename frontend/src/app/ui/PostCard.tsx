@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { Post } from "@/types/post";
 import { usePosts } from "@/features/posts/posts-context";
 import { useAuthGuard } from "@/features/auth/withAuthGuard";
+import { formatKSTDateTime } from "@/lib/time";
 
 /** 검색어를 <mark>로 하이라이트 */
 function highlight(text: string, q: string) {
@@ -33,7 +34,7 @@ export default function PostCard({ post }: { post: Post }) {
         <a className="handle" href="#">{post.author}</a>
         <span className="dot" />
         <time dateTime={post.createdAt}>
-          {new Date(post.createdAt).toLocaleString("ko-KR", { hour12: false })}
+          {formatKSTDateTime(post.createdAt)}
         </time>
 
         {/* 제목은 링크 + 검색 하이라이트 */}

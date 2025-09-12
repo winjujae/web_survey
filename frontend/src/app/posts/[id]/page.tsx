@@ -1,6 +1,7 @@
 //src/app/posts/[id]/page.tsx
 import { getPost } from "@/lib/mock";
 import { notFound } from "next/navigation";
+import { formatKSTDateTime } from "@/lib/time";
 
 export default function PostDetail({ params }: { params: { id: string }}) {
   const post = getPost(params.id);
@@ -13,7 +14,7 @@ export default function PostDetail({ params }: { params: { id: string }}) {
         <a className="handle" href="#">{post.author}</a>
         <span className="dot" />
         <time dateTime={post.createdAt}>
-          {new Date(post.createdAt).toLocaleString("ko-KR", { hour12: false })}
+          {formatKSTDateTime(post.createdAt)}
         </time>
       </div>
       <h1 className="title" style={{fontSize: 22, marginTop: 12}}>{post.title}</h1>

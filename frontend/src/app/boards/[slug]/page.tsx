@@ -4,17 +4,19 @@ import Hero from "@/app/ui/Hero";
 import LeftMenu from "@/app/ui/LeftMenu";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { formatKSTDateTime } from "@/lib/time";
 
 type Props = {
   params: { slug: string };
   searchParams: { tag?: string };
 };
 
-export default function BoardPage({ params, searchParams }: Props) {
-  const board = getBoardBySlug(params.slug);
+export default async function BoardPage({ params, searchParams }: Props) {
+  const {slug} = await params;
+  const board = getBoardBySlug(slug);
   if (!board) return notFound();
 
-  const tag = searchParams.tag;
+  const {tag} = await searchParams;
   const items = getPostsByBoard(board.id, 50, tag);
 
   return (
@@ -38,9 +40,9 @@ export default function BoardPage({ params, searchParams }: Props) {
                   <a className="handle" href="#">{p.author}</a>
                   <span className="dot" />
                   <time dateTime={p.createdAt}>
-                    {new Date(p.createdAt).toLocaleString("ko-KR", { hour12: false })}
+                    {formatKSTDateTime(p.createdAt)}
                   </time>
-                  <a className="title-inline" href={`/posts/${p.id}`}>{p.title}</a>
+                  <Link className="title-inline" href={`/posts/${p.id}`}>{p.title}</Link>
                 </div>
                 {p.excerpt && <p className="excerpt" style={{ marginTop: 6 }}>{p.excerpt}</p>}
               </article>

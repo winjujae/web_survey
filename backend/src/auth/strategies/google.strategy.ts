@@ -12,6 +12,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       callbackURL: process.env.GOOGLE_OAUTH_REDIRECT_URI,
       scope: ['email', 'profile', 'openid'],
     })
+
   }
 
   async validate(accessToken: string, refreshToken: string, profile: any) {

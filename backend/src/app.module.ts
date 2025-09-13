@@ -33,8 +33,14 @@ import { TagsModule } from './tags/tags.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
-    TypeOrmModule.forRoot(typeORMConfig),
+    ConfigModule.forRoot({ 
+      envFilePath : (process.env.NODE_ENV === 'production') ? '.production.env'
+      : (process.env.NODE_ENV === '.stage.env') ? '.stage.env' : '.development.env',
+      expandVariables : true,
+      isGlobal: true }),
+    TypeOrmModule.forRootAsync({
+      useFactory:()=>typeORMConfig
+    }),
 
     AuthModule,
     UsersModule,

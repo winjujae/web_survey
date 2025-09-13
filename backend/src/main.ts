@@ -7,7 +7,7 @@ import helmet from 'helmet';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { WinstonLoggerService } from './common/logger/winston.logger';
 import { HttpLoggingMiddleware } from './common/middleware/http-logging.middleware';
-import 'dotenv/config';
+
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);

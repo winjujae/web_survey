@@ -3,8 +3,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeORMConfig } from './configs/typeorm.config';
-import { ConfigModule } from '@nestjs/config';
-
+import { ConfigModule, ConfigService } from '@nestjs/config';
+// import {getTypeConfig} from '@nestjs/'
 
 // Auth Module
 import { AuthModule } from './auth/auth.module';
@@ -30,6 +30,7 @@ import { CommonModule } from './common/common.module';
 
 // Tags Module
 import { TagsModule } from './tags/tags.module';
+import { Config } from 'winston/lib/winston/config';
 
 @Module({
   imports: [
@@ -39,7 +40,8 @@ import { TagsModule } from './tags/tags.module';
       expandVariables : true,
       isGlobal: true }),
     TypeOrmModule.forRootAsync({
-      useFactory:()=>typeORMConfig
+      inject : [ConfigService],
+      useFactory:(config:ConfigService)=>typeORMConfig(config),
     }),
 
     AuthModule,
@@ -54,7 +56,7 @@ import { TagsModule } from './tags/tags.module';
     HospitalsModule,
     ProductsModule,
     ReviewsModule,
-    DatabaseModule,
+    // DatabaseModule,
     CommonModule,
     TagsModule,
   ],

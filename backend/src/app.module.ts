@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { typeORMConfig } from './configs/typeorm.config';
+import { createTypeORMoptions } from './configs/typeorm.config';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
 
@@ -41,19 +41,7 @@ import { Config } from 'winston/lib/winston/config';
       isGlobal: true }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (cfg: ConfigService) => ({
-        type: 'postgres',
-        url: cfg.get<string>('DATABASE_URL'), // e.g. postgresql://user:pass@ep-...neon.tech/db?sslmode=require
-        ssl: true,
-        synchronize: false,          // 운영에서는 false
-        autoLoadEntities: true,      // 엔티티 자동 로드(모놀리식에 편리)
-        logging: cfg.get('NODE_ENV') !== 'production',
-        extra: {
-          max: 10,                   // 풀 크기 (Neon 서버리스 특성상 크게 잡지 않기)
-          connectionTimeoutMillis: 5000,
-          idleTimeoutMillis: 10000,
-        },
-      }),
+      useFactory: createTypeORMoptions,
     }),
 
     AuthModule,

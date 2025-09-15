@@ -11,7 +11,7 @@ import { RefreshTokenStrategy } from './strategies/refresh-token.strategy';
 import { JwtAuthGuard } from './guards/jwt.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { GoogleStrategy } from './strategies/google.strategy';
-import { serializeUser } from 'passport';
+
 import { SessionSerializer } from './serializer/serializer';
 
 @Module({

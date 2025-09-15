@@ -10,22 +10,22 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       clientID: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
       callbackURL: process.env.GOOGLE_CALLBACK_URL!,
-      scope: ['email', 'profile', 'openid'],
+      scope: ['email', 'profile'],
     })
 
   }
 
   async validate(accessToken: string, refreshToken: string, profile: any) {
     try {
-      const { id, name, emails, photos } = profile
+      const { id, name, emails } = profile
       console.log('accessToken',accessToken)
       console.log('refreshToken',refreshToken)
+      console.log('profile',profile)
       const user = {
         id: id,
         email: emails[0].value,
         firstName: name.familyName,
         lastName: name.givenName,
-        photo: photos[0].value,
       }
 
       return user

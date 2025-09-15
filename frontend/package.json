@@ -10,7 +10,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "types:openapi": "openapi-typescript http://localhost:3300/api-json -o src/types/generated/openapi.ts"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.87.4",
@@ -29,6 +30,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.4.6",
+    "openapi-typescript": "^7.5.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

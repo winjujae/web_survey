@@ -3,6 +3,7 @@
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { Post } from "@/types/post";
+import { transformPost } from "@/lib/api";
 
 /** 정렬 키 */
 export type SortKey = "new" | "hot";
@@ -68,20 +69,11 @@ async function fetchPosts(): Promise<Post[]> {
       return [];
     }
     
-    // 백엔드 데이터를 프론트엔드 Post 타입으로 변환
+    // 백엔드 데이터를 프런트엔드 Post 타입으로 변환 (공통 함수 사용)
     return responseData.data.map((post: any) => ({
-      id: String(post?.post_id ?? ""),
-      boardId: String(post?.category_id ?? ""),
-      title: String(post?.title ?? "(제목 없음)"),
-      excerpt: String(post?.content?.substring(0, 100) ?? ""),
-      body: String(post?.content ?? ""),
-      author: post?.is_anonymous ? (post?.anonymous_nickname ?? "익명") : (post?.user?.nickname ?? "작성자"),
-      createdAt: String(post?.created_at ?? new Date().toISOString()),
-      tags: Array.isArray(post?.tags) ? post.tags.map((tag: any) => tag.name || tag) : [],
-      likes: Number(post?.likes || 0),
-      views: Number(post?.view_count || 0),
-      dislikes: 0, // 백엔드에 dislike 기능이 없으므로 기본값
-      liked: false, // 로그인 기능 연결 후 실제 상태로 변경 필요
+      ...transformPost(post),
+      // 컨텍스트 전용 기본값 보정
+      dislikes: 0,
       disliked: false,
     }));
   } catch (error) {
@@ -210,19 +202,15 @@ export function PostsProvider({ children }: { children: React.ReactNode }) {
       if (responseData.success && responseData.data) {
         // 새 게시글을 로컬 상태에 추가 (옵티미스틱 업데이트)
         const newPost: Post = {
-          id: String(responseData.data.post_id),
-          boardId: input.boardId,
-          title: input.title,
-          body: input.body,
+          ...transformPost(responseData.data),
+          // 컨텍스트 전용 필드 보정
           author: input.author,
-          createdAt: responseData.data.created_at || new Date().toISOString(),
-          tags: input.tags ?? [],
+          excerpt: input.body.slice(0, 120),
           views: 0,
           likes: 0,
           dislikes: 0,
           liked: false,
           disliked: false,
-          excerpt: input.body.slice(0, 120),
         };
 
         setPosts(prev => [newPost, ...prev]);

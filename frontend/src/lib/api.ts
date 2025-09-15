@@ -4,7 +4,7 @@ import type { Post } from "@/types/post";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'http://localhost:3300';
 
 // 백엔드 게시글 데이터를 프론트엔드 타입으로 변환
-function transformPost(post: any): Post {
+export function transformPost(post: any): Post {
   return {
     id: String(post?.post_id ?? ""),
     boardId: String(post?.category_id ?? ""),

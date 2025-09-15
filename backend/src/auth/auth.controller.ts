@@ -22,6 +22,7 @@ import { LoginDto } from './dto/login.dto';
 import { TokenDto } from './dto/token.dto';
 import { JwtAuthGuard } from './guards/jwt.guard';
 import { User } from '../users/entities/user.entity';
+import { GoogleAuthGuard } from './guards/Google.auth.guard';
 
 @ApiTags('auth')
 @Controller('api/auth')
@@ -113,5 +114,18 @@ export class AuthController {
   ): Promise<User> {
     const user = req.user as User;
     return this.authService.updateProfile(user, updateData);
+  }
+
+  @Get('google/login')
+  @UseGuards(GoogleAuthGuard)
+  handleLogin( ){
+    return {msg:'ok'}
+  }
+
+  @Get('google/callback')
+  @UseGuards(GoogleAuthGuard)
+  handleRedirect(){
+    return{msg: 'ok'};
+
   }
 }

@@ -56,7 +56,7 @@ import { Config } from 'winston/lib/winston/config';
     HospitalsModule,
     ProductsModule,
     ReviewsModule,
-    // DatabaseModule,
+    DatabaseModule,
     CommonModule,
     TagsModule,
   ],

@@ -5,7 +5,7 @@ import { DatabaseController } from './database.controller';
 import pg from 'pg';
 // Load Environment Variables
 config({
-  path: ['.env', '.env.production', '.env.local'],
+  path: ['.development.env', '.production.env', '.stage.env'],
 });
 const sql = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 const dbProvider = {

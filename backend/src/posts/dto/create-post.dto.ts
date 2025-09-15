@@ -103,4 +103,25 @@ export class CreatePostDto {
   @IsNotForbidden({ message: '익명 닉네임에 금지된 단어가 포함되어 있습니다.' })
   @Sanitize(String) // XSS 방지 및 타입 변환
   anonymous_nickname?: string;
+
+  @IsOptional()
+  @IsArray({ message: '태그는 배열이어야 합니다.' })
+  @ArrayMaxSize(10, { message: '태그는 최대 10개까지 추가 가능합니다.' })
+  @IsString({ each: true, message: '각 태그는 문자열이어야 합니다.' })
+  @MinLength(1, { each: true, message: '태그는 최소 1자 이상이어야 합니다.' })
+  @MaxLength(30, { each: true, message: '태그는 최대 30자까지 가능합니다.' })
+  @Matches(/^[a-zA-Z0-9가-힣#]+$/, {
+    each: true,
+    message: '태그는 한글, 영문, 숫자, #만 사용할 수 있습니다.'
+  })
+  @Transform(({ value }) => {
+    // # 접두사 자동 추가
+    if (Array.isArray(value)) {
+      return value.map(tag =>
+        tag.startsWith('#') ? tag : `#${tag}`
+      );
+    }
+    return value;
+  })
+  tags?: string[];
 }

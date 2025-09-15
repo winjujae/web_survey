@@ -1,12 +1,12 @@
 // src/app/page.tsx
 import Hero from "./ui/Hero";
 import LeftMenu from "./ui/LeftMenu";
-import Feed from "./ui/Feed";
-import SortTabs from "./ui/SortTabs";
-import { getPosts } from "@/lib/mock";
+import HomeFeedContainer from "./components/HomeFeedContainer";
+import { fetchPosts } from "@/lib/api";
 
-export default function HomePage() {
-  const recent = getPosts(12);
+export default async function HomePage() {
+  const posts = await fetchPosts();
+  
   return (
     <>
       <Hero 
@@ -18,11 +18,7 @@ export default function HomePage() {
           <LeftMenu />
         </div>
         <div>
-          <div className="tabs">
-            <button className="tab" aria-selected="true">전체 최신</button>
-            <button className="tab" aria-selected="false">인기</button>
-          </div>
-          <Feed posts={recent} />
+          <HomeFeedContainer initialPosts={posts} />
         </div>
       </div>
     </>

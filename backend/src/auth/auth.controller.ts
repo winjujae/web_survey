@@ -20,8 +20,10 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { TokenDto } from './dto/token.dto';
+import { GoogleLoginDto } from './dto/google-login.dto';
 import { JwtAuthGuard } from './guards/jwt.guard';
 import { User } from '../users/entities/user.entity';
+import { GoogleAuthGuard } from './guards/Google.auth.guard';
 
 @ApiTags('auth')
 @Controller('api/auth')
@@ -113,5 +115,49 @@ export class AuthController {
   ): Promise<User> {
     const user = req.user as User;
     return this.authService.updateProfile(user, updateData);
+  }
+
+  @Get('google/login')
+  @UseGuards(GoogleAuthGuard)
+  @ApiOperation({
+    summary: '구글 로그인',
+    description: '구글 OAuth 로그인을 시작합니다.',
+  })
+  async handleGoogleLogin() {
+    // GoogleAuthGuard에서 자동으로 구글 로그인 페이지로 리다이렉트
+    return { message: '구글 로그인 페이지로 리다이렉트합니다.' };
+  }
+
+  @Get('google/callback')
+  @UseGuards(GoogleAuthGuard)
+  @ApiOperation({
+    summary: '구글 로그인 콜백',
+    description: '구글 OAuth 콜백을 처리하고 JWT 토큰을 발급합니다.',
+  })
+  async handleGoogleCallback(@Request() req: any, @Response() res: any) {
+    try {
+      // Passport에서 받은 구글 사용자 정보
+      const googleUserInfo = req.user;
+      
+      if (!googleUserInfo) {
+        return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/error?message=구글 인증에 실패했습니다.`);
+      }
+
+      // DB에서 사용자 찾기/생성
+      const user = await this.authService.findOrCreateGoogleUser(googleUserInfo);
+      
+      // JWT 토큰 발급
+      const tokens = await this.authService.generateTokens(user);
+      
+      // 프론트엔드로 리다이렉트 (토큰 포함)
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      const redirectUrl = `${frontendUrl}/auth/callback?token=${tokens.access_token}&refresh_token=${tokens.refresh_token}`;
+      
+      return res.redirect(redirectUrl);
+    } catch (error) {
+      console.error('구글 콜백 처리 실패:', error);
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      return res.redirect(`${frontendUrl}/auth/error?message=로그인 처리 중 오류가 발생했습니다.`);
+    }
   }
 }

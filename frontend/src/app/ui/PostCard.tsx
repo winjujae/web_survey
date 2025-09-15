@@ -1,15 +1,15 @@
-// src/app/ui/PostCard.tsx
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import type { Post } from "@/types/post";
-import { usePosts } from "@/features/posts/posts-context";
 import { useAuthGuard } from "@/features/auth/withAuthGuard";
+import { formatKSTDateTime } from "@/lib/time";
+import { toggleLike as apiToggleLike } from "@/lib/api";
 
 /** 검색어를 <mark>로 하이라이트 */
 function highlight(text: string, q: string) {
   if (!q) return text;
-  // 정규식 특수문자 이스케이프
   const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const re = new RegExp(`(${escaped})`, "ig");
   const parts = text.split(re);
@@ -18,12 +18,27 @@ function highlight(text: string, q: string) {
   );
 }
 
-export default function PostCard({ post }: { post: Post }) {
-  const { query, toggleLike } = usePosts();
+interface PostCardProps {
+  post: Post;
+  searchQuery?: string;
+}
+
+export default function PostCard({ post, searchQuery = "" }: PostCardProps) {
+  const [liked, setLiked] = useState(!!post.liked);
+  const [likes, setLikes] = useState(post.likes ?? 0);
   const guard = useAuthGuard();
 
-  const liked = !!post.likes;
-  const likes = post.likes ?? 0;
+  const handleToggleLike = async () => {
+    try {
+      const result = await apiToggleLike(post.id);
+      setLiked(result.liked);
+      setLikes(result.likes);
+    } catch {
+      // 옵티미스틱 업데이트 (실패 시 토글)
+      setLiked(!liked);
+      setLikes(likes + (liked ? -1 : 1));
+    }
+  };
 
   return (
     <article className="card card--compact">
@@ -33,16 +48,19 @@ export default function PostCard({ post }: { post: Post }) {
         <a className="handle" href="#">{post.author}</a>
         <span className="dot" />
         <time dateTime={post.createdAt}>
-          {new Date(post.createdAt).toLocaleString("ko-KR", { hour12: false })}
+          {formatKSTDateTime(post.createdAt)}
         </time>
+
+        {/* 제목: 링크 + 검색 하이라이트 */}
+        <Link className="title-inline" href={`/posts/${post.id}`}>
+          {highlight(post.title ?? "", searchQuery)}
+        </Link>
       </div>
 
       {/* 요약(검색 하이라이트 적용) */}
-      {post.title && (
-        <p>
-          <Link className="title-inline" href={`/posts/${post.id}`}>
-          {highlight(post.title, query)}
-        </Link>
+      {post.excerpt && (
+        <p className="excerpt" style={{ marginTop: 6 }}>
+          {highlight(post.excerpt, searchQuery)}
         </p>
       )}
 
@@ -51,7 +69,7 @@ export default function PostCard({ post }: { post: Post }) {
         <button
           className="action"
           aria-pressed={liked}
-          onClick={guard(() => toggleLike(post.id))}
+          onClick={guard(handleToggleLike)}
           title={liked ? "좋아요 취소" : "좋아요"}
         >
           ❤ {likes}

@@ -2,8 +2,8 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { typeORMConfig } from './configs/typeorm.config';
-import { ConfigModule } from '@nestjs/config';
+import { createTypeORMoptions } from './configs/typeorm.config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 
 // Auth Module
@@ -28,10 +28,23 @@ import { DatabaseModule } from './database/database.module';
 // Common Module
 import { CommonModule } from './common/common.module';
 
+// Tags Module
+import { TagsModule } from './tags/tags.module';
+import { Config } from 'winston/lib/winston/config';
+import { PassportModule } from '@nestjs/passport';
+
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
-    TypeOrmModule.forRoot(typeORMConfig),
+    ConfigModule.forRoot({ 
+      envFilePath : (process.env.NODE_ENV === 'production') ? '.production.env'
+      : (process.env.NODE_ENV === '.stage.env') ? '.stage.env' : '.development.env',
+      expandVariables : true,
+      isGlobal: true }),
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: createTypeORMoptions,
+    }),
+    PassportModule.register({session: true}),
 
     AuthModule,
     UsersModule,
@@ -47,6 +60,7 @@ import { CommonModule } from './common/common.module';
     ReviewsModule,
     DatabaseModule,
     CommonModule,
+    TagsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

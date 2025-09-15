@@ -7,6 +7,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcryptjs';
+import * as crypto from 'crypto';
 import { Repository } from 'typeorm';
 import { User, UserRole } from '../users/entities/user.entity';
 import { RegisterDto } from './dto/register.dto';
@@ -124,7 +125,7 @@ export class AuthService {
     return null;
   }
 
-  private async generateTokens(user: User): Promise<TokenDto> {
+  async generateTokens(user: User): Promise<TokenDto> {
     const payload = {
       sub: user.user_id,
       email: user.email,
@@ -190,5 +191,101 @@ export class AuthService {
     });
 
     return this.getProfile(user);
+  }
+
+  async findUser(userId:string){
+    const user = await this.userRepository.findOneBy({user_id: userId})
+    return user
+  }
+
+  async findOrCreateGoogleUser(googleUserInfo: any): Promise<User> {
+    const { googleId, email, name, picture, emailVerified } = googleUserInfo;
+
+    try {
+      // 1. Google ID로 기존 사용자 찾기
+      let user = await this.userRepository.findOne({
+        where: { google_id: googleId }
+      });
+
+      if (user) {
+        // 기존 구글 사용자 정보 업데이트
+        if (user.avatar_url !== picture && picture) {
+          user.avatar_url = picture;
+          await this.userRepository.save(user);
+        }
+        return user;
+      }
+
+      // 2. 이메일로 기존 사용자 찾기 (계정 연결)
+      user = await this.userRepository.findOne({
+        where: { email }
+      });
+
+      if (user) {
+        // 기존 이메일 계정에 Google 연결
+        user.google_id = googleId;
+        user.provider = 'google';
+        user.email_verified = emailVerified || true;
+        if (picture) {
+          user.avatar_url = picture;
+        }
+        return await this.userRepository.save(user);
+      }
+
+      // 3. 새 사용자 생성
+      const uniqueNickname = await this.generateUniqueNickname(name || email.split('@')[0]);
+      
+      const newUser = this.userRepository.create({
+        email,
+        nickname: uniqueNickname,
+        google_id: googleId,
+        provider: 'google',
+        email_verified: emailVerified || true,
+        avatar_url: picture,
+        password: await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 12), // 랜덤 비밀번호
+        role: UserRole.USER,
+      });
+
+      return await this.userRepository.save(newUser);
+    } catch (error) {
+      console.error('Google 사용자 생성/찾기 실패:', error);
+      throw new BadRequestException('구글 계정 처리 중 오류가 발생했습니다.');
+    }
+  }
+
+  private async generateUniqueNickname(baseName: string): Promise<string> {
+    // 특수문자 제거 및 기본 정리
+    let cleanName = baseName
+      .replace(/[^a-zA-Z0-9가-힣_]/g, '')
+      .substring(0, 15);
+    
+    if (!cleanName) {
+      cleanName = '사용자';
+    }
+
+    // 중복 확인 및 고유 닉네임 생성
+    let nickname = cleanName;
+    let counter = 1;
+    
+    while (true) {
+      const existingUser = await this.userRepository.findOne({
+        where: { nickname }
+      });
+      
+      if (!existingUser) {
+        return nickname;
+      }
+      
+      nickname = `${cleanName}${counter}`;
+      counter++;
+      
+      // 무한 루프 방지
+      if (counter > 9999) {
+        nickname = `${cleanName}${Date.now()}`;
+        break;
+      }
+    }
+    
+    return nickname;
   }
 }

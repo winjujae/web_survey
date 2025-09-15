@@ -7,7 +7,9 @@ import helmet from 'helmet';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { WinstonLoggerService } from './common/logger/winston.logger';
 import { HttpLoggingMiddleware } from './common/middleware/http-logging.middleware';
-import 'dotenv/config';
+import session from 'express-session';
+import passport from 'passport';
+
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -57,6 +59,18 @@ async function bootstrap() {
   // 글로벌 예외 필터
   app.useGlobalFilters(new GlobalExceptionFilter());
 
+  app.use(session({
+    secret: 'dsfsdfsdfsfsfsf',
+    saveUninitialized: false,
+    resave: false,
+    cookie:{
+      maxAge: 60000,
+      
+    },
+  }))
+  app.use(passport.initialize())
+  app.use(passport.session())
+
   // Swagger 설정
   const config = new DocumentBuilder()
     .setTitle('탈모 커뮤니티 플랫폼 API')
@@ -88,6 +102,6 @@ async function bootstrap() {
     },
   });
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT ?? 3300);
 }
 bootstrap();

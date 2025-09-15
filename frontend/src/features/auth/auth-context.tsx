@@ -2,7 +2,7 @@
 "use client";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { User } from "@/types/auth";
-import type { ILoginService, LoginPayload } from "./auth-service";
+import type { ILoginService, LoginPayload, RegisterPayload } from "./auth-service";
 import { mockAuthService } from "./auth-mock";
 
 const AUTH_KEY = "auth.token";
@@ -10,7 +10,9 @@ const AUTH_KEY = "auth.token";
 type AuthState = { user: User | null; token: string | null; loading: boolean };
 type Ctx = AuthState & {
   login: (p: LoginPayload) => Promise<void>;
+  register: (p: RegisterPayload) => Promise<void>;
   logout: () => Promise<void>;
+  forgotPassword: (email: string) => Promise<void>;
   service: ILoginService;
 };
 
@@ -34,13 +36,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setState({ user, token: accessToken, loading: false });
   };
 
+  const register = async (p: RegisterPayload) => {
+    const { user, accessToken } = await service.register(p);
+    localStorage.setItem(AUTH_KEY, accessToken);
+    setState({ user, token: accessToken, loading: false });
+  };
+
   const logout = async () => {
     await service.logout();
     localStorage.removeItem(AUTH_KEY);
     setState({ user: null, token: null, loading: false });
   };
 
-  const value = useMemo(() => ({ ...state, login, logout, service }), [state]);
+  const forgotPassword = async (email: string) => {
+    await service.forgotPassword(email);
+  };
+
+  const value = useMemo(() => ({ ...state, login, register, logout, forgotPassword, service }), [state]);
   return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>;
 }
 

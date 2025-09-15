@@ -7,7 +7,6 @@ import UserBadge from "@/components/presentational/UserBadge";
 import SearchBox from "@/components/presentational/SearchBox";
 import WriteButton from "@/components/presentational/WriteButton";
 import RightDock from "@/components/containers/RightDock";
-import { useUIStore } from "@/stores/useUIStore"
 import Image from "next/image";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -39,7 +39,6 @@ import { SessionSerializer } from './serializer/serializer';
     RolesGuard,
     GoogleStrategy,
     SessionSerializer,
-    { provide: 'AUTH_SERVICE', useExisting: AuthService },
   ],
   exports: [AuthService, JwtAuthGuard, RolesGuard, PassportModule, JwtModule, GoogleStrategy],
 })

@@ -1,9 +1,8 @@
 // app/boards/[slug]/page.tsx
 import { notFound } from "next/navigation";
-import { formatKSTDateTime } from "@/lib/time";
-import Link from "next/link";
 import Hero from "@/app/ui/Hero";
 import LeftMenu from "@/app/ui/LeftMenu";
+import Feed from "@/app/ui/Feed";
 import { fetchPostsByCategory, fetchPosts } from "@/lib/api";
 
 type Props = { params: { slug: string }; searchParams: { tag?: string } };
@@ -41,27 +40,13 @@ export default async function BoardPage({ params, searchParams }: Props) {
       <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: 16, marginTop: 12 }}>
         <div><LeftMenu /></div>
         <div>
-          <section className="feed">
-            {items.length > 0 ? (
-              items.map((p) => (
-                <article key={p.id} className="card card--compact">
-                  <div className="head-compact">
-                    <span className="avatar mini">{p.author.substring(0, 1)}</span>
-                    <a className="handle" href="#">{p.author}</a>
-                    <span className="dot" />
-                    <time dateTime={p.createdAt}>{formatKSTDateTime(p.createdAt)}</time>
-                    <Link className="title-inline" href={`/posts/${p.id}`}>{p.title}</Link>
-                  </div>
-                  {p.excerpt && <p className="excerpt" style={{ marginTop: 6 }}>{p.excerpt}</p>}
-                </article>
-              ))
-            ) : (
-              // 데이터가 없을 때 표시할 UI
-              <div className="card card--compact">
-                <p>게시글이 없습니다.</p>
-              </div>
-            )}
-          </section>
+          {items.length > 0 ? (
+            <Feed posts={items} />
+          ) : (
+            <div className="card card--compact">
+              <p>게시글이 없습니다.</p>
+            </div>
+          )}
         </div>
       </div>
     </>

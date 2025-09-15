@@ -2,10 +2,11 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import type { Post } from "@/types/post";
-import { usePosts } from "@/features/posts/posts-context";
 import { useAuthGuard } from "@/features/auth/withAuthGuard";
 import { formatKSTDateTime } from "@/lib/time";
+import { toggleLike as apiToggleLike } from "@/lib/api";
 
 /** 검색어를 <mark>로 하이라이트 */
 function highlight(text: string, q: string) {
@@ -19,12 +20,27 @@ function highlight(text: string, q: string) {
   );
 }
 
-export default function PostCard({ post }: { post: Post }) {
-  const { query, toggleLike } = usePosts();
+interface PostCardProps {
+  post: Post;
+  searchQuery?: string;
+}
+
+export default function PostCard({ post, searchQuery = "" }: PostCardProps) {
+  const [liked, setLiked] = useState(!!post.liked);
+  const [likes, setLikes] = useState(post.likes ?? 0);
   const guard = useAuthGuard();
 
-  const liked = !!post.liked;
-  const likes = post.likes ?? 0;
+  const handleToggleLike = async () => {
+    try {
+      const result = await apiToggleLike(post.id);
+      setLiked(result.liked);
+      setLikes(result.likes);
+    } catch (error) {
+      // 옵티미스틱 업데이트
+      setLiked(!liked);
+      setLikes(likes + (liked ? -1 : 1));
+    }
+  };
 
   return (
     <article className="card card--compact">
@@ -39,14 +55,14 @@ export default function PostCard({ post }: { post: Post }) {
 
         {/* 제목은 링크 + 검색 하이라이트 */}
         <Link className="title-inline" href={`/posts/${post.id}`}>
-          {highlight(post.title, query)}
+          {highlight(post.title, searchQuery)}
         </Link>
       </div>
 
       {/* 요약(검색 하이라이트 적용) */}
       {post.excerpt && (
         <p className="excerpt" style={{ marginTop: 6 }}>
-          {highlight(post.excerpt, query)}
+          {highlight(post.excerpt, searchQuery)}
         </p>
       )}
 
@@ -55,7 +71,7 @@ export default function PostCard({ post }: { post: Post }) {
         <button
           className="action"
           aria-pressed={liked}
-          onClick={guard(() => toggleLike(post.id))}
+          onClick={guard(handleToggleLike)}
           title={liked ? "좋아요 취소" : "좋아요"}
         >
           ❤ {likes}

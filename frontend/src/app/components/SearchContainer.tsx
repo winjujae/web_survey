@@ -82,7 +82,7 @@ export default function SearchContainer() {
       {loading ? (
         <div className="skeleton" style={{ height: 200 }} />
       ) : posts.length > 0 ? (
-        <Feed posts={posts} />
+        <Feed posts={posts} searchQuery={query} />
       ) : query ? (
         <div className="card">
           <p>검색 결과가 없습니다.</p>

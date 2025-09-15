@@ -1,7 +1,7 @@
 // src/app/search/page.tsx
-import Hero from "../ui/Hero";
-import LeftMenu from "../ui/LeftMenu";
-import SearchContainer from "../components/SearchContainer";
+import Hero from "@/components/ui/Hero";
+import LeftMenu from "@/components/ui/LeftMenu";
+import SearchContainer from "@/components/containers/SearchContainer";
 
 export default function SearchPage() {
   return (

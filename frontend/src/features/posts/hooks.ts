@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Post } from "@/types/post";
 import { createPost, deletePost, fetchPost, fetchPosts, toggleLike, updatePost } from "@/lib/api";
+import type { components } from "@/types/generated/openapi";
+type CreatePostDto = components["schemas"]["CreatePostDto"];
 
 export function usePostsQuery() {
   return useQuery({
@@ -24,7 +26,7 @@ export function usePostMutations() {
   const qc = useQueryClient();
 
   const create = useMutation({
-    mutationFn: (input: { title: string; content: string; category_id?: string; tags?: string[]; is_anonymous?: boolean; }) => createPost(input),
+    mutationFn: (input: CreatePostDto) => createPost(input),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["posts"] });
     },
@@ -32,7 +34,7 @@ export function usePostMutations() {
 
   const update = useMutation({
     mutationFn: (p: { id: string; data: Partial<Pick<Post, "title" | "body" | "tags">> }) =>
-      updatePost(p.id, { title: p.data.title, content: p.data.body, tags: p.data.tags }),
+      updatePost(p.id, { title: p.data.title, content: p.data.body, tags: p.data.tags } as any),
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: ["posts"] });
       qc.invalidateQueries({ queryKey: ["posts", variables.id] });

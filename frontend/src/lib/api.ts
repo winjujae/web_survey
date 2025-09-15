@@ -1,5 +1,8 @@
 // src/lib/api.ts
 import type { Post } from "@/types/post";
+import type { components } from "@/types/generated/openapi";
+type CreatePostDto = components["schemas"]["CreatePostDto"];
+type UpdatePostDto = components["schemas"]["UpdatePostDto"];
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'http://localhost:3300';
 
@@ -93,13 +96,7 @@ export async function fetchPost(id: string): Promise<Post | null> {
 }
 
 // 게시글 생성
-export async function createPost(postData: {
-  title: string;
-  content: string;
-  category_id?: string;
-  tags?: string[];
-  is_anonymous?: boolean;
-}, token?: string): Promise<Post> {
+export async function createPost(postData: CreatePostDto, token?: string): Promise<Post> {
   const responseData = await apiRequest('/api/posts', {
     method: 'POST',
     headers: {
@@ -117,13 +114,8 @@ export async function createPost(postData: {
 
 // 게시글 수정
 export async function updatePost(
-  id: string, 
-  postData: {
-    title?: string;
-    content?: string;
-    category_id?: string;
-    tags?: string[];
-  }, 
+  id: string,
+  postData: UpdatePostDto,
   token?: string
 ): Promise<Post> {
   const responseData = await apiRequest(`/api/posts/${id}`, {

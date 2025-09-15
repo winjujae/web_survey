@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Hero from "@/app/ui/Hero";
 import LeftMenu from "@/app/ui/LeftMenu";
 import PostCard from "@/app/ui/PostCard";
+import Breadcrumb from "@/app/components/Breadcrumb";
 import { fetchPosts /*, fetchPostsByCategory */ } from "@/lib/api";
 
 type Props = { 
@@ -34,6 +35,7 @@ export default async function BoardPage({ params, searchParams }: Props) {
 
   return (
     <>
+      <Breadcrumb />
       <Hero title={boardTitle} subtitle={tag ? `#${tag}` : undefined} />
 
       <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: 16, marginTop: 12 }}>

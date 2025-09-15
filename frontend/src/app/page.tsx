@@ -10,8 +10,8 @@ export default async function HomePage() {
   return (
     <>
       <Hero 
-         title="자라머니 · 탈모 커뮤니티"
-        subtitle="탈모 치료 경험 공유, 약·제품 정보, 모발이식 후기까지 모아서 서로 돕는 공간이에요."
+         title="전체 게시글"
+        subtitle="모든 게시판의 최신 게시글을 한눈에 확인하세요."
       />
       <div style={{display: "grid", gridTemplateColumns: "280px 1fr", gap: "16px", marginTop: 12}}>
         <div>

@@ -700,6 +700,120 @@
             color: var(--muted);
           }
 
+          /* 게시판 목록 스타일 */
+          .boards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+          }
+
+          .board-card {
+            display: block;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.2s;
+          }
+
+          .board-card:hover {
+            border-color: var(--accent);
+            box-shadow: var(--shadow);
+            transform: translateY(-2px);
+          }
+
+          .board-card-content {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+          }
+
+          .board-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin: 0 0 12px 0;
+            color: var(--text);
+          }
+
+          .board-description {
+            color: var(--muted);
+            line-height: 1.5;
+            margin: 0 0 16px 0;
+            flex: 1;
+          }
+
+          .board-stats {
+            color: var(--muted);
+            font-size: 14px;
+            margin-top: auto;
+          }
+
+          /* 네비게이션 개선 */
+          .nav-item.active {
+            background: var(--accent);
+            color: white;
+            font-weight: 500;
+          }
+
+          .nav-item.active:hover {
+            background: var(--accent);
+            color: white;
+          }
+
+          .nav-sub-item {
+            font-size: 13px;
+            color: var(--muted);
+          }
+
+          .nav-sub-item.active {
+            background: rgba(108, 99, 255, 0.1);
+            color: var(--accent);
+            font-weight: 500;
+          }
+
+          .nav-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 8px 0;
+          }
+
+          /* 브레드크럼 스타일 */
+          .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            color: var(--muted);
+          }
+
+          .breadcrumb-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+          }
+
+          .breadcrumb-link {
+            color: var(--muted);
+            text-decoration: none;
+            transition: color 0.2s;
+          }
+
+          .breadcrumb-link:hover {
+            color: var(--accent);
+          }
+
+          .breadcrumb-current {
+            color: var(--text);
+            font-weight: 500;
+          }
+
+          .breadcrumb-separator {
+            color: var(--border);
+          }
+
           /* 작은 화면에서: 버튼만 보이고, 열면 백드롭으로 전체 덮기 */
           @media (max-width: 640px) {
             .dock-panel {

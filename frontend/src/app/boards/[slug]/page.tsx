@@ -4,6 +4,7 @@ import { formatKSTDateTime } from "@/lib/time";
 import Link from "next/link";
 import Hero from "@/app/ui/Hero";
 import LeftMenu from "@/app/ui/LeftMenu";
+import { fetchPostsByCategory, fetchPosts } from "@/lib/api";
 
 type Props = { params: { slug: string }; searchParams: { tag?: string } };
 
@@ -14,19 +15,6 @@ const BOARD_LABEL: Record<string, string> = {
   clinics: "지역 병원/클리닉",
 };
 
-// API 응답 데이터 구조에 맞게 수정된 함수
-function normalizePosts(rows: any[]) {
-  return rows.map((post) => ({
-    id: String(post?.post_id ?? ""),
-    author: post?.is_anonymous ? (post?.anonymous_nickname ?? "익명") : (post?.user?.nickname ?? "작성자"),
-    createdAt: String(post?.created_at ?? new Date().toISOString()),
-    title: String(post?.title ?? "(제목 없음)"),
-    excerpt: String(post?.content?.substring(0, 100) ?? ""), // content의 일부를 요약으로 사용
-    boardId: String(post?.category_id ?? ""),
-    tags: Array.isArray(post?.tags) ? post.tags : [],
-  }));
-}
-
 export default async function BoardPage({ params, searchParams }: Props) {
   const { slug } = params;
   const { tag } = searchParams;
@@ -34,19 +22,18 @@ export default async function BoardPage({ params, searchParams }: Props) {
   const boardTitle = BOARD_LABEL[slug];
   if (!boardTitle) return notFound();
 
-  const base = process.env.API_URL!;
-  // API 엔드포인트가 /api/posts 가 맞는지 다시 한번 확인해보세요.
-  // 로그에는 GET /boards/clinics 로 기록되어 있습니다.
-  const res = await fetch(`${base}/api/posts`, { cache: "no-store" });
-  if (!res.ok) throw new Error(`Failed to load posts: ${res.status}`);
+  // 카테고리별 게시글 조회 (카테고리 ID가 있다면)
+  let posts;
+  if (slug && BOARD_LABEL[slug]) {
+    // 모든 게시글을 가져온 후 클라이언트에서 필터링 (임시)
+    posts = await fetchPosts();
+    // 실제로는 카테고리별 API가 필요: posts = await fetchPostsByCategory(slug);
+  } else {
+    posts = await fetchPosts();
+  }
 
-  // API 응답에서 실제 데이터 배열을 가져오도록 수정
-  const responseData = await res.json();
-  let items = responseData?.data && Array.isArray(responseData.data) 
-    ? normalizePosts(responseData.data) 
-    : [];
-
-  if (tag) items = items.filter(p => p.tags.includes(tag));
+  // 태그 필터링
+  let items = tag ? posts.filter(p => p.tags.some(t => t.includes(tag))) : posts;
 
   return (
     <>

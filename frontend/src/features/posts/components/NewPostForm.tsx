@@ -4,6 +4,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/features/auth/auth-context";
 import { useLoginDialog } from "@/features/auth/components/LoginDialogProvider";
+import { createPost } from "@/lib/api";
 
 type Seg = { value: string; label: string };
 
@@ -55,33 +56,27 @@ export default function NewPostForm() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (disabled) return;
+    if (disabled || !user) return;
     setSubmitting(true);
     setErr("");
 
     try {
-      // ★ 나중에 DB 연결 시 여기에 실제 API 호출 넣으면 됨
-      // 예시:
-      // await fetch("/api/posts", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //     ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      //   },
-      //   body: JSON.stringify({
-      //     boardId,
-      //     title: title.trim(),
-      //     body: body.trim(),
-      //     tags: tags.trim() ? tags.trim().split(/\s+/) : [],
-      //   }),
-      // });
+      await createPost(
+        {
+          title: title.trim(),
+          content: body.trim(),
+          category_id: boardId,
+          tags: tags.length > 0 ? tags : [],
+          is_anonymous: false,
+        }
+        /* , user.token */
+      );
 
-    } catch (e: any) {
-      // 실패해도 지금은 홈으로 돌려보내기만 한다면 에러를 막 굳이 보여줄 필요 X
-      // 필요하면 setErr(e.message ?? "등록 실패"); return;
-    } finally {
-      // ✅ 완전 새로고침으로 홈으로 이동 (컨텍스트/클라 상태 전부 초기화)
+      // 성공 시 홈으로 이동
       window.location.href = "/";
+    } catch (e: any) {
+      setErr(e.message ?? "게시글 등록에 실패했습니다.");
+      setSubmitting(false);
     }
   };
 

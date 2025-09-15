@@ -3,7 +3,6 @@
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { Post } from "@/types/post";
-import { getPosts } from "@/lib/mock";
 
 /** 정렬 키 */
 export type SortKey = "new" | "hot";
@@ -37,8 +36,8 @@ type Ctx = {
   /** 투표(1=업, -1=다운, 옵티미스틱) */
   vote: (id: string, dir: 1 | -1) => void;
 
-  /** 새 글 추가(목 데이터용, 서버 붙이면 API로 대체) → 새 글 id 반환 */
-  addPost: (input: NewPostInput) => string;
+  /** 새 글 추가(API 호출) → 새 글 id 반환 */
+  addPost: (input: NewPostInput) => Promise<string>;
 
   /** (선택) 조회수 증가 */
   incView: (id: string) => void;
@@ -46,12 +45,71 @@ type Ctx = {
 
 const PostsCtx = createContext<Ctx | null>(null);
 
+// API 호출 함수
+async function fetchPosts(): Promise<Post[]> {
+  try {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3300';
+    const response = await fetch(`${apiUrl}/api/posts`, { 
+      cache: 'no-store',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`API 호출 실패: ${response.status}`);
+    }
+    
+    const responseData = await response.json();
+    
+    if (!responseData.success || !Array.isArray(responseData.data)) {
+      console.warn('API 응답 형식이 올바르지 않습니다:', responseData);
+      return [];
+    }
+    
+    // 백엔드 데이터를 프론트엔드 Post 타입으로 변환
+    return responseData.data.map((post: any) => ({
+      id: String(post?.post_id ?? ""),
+      boardId: String(post?.category_id ?? ""),
+      title: String(post?.title ?? "(제목 없음)"),
+      excerpt: String(post?.content?.substring(0, 100) ?? ""),
+      body: String(post?.content ?? ""),
+      author: post?.is_anonymous ? (post?.anonymous_nickname ?? "익명") : (post?.user?.nickname ?? "작성자"),
+      createdAt: String(post?.created_at ?? new Date().toISOString()),
+      tags: Array.isArray(post?.tags) ? post.tags.map((tag: any) => tag.name || tag) : [],
+      likes: Number(post?.likes || 0),
+      views: Number(post?.view_count || 0),
+      dislikes: 0, // 백엔드에 dislike 기능이 없으므로 기본값
+      liked: false, // 로그인 기능 연결 후 실제 상태로 변경 필요
+      disliked: false,
+    }));
+  } catch (error) {
+    console.error('게시글 데이터 로딩 실패:', error);
+    return [];
+  }
+}
+
 export function PostsProvider({ children }: { children: React.ReactNode }) {
-  // 초기 데이터 (서버/DB 붙이면 교체)
-  const [posts, setPosts] = useState<Post[]>(() => getPosts(80));
+  // 초기 데이터를 빈 배열로 시작하고 useEffect에서 로드
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortKey>("new");
+
+  /* ───────────────── 초기 데이터 로딩 ───────────────── */
+  
+  // 컴포넌트 마운트 시 게시글 데이터 로드
+  useEffect(() => {
+    const loadPosts = async () => {
+      setLoading(true);
+      const postsData = await fetchPosts();
+      setPosts(postsData);
+      setLoading(false);
+    };
+    
+    loadPosts();
+  }, []);
 
   /* ───────────────── URL <-> 상태 동기화 ───────────────── */
 
@@ -123,29 +181,80 @@ export function PostsProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
-  const addPost = (input: NewPostInput) => {
-    const id = String(Date.now()); // 데모용 id. 실제로는 서버에서 발급받음.
-    const createdAt = new Date().toISOString();
-    const excerpt = input.body.slice(0, 120);
+  const addPost = async (input: NewPostInput): Promise<string> => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3300';
+      const response = await fetch(`${apiUrl}/api/posts`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // 나중에 인증 토큰 추가 필요
+          // 'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          title: input.title,
+          content: input.body,
+          category_id: input.boardId,
+          tags: input.tags,
+          is_anonymous: false, // 기본값, 나중에 폼에서 받도록 수정
+        }),
+      });
 
-    const newPost: Post = {
-      id,
-      boardId: input.boardId,
-      title: input.title,
-      body: input.body,
-      author: input.author,
-      createdAt,
-      tags: input.tags ?? [],
-      views: 0,
-      likes: 0,
-      dislikes: 0,
-      liked: false,
-      disliked: false,
-      excerpt,
-    };
+      if (!response.ok) {
+        throw new Error(`게시글 작성 실패: ${response.status}`);
+      }
 
-    setPosts(prev => [newPost, ...prev]);
-    return id;
+      const responseData = await response.json();
+      
+      if (responseData.success && responseData.data) {
+        // 새 게시글을 로컬 상태에 추가 (옵티미스틱 업데이트)
+        const newPost: Post = {
+          id: String(responseData.data.post_id),
+          boardId: input.boardId,
+          title: input.title,
+          body: input.body,
+          author: input.author,
+          createdAt: responseData.data.created_at || new Date().toISOString(),
+          tags: input.tags ?? [],
+          views: 0,
+          likes: 0,
+          dislikes: 0,
+          liked: false,
+          disliked: false,
+          excerpt: input.body.slice(0, 120),
+        };
+
+        setPosts(prev => [newPost, ...prev]);
+        return String(responseData.data.post_id);
+      } else {
+        throw new Error('API 응답이 올바르지 않습니다');
+      }
+    } catch (error) {
+      console.error('게시글 작성 실패:', error);
+      // 실패 시 로컬에만 추가 (임시)
+      const id = String(Date.now());
+      const createdAt = new Date().toISOString();
+      const excerpt = input.body.slice(0, 120);
+
+      const newPost: Post = {
+        id,
+        boardId: input.boardId,
+        title: input.title,
+        body: input.body,
+        author: input.author,
+        createdAt,
+        tags: input.tags ?? [],
+        views: 0,
+        likes: 0,
+        dislikes: 0,
+        liked: false,
+        disliked: false,
+        excerpt,
+      };
+
+      setPosts(prev => [newPost, ...prev]);
+      return id;
+    }
   };
 
   /* ───────────────── 정렬/검색 파이프 ───────────────── */

@@ -22,7 +22,8 @@ export default function AccountMenu() {
             <div style={{ color: "var(--muted)" }}>{user.name}</div>
           </div>
           <div className="nav-list">
-            <a className="nav-item" onClick={(e) => e.preventDefault()}>⚙️ 계정 설정</a>
+            <a className="nav-item" href="/profile">👤 내 프로필</a>
+            <a className="nav-item" href="/settings">⚙️ 계정 설정</a>
             <a className="nav-item" onClick={async (e) => { e.preventDefault(); await logout(); }}>
               🚪 로그아웃
             </a>

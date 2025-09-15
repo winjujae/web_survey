@@ -396,6 +396,310 @@
             color: inherit;
           }
 
+          /* 프로필 페이지 스타일 */
+          .profile-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px 0;
+          }
+
+          .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 20px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 20px;
+          }
+
+          .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 700;
+          }
+
+          .profile-info {
+            flex: 1;
+          }
+
+          .profile-name {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0 0 4px 0;
+          }
+
+          .profile-handle {
+            color: var(--muted);
+            margin: 0 0 8px 0;
+          }
+
+          .profile-bio {
+            color: var(--text);
+            margin: 0;
+          }
+
+          .profile-stats {
+            display: flex;
+            gap: 40px;
+            padding: 20px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 20px;
+          }
+
+          .stat-item {
+            text-align: center;
+          }
+
+          .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent);
+          }
+
+          .stat-label {
+            color: var(--muted);
+            font-size: 14px;
+          }
+
+          .profile-actions {
+            margin-bottom: 20px;
+          }
+
+          .profile-content {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+          }
+
+          .content-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+          }
+
+          .tab-button {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+          }
+
+          .tab-button:hover {
+            background: var(--bg-soft);
+          }
+
+          .tab-button.active {
+            background: var(--accent);
+            color: white;
+          }
+
+          .content-area {
+            padding: 40px 20px;
+            text-align: center;
+          }
+
+          .empty-state p {
+            color: var(--muted);
+            margin-bottom: 16px;
+          }
+
+          /* 설정 페이지 스타일 */
+          .settings-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px 0;
+          }
+
+          .settings-header {
+            margin-bottom: 30px;
+          }
+
+          .settings-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0 0 8px 0;
+          }
+
+          .settings-header p {
+            color: var(--muted);
+            margin: 0;
+          }
+
+          .settings-sections {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+          }
+
+          .settings-section {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+          }
+
+          .settings-section h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin: 0 0 20px 0;
+          }
+
+          .profile-preview {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+          }
+
+          .profile-details {
+            flex: 1;
+          }
+
+          .field-group {
+            margin-bottom: 16px;
+          }
+
+          .field-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: var(--text);
+          }
+
+          .field-value {
+            padding: 8px 0;
+            color: var(--text);
+          }
+
+          .field-note {
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 4px;
+            display: block;
+          }
+
+          .form-input,
+          .form-textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+          }
+
+          .form-input:focus,
+          .form-textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: var(--focus);
+          }
+
+          .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+          }
+
+          .section-actions {
+            display: flex;
+            gap: 12px;
+          }
+
+          .settings-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+          }
+
+          .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-soft);
+          }
+
+          .setting-info h3 {
+            font-size: 16px;
+            font-weight: 500;
+            margin: 0 0 4px 0;
+          }
+
+          .setting-info p {
+            color: var(--muted);
+            font-size: 14px;
+            margin: 0;
+          }
+
+          .danger-zone {
+            border-color: var(--danger);
+          }
+
+          .danger-zone h2 {
+            color: var(--danger);
+          }
+
+          .danger-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+          }
+
+          .danger-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border: 1px solid var(--danger);
+            border-radius: 8px;
+            background: rgba(255, 51, 102, 0.05);
+          }
+
+          .danger-info h3 {
+            font-size: 16px;
+            font-weight: 500;
+            margin: 0 0 4px 0;
+            color: var(--danger);
+          }
+
+          .danger-info p {
+            color: var(--muted);
+            font-size: 14px;
+            margin: 0;
+          }
+
+          .btn-danger {
+            background: var(--danger);
+            color: white;
+            border: 1px solid var(--danger);
+          }
+
+          .btn-danger:hover {
+            background: #e62e4d;
+            border-color: #e62e4d;
+          }
+
+          .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--muted);
+          }
+
           /* 작은 화면에서: 버튼만 보이고, 열면 백드롭으로 전체 덮기 */
           @media (max-width: 640px) {
             .dock-panel {

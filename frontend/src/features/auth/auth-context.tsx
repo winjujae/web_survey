@@ -2,7 +2,7 @@
 "use client";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { User } from "@/types/auth";
-import type { ILoginService, LoginPayload, RegisterPayload } from "./auth-service";
+import type { ILoginService, LoginPayload, RegisterPayload, UpdateProfilePayload } from "./auth-service";
 import { mockAuthService } from "./auth-mock";
 
 const AUTH_KEY = "auth.token";
@@ -13,6 +13,7 @@ type Ctx = AuthState & {
   register: (p: RegisterPayload) => Promise<void>;
   logout: () => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
+  updateProfile: (p: UpdateProfilePayload) => Promise<void>;
   service: ILoginService;
 };
 
@@ -52,7 +53,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await service.forgotPassword(email);
   };
 
-  const value = useMemo(() => ({ ...state, login, register, logout, forgotPassword, service }), [state]);
+  const updateProfile = async (payload: UpdateProfilePayload) => {
+    if (!state.token) throw new Error("로그인이 필요합니다.");
+    const updatedUser = await service.updateProfile(payload);
+    setState(prev => ({ ...prev, user: updatedUser }));
+  };
+
+  const value = useMemo(() => ({ ...state, login, register, logout, forgotPassword, updateProfile, service }), [state]);
   return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>;
 }
 

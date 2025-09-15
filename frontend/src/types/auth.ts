@@ -7,4 +7,5 @@ export type User = {
   picture?: string; // 구글 프로필 이미지
   provider?: "email" | "google";
   nickname?: string;
+  bio?: string; // 자기소개
 };

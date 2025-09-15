@@ -1,5 +1,5 @@
 // src/features/auth/auth-mock.ts
-import { ILoginService, LoginPayload, RegisterPayload } from "./auth-service";
+import { ILoginService, LoginPayload, RegisterPayload, UpdateProfilePayload } from "./auth-service";
 import type { User } from "../../types/auth";
 
 // email → handle/name 유틸
@@ -26,7 +26,8 @@ export const mockAuthService: ILoginService = {
         name: name || handle,
         email,
         picture,
-        provider: "google"
+        provider: "google",
+        bio: ""
       };
       
       const accessToken = TOKEN_PREFIX + handle + "-google";
@@ -41,7 +42,8 @@ export const mockAuthService: ILoginService = {
         handle, 
         name: name || defaultName,
         email,
-        provider: "email"
+        provider: "email",
+        bio: ""
       };
 
       const accessToken = TOKEN_PREFIX + handle;
@@ -66,7 +68,8 @@ export const mockAuthService: ILoginService = {
       handle, 
       name,
       email,
-      provider: "email"
+      provider: "email",
+      bio: ""
     };
 
     const accessToken = TOKEN_PREFIX + handle;
@@ -90,7 +93,8 @@ export const mockAuthService: ILoginService = {
       handle, 
       name,
       email: handle + "@example.com",
-      provider: isGoogleToken ? "google" : "email"
+      provider: isGoogleToken ? "google" : "email",
+      bio: ""
     };
     return user;
   },
@@ -101,5 +105,23 @@ export const mockAuthService: ILoginService = {
     // Mock 응답
     console.log(`비밀번호 재설정 이메일을 ${email}로 발송했습니다.`);
     return;
+  },
+
+  async updateProfile(payload: UpdateProfilePayload) {
+    // Mock: 현재 사용자 정보를 기반으로 업데이트된 사용자 반환
+    const { name, bio, email } = payload;
+    
+    // 실제로는 서버에서 현재 사용자 정보를 가져와야 하지만, 
+    // Mock에서는 기본 사용자 정보를 생성
+    const user: User = {
+      id: "u-current",
+      handle: "currentuser",
+      name: name || "Current User",
+      email: email || "current@example.com",
+      bio: bio || "",
+      provider: "email"
+    };
+    
+    return user;
   },
 };

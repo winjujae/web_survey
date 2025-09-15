@@ -61,19 +61,20 @@ export default function NewPostForm() {
     setErr("");
 
     try {
-      await createPost(
+      const isUuidV4 = (v: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);
+      const saved = await createPost(
         {
           title: title.trim(),
           content: body.trim(),
-          category_id: boardId,
+          category_id: isUuidV4(boardId) ? boardId : undefined,
           tags: tags.length > 0 ? tags : [],
           is_anonymous: false,
         }
         /* , user.token */
       );
 
-      // 성공 시 홈으로 이동
-      window.location.href = "/";
+      // 성공 시 상세 페이지로 이동
+      window.location.href = `/posts/${saved.id}`; //홈은 "/"
     } catch (e: any) {
       setErr(e.message ?? "게시글 등록에 실패했습니다.");
       setSubmitting(false);

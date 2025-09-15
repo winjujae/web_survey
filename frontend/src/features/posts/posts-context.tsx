@@ -51,6 +51,7 @@ async function fetchPosts(): Promise<Post[]> {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3300';
     const response = await fetch(`${apiUrl}/api/posts`, { 
       cache: 'no-store',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
       }

@@ -9,6 +9,7 @@ import { WinstonLoggerService } from './common/logger/winston.logger';
 import { HttpLoggingMiddleware } from './common/middleware/http-logging.middleware';
 import session from 'express-session';
 import passport from 'passport';
+import cookieParser from 'cookie-parser';
 
 
 async function bootstrap() {
@@ -45,7 +46,7 @@ async function bootstrap() {
       : true, // 개발에서는 모든 오리진 허용
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-CSRF-Token'],
   });
 
   // 글로벌 유효성 검증 파이프
@@ -68,6 +69,7 @@ async function bootstrap() {
       
     },
   }))
+  app.use(cookieParser())
   app.use(passport.initialize())
   app.use(passport.session())
 

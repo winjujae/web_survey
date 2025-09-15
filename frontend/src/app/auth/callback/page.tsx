@@ -15,8 +15,6 @@ export default function AuthCallbackPage() {
   useEffect(() => {
     const handleCallback = async () => {
       try {
-        const token = searchParams.get("token");
-        const refreshToken = searchParams.get("refresh_token");
         const error = searchParams.get("message");
 
         if (error) {
@@ -25,22 +23,10 @@ export default function AuthCallbackPage() {
           return;
         }
 
-        if (!token) {
-          setStatus("error");
-          setMessage("토큰이 없습니다.");
-          return;
-        }
-
-        // 토큰을 localStorage에 저장
-        localStorage.setItem("auth.token", token);
-        if (refreshToken) {
-          localStorage.setItem("auth.refresh_token", refreshToken);
-        }
-
-        // 토큰으로 사용자 정보 가져오기
+        // 서버가 이미 쿠키를 설정했으므로, withCredentials로 프로필 호출
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3300'}/api/auth/profile`, {
+          credentials: 'include',
           headers: {
-            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
         });

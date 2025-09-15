@@ -24,28 +24,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AuthState>({ user: null, token: null, loading: true });
 
   useEffect(() => {
-    const t = typeof window !== "undefined" ? localStorage.getItem(AUTH_KEY) : null;
-    if (!t) return setState(s => ({ ...s, loading: false }));
-    service.me(t)
-      .then(u => setState({ user: u, token: u ? t : null, loading: false }))
+    // 쿠키 기반으로 서버 세션/토큰이 이미 설정되어 있다고 가정하고 me를 호출
+    service.me("")
+      .then(u => setState({ user: u, token: null, loading: false }))
       .catch(() => setState({ user: null, token: null, loading: false }));
   }, []);
 
   const login = async (p: LoginPayload) => {
-    const { user, accessToken } = await service.login(p);
-    localStorage.setItem(AUTH_KEY, accessToken);
-    setState({ user, token: accessToken, loading: false });
+    const { user } = await service.login(p);
+    setState({ user, token: null, loading: false });
   };
 
   const register = async (p: RegisterPayload) => {
-    const { user, accessToken } = await service.register(p);
-    localStorage.setItem(AUTH_KEY, accessToken);
-    setState({ user, token: accessToken, loading: false });
+    const { user } = await service.register(p);
+    setState({ user, token: null, loading: false });
   };
 
   const logout = async () => {
     await service.logout();
-    localStorage.removeItem(AUTH_KEY);
     setState({ user: null, token: null, loading: false });
   };
 
@@ -54,7 +50,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateProfile = async (payload: UpdateProfilePayload) => {
-    if (!state.token) throw new Error("로그인이 필요합니다.");
     const updatedUser = await service.updateProfile(payload);
     setState(prev => ({ ...prev, user: updatedUser }));
   };

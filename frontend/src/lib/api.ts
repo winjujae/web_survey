@@ -27,6 +27,7 @@ async function apiRequest(endpoint: string, options: RequestInit = {}) {
     ...options,
     // Next.js 15: 기본적으로 캐싱되지 않음, 명시적 캐싱 설정
     cache: 'no-store', // 항상 최신 데이터 가져오기
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
       ...options.headers,

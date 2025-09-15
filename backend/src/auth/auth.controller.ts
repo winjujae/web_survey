@@ -24,6 +24,7 @@ import { GoogleLoginDto } from './dto/google-login.dto';
 import { JwtAuthGuard } from './guards/jwt.guard';
 import { User } from '../users/entities/user.entity';
 import { GoogleAuthGuard } from './guards/Google.auth.guard';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('auth')
 @Controller('api/auth')
@@ -38,8 +39,10 @@ export class AuthController {
   @ApiResponse({ status: 201, description: '회원가입 성공', type: TokenDto })
   @ApiResponse({ status: 400, description: '잘못된 입력 데이터' })
   @ApiResponse({ status: 409, description: '이미 존재하는 이메일 또는 닉네임' })
-  async register(@Body() registerDto: RegisterDto): Promise<TokenDto> {
-    return this.authService.register(registerDto);
+  async register(@Body() registerDto: RegisterDto, @Response() res: any): Promise<void> {
+    const tokens = await this.authService.register(registerDto);
+    this.setAuthCookies(res, tokens);
+    res.status(HttpStatus.CREATED).json({ success: true });
   }
 
   @Post('login')
@@ -52,12 +55,14 @@ export class AuthController {
     status: 401,
     description: '이메일 또는 비밀번호가 올바르지 않음',
   })
-  async login(@Body() loginDto: LoginDto): Promise<TokenDto> {
-    return this.authService.login(loginDto);
+  async login(@Body() loginDto: LoginDto, @Response() res: any): Promise<void> {
+    const tokens = await this.authService.login(loginDto);
+    this.setAuthCookies(res, tokens);
+    res.status(HttpStatus.OK).json({ success: true });
   }
 
   @Post('refresh')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard('refresh-token'))
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: '토큰 갱신',
@@ -65,9 +70,11 @@ export class AuthController {
   })
   @ApiResponse({ status: 200, description: '토큰 갱신 성공', type: TokenDto })
   @ApiResponse({ status: 401, description: '유효하지 않은 토큰' })
-  async refresh(@Request() req: any): Promise<TokenDto> {
+  async refresh(@Request() req: any, @Response() res: any): Promise<void> {
     const user = req.user as User;
-    return this.authService.refreshToken(user);
+    const tokens = await this.authService.refreshToken(user);
+    this.setAuthCookies(res, tokens);
+    res.status(HttpStatus.OK).json({ success: true });
   }
 
   @Post('logout')
@@ -80,7 +87,8 @@ export class AuthController {
   @ApiResponse({ status: 200, description: '로그아웃 성공' })
   @ApiResponse({ status: 401, description: '유효하지 않은 토큰' })
   async logout(@Response() res: any): Promise<void> {
-    // 클라이언트 측에서 토큰을 제거하도록 함
+    res.clearCookie('access_token', { httpOnly: true, secure: true, sameSite: 'lax' });
+    res.clearCookie('refresh_token', { httpOnly: true, secure: true, sameSite: 'lax' });
     res.status(HttpStatus.OK).json({ message: '로그아웃되었습니다.' });
   }
 
@@ -146,18 +154,36 @@ export class AuthController {
       // DB에서 사용자 찾기/생성
       const user = await this.authService.findOrCreateGoogleUser(googleUserInfo);
       
-      // JWT 토큰 발급
+      // JWT 토큰 발급 및 쿠키 설정
       const tokens = await this.authService.generateTokens(user);
-      
-      // 프론트엔드로 리다이렉트 (토큰 포함)
+      this.setAuthCookies(res, tokens);
+
+      // 토큰을 노출하지 않고 안전 리다이렉트
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-      const redirectUrl = `${frontendUrl}/auth/callback?token=${tokens.access_token}&refresh_token=${tokens.refresh_token}`;
-      
-      return res.redirect(redirectUrl);
+      return res.redirect(`${frontendUrl}/auth/callback`);
     } catch (error) {
       console.error('구글 콜백 처리 실패:', error);
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
       return res.redirect(`${frontendUrl}/auth/error?message=로그인 처리 중 오류가 발생했습니다.`);
     }
+  }
+
+  private setAuthCookies(res: any, tokens: TokenDto) {
+    const isProd = process.env.NODE_ENV === 'production';
+    const cookieBase = {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'lax' as const,
+      path: '/',
+    };
+
+    res.cookie('access_token', tokens.access_token, {
+      ...cookieBase,
+      maxAge: (process.env.JWT_EXPIRES_IN ? parseInt(process.env.JWT_EXPIRES_IN) : 60 * 60 * 24) * 1000,
+    });
+    res.cookie('refresh_token', tokens.refresh_token, {
+      ...cookieBase,
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+    });
   }
 }

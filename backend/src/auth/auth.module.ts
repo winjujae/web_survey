@@ -10,6 +10,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { RefreshTokenStrategy } from './strategies/refresh-token.strategy';
 import { JwtAuthGuard } from './guards/jwt.guard';
 import { RolesGuard } from './guards/roles.guard';
+import { GoogleStrategy } from './strategies/google.strategy';
 
 @Module({
   imports: [
@@ -34,7 +35,8 @@ import { RolesGuard } from './guards/roles.guard';
     RefreshTokenStrategy,
     JwtAuthGuard,
     RolesGuard,
+    GoogleStrategy
   ],
-  exports: [AuthService, JwtAuthGuard, RolesGuard, PassportModule, JwtModule],
+  exports: [AuthService, JwtAuthGuard, RolesGuard, PassportModule, JwtModule, GoogleStrategy],
 })
 export class AuthModule {}

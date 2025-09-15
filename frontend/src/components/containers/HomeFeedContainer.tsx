@@ -1,9 +1,10 @@
 // src/app/components/HomeFeedContainer.tsx
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Feed from "../ui/Feed";
 import type { Post } from "@/types/post";
+import { usePostsQuery } from "@/features/posts/hooks";
 
 type SortType = "new" | "hot";
 
@@ -12,7 +13,8 @@ interface HomeFeedContainerProps {
 }
 
 export default function HomeFeedContainer({ initialPosts }: HomeFeedContainerProps) {
-  const [posts] = useState<Post[]>(initialPosts);
+  const { data } = usePostsQuery();
+  const posts = (data && data.length ? data : initialPosts) as Post[];
   const [sort, setSort] = useState<SortType>("new");
 
   // 인기 점수 계산 (시간 감쇠 포함)
@@ -28,13 +30,13 @@ export default function HomeFeedContainer({ initialPosts }: HomeFeedContainerPro
   };
 
   // 정렬된 게시글 목록
-  const sortedPosts = [...posts].sort((a, b) => {
+  const sortedPosts = useMemo(() => [...posts].sort((a, b) => {
     if (sort === "new") {
       return Date.parse(b.createdAt) - Date.parse(a.createdAt);
     } else {
       return hotScore(b) - hotScore(a);
     }
-  });
+  }), [posts, sort]);
 
   return (
     <>

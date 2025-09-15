@@ -18,6 +18,7 @@ export type Post = {
   liked?: boolean;   // 👈 추가
   views?: number;
   body: string;
+  dislikes?: number; // 누락 가능성 보완
 
   // ✨ 추가
   comments?: Comment[];

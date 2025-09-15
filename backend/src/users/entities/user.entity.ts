@@ -46,6 +46,13 @@ export class User {
   @Column({ length: 255 })
   password: string;
 
+  @ApiPropertyOptional({
+    description: '사용자 실제 이름',
+    example: '홍길동',
+  })
+  @Column({ nullable: true, length: 100 })
+  name?: string;
+
   @ApiProperty({
     description: '사용자 닉네임',
     example: '탈모탈출러',

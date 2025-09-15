@@ -18,6 +18,11 @@ export class CreateUserDto {
   @MaxLength(50, { message: '비밀번호는 최대 50자까지 가능합니다.' })
   password: string;
 
+  @IsOptional()
+  @IsString({ message: '실제 이름은 문자열이어야 합니다.' })
+  @MaxLength(100, { message: '실제 이름은 최대 100자까지 가능합니다.' })
+  name?: string;
+
   @IsString({ message: '닉네임은 문자열이어야 합니다.' })
   @MinLength(2, { message: '닉네임은 최소 2자 이상이어야 합니다.' })
   @MaxLength(20, { message: '닉네임은 최대 20자까지 가능합니다.' })

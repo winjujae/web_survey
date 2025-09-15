@@ -233,11 +233,13 @@ export class AuthService {
       }
 
       // 3. 새 사용자 생성
+      // 실제 이름을 기반으로 닉네임 생성 (현재 요구사항)
       const uniqueNickname = await this.generateUniqueNickname(name || email.split('@')[0]);
       
       const newUser = this.userRepository.create({
         email,
-        nickname: uniqueNickname,
+        name: name, // 실제 이름 저장
+        nickname: uniqueNickname, // 실제 이름 기반으로 생성된 닉네임
         google_id: googleId,
         provider: 'google',
         email_verified: emailVerified || true,

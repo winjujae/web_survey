@@ -17,7 +17,7 @@ export class GoogleLoginDto {
   email: string;
 
   @ApiProperty({
-    description: '사용자 이름',
+    description: '사용자 실제 이름',
     example: '홍길동',
   })
   @IsString()

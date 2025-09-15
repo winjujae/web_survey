@@ -1,7 +1,7 @@
 // src/app/page.tsx
-import Hero from "./ui/Hero";
-import LeftMenu from "./ui/LeftMenu";
-import HomeFeedContainer from "./components/HomeFeedContainer";
+import Hero from "@/components/ui/Hero";
+import LeftMenu from "@/components/ui/LeftMenu";
+import HomeFeedContainer from "@/components/containers/HomeFeedContainer";
 import { fetchPosts } from "@/lib/api";
 
 export default async function HomePage() {

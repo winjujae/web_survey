@@ -1,9 +1,9 @@
 // app/boards/[slug]/page.tsx
 import { notFound } from "next/navigation";
-import Hero from "@/app/ui/Hero";
-import LeftMenu from "@/app/ui/LeftMenu";
-import PostCard from "@/app/ui/PostCard";
-import Breadcrumb from "@/app/components/Breadcrumb";
+import Hero from "@/components/ui/Hero";
+import LeftMenu from "@/components/ui/LeftMenu";
+import PostCard from "@/components/ui/PostCard";
+import Breadcrumb from "@/components/presentational/Breadcrumb";
 import { fetchPosts /*, fetchPostsByCategory */ } from "@/lib/api";
 
 type Props = { 

@@ -1,13 +1,15 @@
-// src/app/ui/LeftMenu.tsx
+// src/components/ui/LeftMenu.tsx
 "use client";
 
+import React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { getBoards, treatmentTags } from "@/lib/mock";
 
 export default function LeftMenu() {
   const boards = getBoards();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   return (
     <aside className="panel">
@@ -39,7 +41,7 @@ export default function LeftMenu() {
                 {treatmentTags.map(t => (
                   <Link
                     key={t.key}
-                    className={`nav-item nav-sub-item ${pathname === `/boards/${b.slug}` && new URLSearchParams(window.location.search).get('tag') === t.key ? "active" : ""}`}
+                    className={`nav-item nav-sub-item ${pathname === `/boards/${b.slug}` && searchParams.get('tag') === t.key ? "active" : ""}`}
                     href={`/boards/${b.slug}?tag=${t.key}`}
                   >
                     #{t.label}

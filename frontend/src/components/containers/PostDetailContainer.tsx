@@ -1,4 +1,4 @@
-// src/app/posts/[id]/PostDetailContainer.tsx
+// src/components/containers/PostDetailContainer.tsx
 "use client";
 
 import { useState } from "react";

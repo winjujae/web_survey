@@ -1,4 +1,4 @@
-//src/app/posts/[id]/Reactions.tsx
+// src/components/presentational/Reactions.tsx
 "use client";
 import { useState } from "react";
 import { useAuth } from "@/features/auth/auth-context";

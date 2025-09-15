@@ -15,6 +15,7 @@ export type Post = {
   createdAt: string; // ISO
   tags?: string[];
   likes: number;     // 숫자(집계)
+  liked?: boolean;   // 👈 추가
   views?: number;
   body: string;
 

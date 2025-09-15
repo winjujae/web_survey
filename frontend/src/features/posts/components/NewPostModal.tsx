@@ -2,6 +2,8 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { createPost } from "@/lib/api";
+import type { components } from "@/types/generated/openapi";
+type CreatePostDto = components["schemas"]["CreatePostDto"];
 import { useLoginDialog } from "@/features/auth/components/LoginDialogProvider";
 import { useAuth } from "@/features/auth/auth-context";
 import { useRouter } from "next/navigation";
@@ -33,12 +35,14 @@ export default function NewPostModal({ open, onClose }: { open: boolean; onClose
     setErr("");
 
     try {
-      const saved = await createPost({
+      const payload: CreatePostDto = {
         title,
         content: body,
         category_id: boardId,
         tags: tags.split(" ").filter(Boolean),
-      });
+        is_anonymous: false,
+      };
+      const saved = await createPost(payload);
       // 입력값 초기화
       setTitle("");
       setBody("");

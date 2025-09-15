@@ -922,8 +922,46 @@ export interface components {
         };
         CreateUserDto: Record<string, never>;
         UpdateUserDto: Record<string, never>;
-        CreatePostDto: Record<string, never>;
-        UpdatePostDto: Record<string, never>;
+        CreatePostDto: {
+            /**
+             * @description 게시글 제목
+             * @example 병원 추천 부탁드립니다
+             */
+            title: string;
+            /**
+             * @description 게시글 본문
+             * @example OO병원 가보신 분 계신가요?
+             */
+            content: string;
+            /** @description 이미지 URL 목록 */
+            image_urls?: string[];
+            /** @description 카테고리 ID(UUID v4) */
+            category_id?: string;
+            /**
+             * @description 게시글 유형
+             * @enum {string}
+             */
+            type?: "general" | "anonymous" | "hospital" | "product" | "expert_qna";
+            /**
+             * @description 익명 여부
+             * @default false
+             */
+            is_anonymous: boolean;
+            /** @description 익명 닉네임(익명일 때만) */
+            anonymous_nickname?: string;
+            /** @description 태그 목록(자동으로 # 접두사 부여) */
+            tags?: string[];
+        };
+        UpdatePostDto: {
+            /** @description 수정할 게시글 제목 */
+            title?: string;
+            /** @description 수정할 게시글 본문 */
+            content?: string;
+            /** @description 수정할 카테고리 ID(UUID v4) */
+            category_id?: string;
+            /** @description 수정할 태그 목록 */
+            tags?: string[];
+        };
         CreateTagDto: Record<string, never>;
         AddTagsToPostDto: Record<string, never>;
         CreateCommentDto: Record<string, never>;
@@ -1530,6 +1568,7 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
+        /** @description 게시글 생성 입력 */
         requestBody: {
             content: {
                 "application/json": components["schemas"]["CreatePostDto"];
@@ -1622,6 +1661,7 @@ export interface operations {
             };
             cookie?: never;
         };
+        /** @description 게시글 수정 입력 */
         requestBody: {
             content: {
                 "application/json": components["schemas"]["UpdatePostDto"];

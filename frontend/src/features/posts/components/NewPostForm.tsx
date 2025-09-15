@@ -5,6 +5,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/features/auth/auth-context";
 import { useLoginDialog } from "@/features/auth/components/LoginDialogProvider";
 import { createPost } from "@/lib/api";
+import type { components } from "@/types/generated/openapi";
+type CreatePostDto = components["schemas"]["CreatePostDto"];
 
 type Seg = { value: string; label: string };
 
@@ -62,16 +64,14 @@ export default function NewPostForm() {
 
     try {
       const isUuidV4 = (v: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);
-      const saved = await createPost(
-        {
-          title: title.trim(),
-          content: body.trim(),
-          category_id: isUuidV4(boardId) ? boardId : undefined,
-          tags: tags.length > 0 ? tags : [],
-          is_anonymous: false,
-        }
-        /* , user.token */
-      );
+      const payload: CreatePostDto = {
+        title: title.trim(),
+        content: body.trim(),
+        category_id: isUuidV4(boardId) ? boardId : undefined,
+        tags: tags.length > 0 ? tags : [],
+        is_anonymous: false,
+      };
+      const saved = await createPost(payload /* , user.token */);
 
       // 성공 시 상세 페이지로 이동
       window.location.href = `/posts/${saved.id}`; //홈은 "/"

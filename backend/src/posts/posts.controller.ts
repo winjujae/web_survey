@@ -22,6 +22,7 @@ import {
   ApiBearerAuth,
   ApiQuery,
   ApiParam,
+  ApiBody,
 } from '@nestjs/swagger';
 
 import { PostsService, PostFilters, PaginationOptions } from './posts.service';
@@ -53,6 +54,7 @@ export class PostsController {
     description: '새로운 게시글을 작성합니다.',
   })
   @ApiResponse({ status: 201, description: '게시글 작성 성공' })
+  @ApiBody({ type: CreatePostDto, description: '게시글 생성 입력' })
   @ApiResponse({ status: 400, description: '잘못된 입력 데이터' })
   @ApiResponse({ status: 401, description: '인증되지 않은 사용자' })
   @ApiResponse({ status: 404, description: '카테고리를 찾을 수 없음' })
@@ -164,6 +166,7 @@ export class PostsController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
+  @ApiBody({ type: UpdatePostDto, description: '게시글 수정 입력' })
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updatePostDto: UpdatePostDto,

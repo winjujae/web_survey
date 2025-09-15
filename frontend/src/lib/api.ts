@@ -17,7 +17,7 @@ export function transformPost(post: any): Post {
     author: post?.is_anonymous ? (post?.anonymous_nickname ?? "익명") : (post?.user?.nickname ?? "작성자"),
     createdAt: String(post?.created_at ?? new Date().toISOString()),
     tags: Array.isArray(post?.tags) ? post.tags.map((tag: any) => tag.name || tag) : [],
-    likes: Number(post?.likes || 0),
+    likes: Number(post?.likes_count || 0),
     views: Number(post?.view_count || 0),
     liked: false,
   };

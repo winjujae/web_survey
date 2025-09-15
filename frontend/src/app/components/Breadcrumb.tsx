@@ -22,9 +22,7 @@ export default function Breadcrumb() {
     let label = segment;
     
     // 특정 경로에 대한 라벨 매핑
-    if (segment === "boards") {
-      label = "게시판";
-    } else if (segment === "posts") {
+    if (segment === "posts") {
       label = "게시글";
     } else if (segment === "profile") {
       label = "프로필";

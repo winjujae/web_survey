@@ -20,14 +20,6 @@ export default function LeftMenu() {
         >
           🏠 전체 게시글
         </Link>
-        
-        {/* 게시판 목록 링크 */}
-        <Link 
-          className={`nav-item ${pathname === "/boards" ? "active" : ""}`} 
-          href="/boards"
-        >
-          📋 게시판 목록
-        </Link>
 
         <div className="nav-divider"></div>
 

@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../auth-context";
-import GoogleAuthService, { type GoogleUserInfo } from "../google-auth";
 
 type AuthMode = "login" | "register" | "forgot";
 
@@ -70,31 +69,10 @@ export default function LoginModal({ open, onClose }: { open: boolean; onClose: 
     }
   };
 
-  const handleGoogleLogin = async () => {
-    try {
-      setLoading(true);
-      setErr("");
-      
-      const googleAuth = GoogleAuthService.getInstance();
-      const userInfo: GoogleUserInfo = await googleAuth.signIn();
-      
-      // 구글 사용자 정보로 로그인 처리
-      await login({
-        email: userInfo.email,
-        password: "", // 구글 로그인은 비밀번호가 필요없음
-        provider: "google",
-        googleId: userInfo.sub,
-        name: userInfo.name,
-        picture: userInfo.picture,
-      });
-      
-      onClose();
-    } catch (error: any) {
-      console.error("구글 로그인 실패:", error);
-      setErr("구글 로그인에 실패했습니다. 다시 시도해주세요.");
-    } finally {
-      setLoading(false);
-    }
+  const handleGoogleLogin = () => {
+    // Passport OAuth 로그인으로 리다이렉트
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3300';
+    window.location.href = `${apiUrl}/api/auth/google/login`;
   };
 
   const getTitle = () => {

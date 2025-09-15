@@ -15,8 +15,8 @@ const BOARD_LABEL: Record<string, string> = {
 };
 
 export default async function BoardPage({ params, searchParams }: Props) {
-  const { slug } = params;
-  const { tag } = searchParams;
+  const { slug } = await params;
+  const { tag } = await searchParams;
 
   const boardTitle = BOARD_LABEL[slug];
   if (!boardTitle) return notFound();

@@ -17,20 +17,23 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
 
   async validate(accessToken: string, refreshToken: string, profile: any) {
     try {
-      const { id, name, emails } = profile
-      console.log('accessToken',accessToken)
-      console.log('refreshToken',refreshToken)
-      console.log('profile',profile)
+      const { id, displayName, name, emails, photos } = profile;
+      
       const user = {
-        id: id,
+        googleId: id,
         email: emails[0].value,
-        firstName: name.familyName,
-        lastName: name.givenName,
-      }
+        name: displayName || `${name.givenName} ${name.familyName}`,
+        firstName: name.givenName,
+        lastName: name.familyName,
+        picture: photos && photos[0] ? photos[0].value : null,
+        emailVerified: emails[0].verified || true,
+      };
 
-      return user
+      console.log('Google OAuth 사용자 정보:', user);
+      return user;
     } catch (error) {
-      return error
+      console.error('Google OAuth validate 에러:', error);
+      throw error;
     }
   }
 }

@@ -86,6 +86,28 @@ export class User {
   @Column({ default: true })
   is_active: boolean;
 
+  @ApiPropertyOptional({
+    description: '구글 고유 ID',
+    example: '1234567890',
+  })
+  @Column({ nullable: true, unique: true })
+  google_id?: string;
+
+  @ApiProperty({
+    description: '로그인 제공자',
+    example: 'email',
+    enum: ['email', 'google'],
+  })
+  @Column({ default: 'email' })
+  provider: 'email' | 'google';
+
+  @ApiProperty({
+    description: '이메일 인증 상태',
+    example: false,
+  })
+  @Column({ default: false })
+  email_verified: boolean;
+
   @ApiProperty({
     description: '계정 생성일시',
     example: '2024-01-01T00:00:00.000Z',

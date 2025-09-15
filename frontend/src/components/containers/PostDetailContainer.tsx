@@ -1,19 +1,21 @@
 // src/components/containers/PostDetailContainer.tsx
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatKSTDateTime } from "@/lib/time";
 import type { Post } from "@/types/post";
 import { useAuth } from "@/features/auth/auth-context";
 import { updatePost, deletePost, toggleLike } from "@/lib/api";
+import { usePostQuery } from "@/features/posts/hooks";
 
 interface PostDetailContainerProps {
   post: Post;
 }
 
 export default function PostDetailContainer({ post: initialPost }: PostDetailContainerProps) {
-  const [post, setPost] = useState(initialPost);
+  const { data } = usePostQuery(initialPost.id, initialPost);
+  const [post, setPost] = useState(data ?? initialPost);
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(post.title);
   const [editBody, setEditBody] = useState(post.body);

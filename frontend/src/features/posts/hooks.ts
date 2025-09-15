@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Post } from "@/types/post";
 import { createPost, deletePost, fetchPost, fetchPosts, toggleLike, updatePost } from "@/lib/api";
@@ -10,11 +10,13 @@ export function usePostsQuery() {
   });
 }
 
-export function usePostQuery(id: string) {
+export function usePostQuery(id: string, initialData?: Post | null) {
   return useQuery({
     queryKey: ["posts", id],
     queryFn: () => fetchPost(id),
     enabled: !!id,
+    initialData: initialData ?? undefined,
+    staleTime: 10_000,
   });
 }
 

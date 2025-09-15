@@ -1,7 +1,7 @@
 //src/features/posts/components/NewPostModal.tsx
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { usePosts } from "@/features/posts/posts-context";
+import { createPost } from "@/lib/api";
 import { useLoginDialog } from "@/features/auth/components/LoginDialogProvider";
 import { useAuth } from "@/features/auth/auth-context";
 import { useRouter } from "next/navigation";
@@ -9,7 +9,6 @@ import { useRouter } from "next/navigation";
 export default function NewPostModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const ref = useRef<HTMLDialogElement>(null);
   const { user } = useAuth();
-  const { posts, /* 원한다면 addPost API를 컨텍스트에 추가해서 사용 */ } = usePosts();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [boardId, setBoardId] = useState<string>("talk"); // 기본 보드
@@ -34,19 +33,12 @@ export default function NewPostModal({ open, onClose }: { open: boolean; onClose
     setErr("");
 
     try {
-      const resp = await fetch("/api/posts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title,
-          body,
-          boardId, // mock.ts의 보드 id와 일치해야 함: talk / treatment / reviews / clinics
-          tags: tags.split(" ").filter(Boolean),
-          authorId: (user as any).id ?? (user as any).name ?? "me",
-        }),
+      const saved = await createPost({
+        title,
+        content: body,
+        category_id: boardId,
+        tags: tags.split(" ").filter(Boolean),
       });
-      if (!resp.ok) throw new Error("save failed");
-      const saved = await resp.json();
       // 입력값 초기화
       setTitle("");
       setBody("");

@@ -2,6 +2,7 @@
 "use client";
 import { useAuth } from "@/features/auth/auth-context";
 import { useState } from "react";
+import { toggleLike } from "@/lib/api";
 
 export default function LikeButton({
   postId, initialCount, onChange,
@@ -14,14 +15,9 @@ export default function LikeButton({
     if (!user) return alert("로그인이 필요합니다.");
     setBusy(true);
     try {
-      const r = await fetch(`/api/posts/${postId}/likes`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user.id ?? "me" }),
-      });
-      const data = await r.json();
-      setCount(data.count);
-      onChange?.(data.count);
+      const { likes } = await toggleLike(postId);
+      setCount(likes);
+      onChange?.(likes);
     } finally {
       setBusy(false);
     }

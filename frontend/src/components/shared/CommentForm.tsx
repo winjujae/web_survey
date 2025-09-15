@@ -1,6 +1,7 @@
 // src/components/CommentForm.tsx
 "use client";
 import { useAuth } from "@/features/auth/auth-context";
+import { createComment } from "@/lib/api";
 import { useRef, useState } from "react";
 import styles from "./CommentForm.module.css";
 
@@ -24,13 +25,7 @@ export default function CommentForm({
     setErr("");
     setPending(true);
     try {
-      const r = await fetch(`/api/posts/${postId}/comments`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user.id ?? "user", body }),
-      });
-      if (!r.ok) throw new Error();
-      const c = await r.json();
+      const c = await createComment({ post_id: postId, content: body });
       setBody("");
       requestAnimationFrame(() => {
         if (taRef.current) taRef.current.scrollTop = taRef.current.scrollHeight;

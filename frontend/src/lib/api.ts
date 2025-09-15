@@ -187,6 +187,26 @@ export async function toggleBookmark(id: string, token?: string): Promise<{ book
   return responseData.data;
 }
 
+// 댓글 생성
+export async function createComment(input: {
+  post_id: string;
+  content: string;
+  parent_comment_id?: string;
+  is_anonymous?: boolean;
+  anonymous_nickname?: string;
+}) {
+  const responseData = await apiRequest(`/api/comments`, {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+
+  if (!responseData.success || !responseData.data) {
+    throw new Error('댓글 등록에 실패했습니다.');
+  }
+
+  return responseData.data;
+}
+
 // 카테고리별 게시글 조회
 export async function fetchPostsByCategory(
   categoryId: string,

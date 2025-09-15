@@ -87,8 +87,10 @@ export class AuthController {
   @ApiResponse({ status: 200, description: '로그아웃 성공' })
   @ApiResponse({ status: 401, description: '유효하지 않은 토큰' })
   async logout(@Response() res: any): Promise<void> {
-    res.clearCookie('access_token', { httpOnly: true, secure: true, sameSite: 'lax' });
-    res.clearCookie('refresh_token', { httpOnly: true, secure: true, sameSite: 'lax' });
+    const isProd = process.env.NODE_ENV === 'production';
+    const base = { httpOnly: true, secure: isProd, sameSite: isProd ? 'none' : 'lax' as const, path: '/' };
+    res.clearCookie('access_token', base);
+    res.clearCookie('refresh_token', base);
     res.status(HttpStatus.OK).json({ message: '로그아웃되었습니다.' });
   }
 
@@ -166,6 +168,21 @@ export class AuthController {
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
       return res.redirect(`${frontendUrl}/auth/error?message=로그인 처리 중 오류가 발생했습니다.`);
     }
+  }
+
+  @Get('csrf')
+  @ApiOperation({ summary: 'CSRF 토큰 발급' })
+  async issueCsrf(@Response() res: any) {
+    const isProd = process.env.NODE_ENV === 'production';
+    const csrf = Math.random().toString(36).slice(2);
+    res.cookie('csrf_token', csrf, {
+      httpOnly: false,
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'lax',
+      path: '/',
+      maxAge: 2 * 60 * 60 * 1000,
+    });
+    res.status(HttpStatus.OK).json({ csrfToken: csrf });
   }
 
   private setAuthCookies(res: any, tokens: TokenDto) {

@@ -10,6 +10,7 @@ import { HttpLoggingMiddleware } from './common/middleware/http-logging.middlewa
 import session from 'express-session';
 import passport from 'passport';
 import cookieParser from 'cookie-parser';
+import { CsrfMiddleware } from './common/middleware/csrf.middleware';
 
 
 async function bootstrap() {
@@ -72,6 +73,10 @@ async function bootstrap() {
   app.use(cookieParser())
   app.use(passport.initialize())
   app.use(passport.session())
+
+  // CSRF 미들웨어 적용 (인증 관련 라우트 우선 적용)
+  const csrf = new CsrfMiddleware();
+  app.use((req, res, next) => csrf.use(req, res, next));
 
   // Swagger 설정
   const config = new DocumentBuilder()

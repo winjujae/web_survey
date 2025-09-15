@@ -1,4 +1,5 @@
 import type { User } from "../../types/auth";
+import { apiRequest } from "@/lib/api";
 
 export type LoginPayload = { 
   email: string; 
@@ -29,5 +30,51 @@ export interface ILoginService {
   forgotPassword(email: string): Promise<void>;
   updateProfile(payload: UpdateProfilePayload): Promise<User>;
 }
-// 실제 API 서비스로 교체 필요
-// 예: export const apiAuthService: ILoginService = { ... }
+
+export const apiAuthService: ILoginService = {
+  async login(payload) {
+    const res = await apiRequest(`/api/auth/login`, {
+      method: 'POST',
+      body: JSON.stringify({
+        email: payload.email,
+        password: payload.password,
+      }),
+    });
+    // 서버는 Set-Cookie만 수행하고 { success: true }를 반환하도록 구성됨
+    // 이후 me로 사용자 정보를 조회
+    const user = await this.me("");
+    if (!user) throw new Error('로그인 실패');
+    return { user, accessToken: "" };
+  },
+  async register(payload) {
+    const res = await apiRequest(`/api/auth/register`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+    const user = await this.me("");
+    if (!user) throw new Error('회원가입 실패');
+    return { user, accessToken: "" };
+  },
+  async logout() {
+    await apiRequest(`/api/auth/logout`, { method: 'POST' });
+  },
+  async me(_token: string) {
+    try {
+      const user = await apiRequest(`/api/auth/profile`, { method: 'GET' });
+      return user as User;
+    } catch {
+      return null;
+    }
+  },
+  async forgotPassword(email: string) {
+    // 백엔드 엔드포인트 준비 시 교체
+    return;
+  },
+  async updateProfile(payload) {
+    const user = await apiRequest(`/api/auth/profile`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
+    return user as User;
+  },
+};

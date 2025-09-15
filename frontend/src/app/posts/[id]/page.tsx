@@ -1,10 +1,11 @@
 // src/app/posts/[id]/page.tsx
 import { notFound } from "next/navigation";
-import PostDetailContainer from "./PostDetailContainer";
+import PostDetail from "@/components/PostDetail";
 import { fetchPost } from "@/lib/api";
 
-export default async function Page({ params }: { params: { id: string } }) {
-  const post = await fetchPost(params.id);
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const post = await fetchPost(id);
   if (!post) return notFound();
-  return <PostDetailContainer post={post} />;
+  return <PostDetail post={post} />;
 }

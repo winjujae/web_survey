@@ -5,7 +5,10 @@ import LeftMenu from "@/app/ui/LeftMenu";
 import PostCard from "@/app/ui/PostCard";
 import { fetchPosts /*, fetchPostsByCategory */ } from "@/lib/api";
 
-type Props = { params: { slug: string }; searchParams: { tag?: string } };
+type Props = { 
+  params: Promise<{ slug: string }>; 
+  searchParams: Promise<{ tag?: string }> 
+};
 
 const BOARD_LABEL: Record<string, string> = {
   talk: "소통하기",
@@ -15,8 +18,8 @@ const BOARD_LABEL: Record<string, string> = {
 };
 
 export default async function BoardPage({ params, searchParams }: Props) {
-  const { slug } = params;
-  const { tag } = searchParams;
+  const { slug } = await params;
+  const { tag } = await searchParams;
 
   const boardTitle = BOARD_LABEL[slug];
   if (!boardTitle) return notFound();

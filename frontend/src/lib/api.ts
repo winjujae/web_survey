@@ -16,17 +16,17 @@ function transformPost(post: any): Post {
     tags: Array.isArray(post?.tags) ? post.tags.map((tag: any) => tag.name || tag) : [],
     likes: Number(post?.likes || 0),
     views: Number(post?.view_count || 0),
-    dislikes: 0,
     liked: false,
-    disliked: false,
   };
 }
 
-// 공통 fetch 함수
+// 공통 fetch 함수 (Next.js 15 캐싱 정책 적용)
 async function apiRequest(endpoint: string, options: RequestInit = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
   const response = await fetch(url, {
     ...options,
+    // Next.js 15: 기본적으로 캐싱되지 않음, 명시적 캐싱 설정
+    cache: 'no-store', // 항상 최신 데이터 가져오기
     headers: {
       'Content-Type': 'application/json',
       ...options.headers,
@@ -43,7 +43,7 @@ async function apiRequest(endpoint: string, options: RequestInit = {}) {
 // 게시글 목록 조회
 export async function fetchPosts(): Promise<Post[]> {
   try {
-    const responseData = await apiRequest('/api/posts', { cache: 'no-store' });
+    const responseData = await apiRequest('/api/posts');
     
     if (!responseData.success || !Array.isArray(responseData.data)) {
       console.warn('API 응답 형식이 올바르지 않습니다:', responseData);
@@ -60,7 +60,7 @@ export async function fetchPosts(): Promise<Post[]> {
 // 특정 게시글 조회
 export async function fetchPost(id: string): Promise<Post | null> {
   try {
-    const responseData = await apiRequest(`/api/posts/${id}`, { cache: 'no-store' });
+    const responseData = await apiRequest(`/api/posts/${id}`);
     
     if (!responseData.success || !responseData.data) {
       return null;

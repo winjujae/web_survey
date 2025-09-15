@@ -1,15 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Next.js 15 최적화 설정
-  experimental: {
-    // Turbopack 안정화 (이미 package.json에서 --turbopack 사용 중)
-    turbo: {
-      rules: {
-        '*.svg': {
-          loaders: ['@svgr/webpack'],
-          as: '*.js',
-        },
+  // Next.js 15.4 Turbopack 안정화 설정
+  turbopack: {
+    // SVG 파일 처리 규칙
+    rules: {
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
       },
     },
   },

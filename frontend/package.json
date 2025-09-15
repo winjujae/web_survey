@@ -11,7 +11,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "types:openapi": "openapi-typescript http://localhost:3300/api-json -o src/types/generated/openapi.ts"
+    "types:openapi": "openapi-typescript http://localhost:3300/api-docs-json -o src/types/generated/openapi.ts"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.87.4",

@@ -18,6 +18,7 @@ import {
 import { Sanitize } from 'class-sanitizer';
 import { Transform } from 'class-transformer';
 import { PostType } from '../entities/post.entity';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 // 금지어 목록
 const FORBIDDEN_WORDS = [
@@ -56,6 +57,7 @@ function IsNotForbidden(validationOptions?: ValidationOptions) {
 }
 
 export class CreatePostDto {
+  @ApiProperty({ description: '게시글 제목', minLength: 1, maxLength: 200, example: '병원 추천 부탁드립니다' })
   @IsString({ message: '제목은 문자열이어야 합니다.' })
   @IsNotEmpty({ message: '제목은 필수입니다.' })
   @MinLength(1, { message: '제목은 최소 1자 이상이어야 합니다.' })
@@ -65,6 +67,7 @@ export class CreatePostDto {
   @Sanitize(String) // XSS 방지 및 타입 변환
   title: string;
 
+  @ApiProperty({ description: '게시글 본문', minLength: 1, maxLength: 10000, example: 'OO병원 가보신 분 계신가요?' })
   @IsString({ message: '내용은 문자열이어야 합니다.' })
   @IsNotEmpty({ message: '내용은 필수입니다.' })
   @MinLength(1, { message: '내용은 최소 1자 이상이어야 합니다.' })
@@ -73,6 +76,7 @@ export class CreatePostDto {
   @Sanitize(String) // XSS 방지 및 타입 변환
   content: string;
 
+  @ApiPropertyOptional({ description: '이미지 URL 목록', type: [String] })
   @IsOptional()
   @IsArray({ message: '이미지 URL은 배열이어야 합니다.' })
   @ArrayMaxSize(10, { message: '이미지는 최대 10개까지 업로드 가능합니다.' })
@@ -83,18 +87,22 @@ export class CreatePostDto {
   })
   image_urls?: string[];
 
+  @ApiPropertyOptional({ description: '카테고리 ID(UUID v4)' })
   @IsOptional()
   @IsUUID('4', { message: '카테고리 ID는 유효한 UUID 형식이어야 합니다.' })
   category_id?: string;
 
+  @ApiPropertyOptional({ description: '게시글 유형', enum: PostType })
   @IsOptional()
   @IsEnum(PostType, { message: '게시글 유형이 올바르지 않습니다.' })
   type?: PostType;
 
+  @ApiPropertyOptional({ description: '익명 여부', default: false })
   @IsOptional()
   @IsBoolean({ message: '익명 여부는 boolean 값이어야 합니다.' })
   is_anonymous?: boolean;
 
+  @ApiPropertyOptional({ description: '익명 닉네임(익명일 때만)', minLength: 2, maxLength: 20 })
   @IsOptional()
   @IsString({ message: '익명 닉네임은 문자열이어야 합니다.' })
   @MinLength(2, { message: '익명 닉네임은 최소 2자 이상이어야 합니다.' })
@@ -104,6 +112,7 @@ export class CreatePostDto {
   @Sanitize(String) // XSS 방지 및 타입 변환
   anonymous_nickname?: string;
 
+  @ApiPropertyOptional({ description: '태그 목록(자동으로 # 접두사 부여)', type: [String], maxItems: 10 })
   @IsOptional()
   @IsArray({ message: '태그는 배열이어야 합니다.' })
   @ArrayMaxSize(10, { message: '태그는 최대 10개까지 추가 가능합니다.' })

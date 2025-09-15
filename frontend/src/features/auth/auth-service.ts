@@ -1,5 +1,8 @@
 import type { User } from "../../types/auth";
 import { apiRequest } from "@/lib/api";
+import type { components } from "@/types/generated/openapi";
+
+type BackendUser = components["schemas"]["User"]; // from OpenAPI
 
 export type LoginPayload = { 
   email: string; 
@@ -29,6 +32,21 @@ export interface ILoginService {
   me(token: string): Promise<User | null>;
   forgotPassword(email: string): Promise<void>;
   updateProfile(payload: UpdateProfilePayload): Promise<User>;
+}
+
+function transformUser(u: any): User {
+  const bu = u as Partial<BackendUser> | undefined;
+  return {
+    id: String(bu?.user_id ?? ""),
+    handle: bu?.nickname ? `@${bu.nickname}` : "@user",
+    name: String((bu as any)?.name ?? bu?.nickname ?? "사용자"),
+    email: (bu as any)?.email,
+    avatar: (bu as any)?.avatar_url,
+    picture: (bu as any)?.avatar_url,
+    provider: (bu as any)?.provider as any,
+    nickname: (bu as any)?.nickname,
+    bio: (bu as any)?.bio,
+  };
 }
 
 export const apiAuthService: ILoginService = {
@@ -61,7 +79,7 @@ export const apiAuthService: ILoginService = {
   async me(_token: string) {
     try {
       const result = await apiRequest(`/api/auth/session`, { method: 'GET' });
-      if (result?.authenticated && result?.user) return result.user as User;
+      if (result?.authenticated && result?.user) return transformUser(result.user);
       return null;
     } catch {
       return null;
@@ -72,10 +90,10 @@ export const apiAuthService: ILoginService = {
     return;
   },
   async updateProfile(payload) {
-    const user = await apiRequest(`/api/auth/profile`, {
+    const res = await apiRequest(`/api/auth/profile`, {
       method: 'PUT',
       body: JSON.stringify(payload),
     });
-    return user as User;
+    return transformUser(res);
   },
 };

@@ -54,8 +54,8 @@ export default function AuthCallbackPage() {
           
           // 1초 후 메인 페이지로 이동
           setTimeout(() => {
-            router.push("/");
-            window.location.reload(); // auth context 새로고침
+            // URL에서 토큰 파라미터를 완전히 제거하고 메인 페이지로 이동
+            window.location.href = "/";
           }, 1000);
         } else {
           throw new Error("사용자 정보를 가져올 수 없습니다.");

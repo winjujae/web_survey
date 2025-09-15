@@ -11,7 +11,7 @@ type Seg = { value: string; label: string };
 const SEGMENTS: Seg[] = [
   { value: "talk",       label: "소통하기" },
   { value: "treatment",  label: "치료/약 정보" },
-  { value: "reviews",    label: "후기/리뷰" },
+  { value: "reviews",    label: "관리후기/제품리뷰" },
   { value: "clinics",    label: "지역 병원/클리닉" },
 ];
 

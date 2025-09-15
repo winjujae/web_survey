@@ -85,7 +85,7 @@ export default function NewPostModal({ open, onClose }: { open: boolean; onClose
               {/* mock.ts 의 boards: talk / treatment / reviews / clinics */}
               <option value="talk">소통하기</option>
               <option value="treatment">치료/약 정보</option>
-              <option value="reviews">후기/리뷰</option>
+              <option value="reviews">관리후기/제품리뷰</option>
               <option value="clinics">지역 병원/클리닉</option>
             </select>
           </div>

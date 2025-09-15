@@ -14,7 +14,7 @@ type Props = {
 const BOARD_LABEL: Record<string, string> = {
   talk: "소통하기",
   treatment: "치료/약 정보",
-  reviews: "후기/리뷰",
+  reviews: "관리후기/제품리뷰",
   clinics: "지역 병원/클리닉",
 };
 

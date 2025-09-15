@@ -35,7 +35,7 @@ export default function Breadcrumb() {
     } else if (segment === "treatment") {
       label = "치료/약 정보";
     } else if (segment === "reviews") {
-      label = "후기/리뷰";
+      label = "관리후기/제품리뷰";
     } else if (segment === "clinics") {
       label = "지역 병원/클리닉";
     }

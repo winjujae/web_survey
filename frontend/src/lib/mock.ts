@@ -5,7 +5,7 @@ import type { Post } from "@/types/post";
 export const boards: Board[] = [
   { id: "talk",           slug: "talk",      title: "소통하기" },
   { id: "treatment",      slug: "treatment", title: "치료/약 정보" },
-  { id: "reviews",        slug: "reviews",   title: "후기/리뷰" },
+  { id: "reviews",        slug: "reviews",   title: "관리후기/제품리뷰" },
   { id: "clinics",        slug: "clinics",   title: "지역 병원/클리닉" },
 ];
 
@@ -15,7 +15,6 @@ export const treatmentTags = [
   { key: "dutasteride", label: "두타스테리드" },
   { key: "minoxidil",   label: "미녹시딜" },
   { key: "supplement",  label: "영양제/기타" },
-  { key: "lifestyle",   label: "생활관리" },
 ];
 
 export const posts: Post[] = Array.from({ length: 24 }).map((_, i) => ({

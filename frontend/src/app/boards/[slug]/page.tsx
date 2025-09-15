@@ -18,7 +18,12 @@ export default async function BoardPage({ params, searchParams }: Props) {
 
   const {tag} = await searchParams;
   const items = getPostsByBoard(board.id, 50, tag);
-
+    const res = await fetch(`${process.env.NEXT_PUBLIC_ORIGIN}/api/posts?`, {
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error("Failed to load posts");
+  const items = await res.json();
+  
   return (
     <>
       <Hero

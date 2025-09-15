@@ -32,7 +32,7 @@ function isSafeMethod(method: string | undefined): boolean {
   return m === 'GET' || m === 'HEAD' || m === 'OPTIONS';
 }
 
-async function apiRequest(endpoint: string, options: RequestInit = {}) {
+export async function apiRequest(endpoint: string, options: RequestInit = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',

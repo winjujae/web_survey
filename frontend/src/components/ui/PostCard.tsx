@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import type { Post } from "@/types/post";
 import { useAuthGuard } from "@/features/auth/withAuthGuard";
 import { formatKSTDateTime } from "@/lib/time";
@@ -27,6 +28,7 @@ export default function PostCard({ post, searchQuery = "" }: PostCardProps) {
   const [liked, setLiked] = useState(!!post.liked);
   const [likes, setLikes] = useState(post.likes ?? 0);
   const guard = useAuthGuard();
+  const router = useRouter();
 
   const handleToggleLike = async () => {
     try {
@@ -41,18 +43,22 @@ export default function PostCard({ post, searchQuery = "" }: PostCardProps) {
   };
 
   return (
-    <article className="card card--compact">
+    <article
+      className="card card--compact"
+      onClick={() => router.push(`/posts/${post.id}`)}
+      style={{ cursor: "pointer" }}
+    >
       {/* 한 줄 헤더 영역 */}
       <div className="head-compact">
         <span className="avatar mini">{post.author?.[0] ?? "U"}</span>
-        <a className="handle" href="#">{post.author}</a>
+        <span className="handle">{post.author}</span>
         <span className="dot" />
         <time dateTime={post.createdAt}>
           {formatKSTDateTime(post.createdAt)}
         </time>
 
         {/* 제목: 링크 + 검색 하이라이트 */}
-        <Link className="title-inline" href={`/posts/${post.id}`}>
+        <Link className="title-inline" href={`/posts/${post.id}`} onClick={(e) => e.stopPropagation()}>
           {highlight(post.title ?? "", searchQuery)}
         </Link>
       </div>
@@ -69,7 +75,10 @@ export default function PostCard({ post, searchQuery = "" }: PostCardProps) {
         <button
           className="action"
           aria-pressed={liked}
-          onClick={guard(handleToggleLike)}
+          onClick={(e) => {
+            e.stopPropagation();
+            return guard(handleToggleLike)();
+          }}
           title={liked ? "좋아요 취소" : "좋아요"}
         >
           ❤ {likes}

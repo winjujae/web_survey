@@ -3,8 +3,8 @@ import { notFound } from "next/navigation";
 import PostDetailContainer from "@/components/containers/PostDetailContainer";
 import { fetchPost } from "@/lib/api";
 
-export default async function Page({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function Page({ params }: { params: { id: string } }) {
+  const { id } = params;
   const post = await fetchPost(id);
   if (!post) return notFound();
   return <PostDetailContainer post={post} />;

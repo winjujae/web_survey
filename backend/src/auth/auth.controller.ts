@@ -17,6 +17,7 @@ import {
 } from '@nestjs/swagger';
 
 import { AuthService } from './auth.service';
+import { JwtService } from '@nestjs/jwt';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { TokenDto } from './dto/token.dto';
@@ -29,7 +30,10 @@ import { AuthGuard } from '@nestjs/passport';
 @ApiTags('auth')
 @Controller('api/auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly jwtService: JwtService,
+  ) {}
 
   @Post('register')
   @ApiOperation({
@@ -106,6 +110,32 @@ export class AuthController {
   async getProfile(@Request() req: any): Promise<User> {
     const user = req.user as User;
     return this.authService.getProfile(user);
+  }
+
+  @Get('session')
+  @ApiOperation({ summary: '세션 상태 조회(항상 200)' })
+  async session(@Request() req: any) {
+    try {
+      const token = req?.cookies?.access_token;
+      if (!token) {
+        return { authenticated: false, user: null };
+      }
+      const payload: any = this.jwtService.verify(token);
+      const user = await this.authService.findUser(payload?.sub);
+      if (!user) return { authenticated: false, user: null };
+      return {
+        authenticated: true,
+        user: {
+          user_id: user.user_id,
+          email: user.email,
+          nickname: user.nickname,
+          role: user.role,
+          avatar_url: user.avatar_url,
+        },
+      };
+    } catch {
+      return { authenticated: false, user: null };
+    }
   }
 
   @Put('profile')
@@ -194,9 +224,27 @@ export class AuthController {
       path: '/',
     };
 
+    const parseTtl = (val?: string): number => {
+      if (!val) return 15 * 60 * 1000; // default 15m
+      const m = String(val).match(/^(\d+)([smhd])$/i);
+      if (!m) {
+        const n = Number(val);
+        return Number.isFinite(n) ? n * 1000 : 15 * 60 * 1000;
+      }
+      const num = parseInt(m[1], 10);
+      const unit = m[2].toLowerCase();
+      switch (unit) {
+        case 's': return num * 1000;
+        case 'm': return num * 60 * 1000;
+        case 'h': return num * 60 * 60 * 1000;
+        case 'd': return num * 24 * 60 * 60 * 1000;
+        default: return 15 * 60 * 1000;
+      }
+    };
+
     res.cookie('access_token', tokens.access_token, {
       ...cookieBase,
-      maxAge: (process.env.JWT_EXPIRES_IN ? parseInt(process.env.JWT_EXPIRES_IN) : 60 * 60 * 24) * 1000,
+      maxAge: parseTtl(process.env.JWT_EXPIRES_IN),
     });
     res.cookie('refresh_token', tokens.refresh_token, {
       ...cookieBase,

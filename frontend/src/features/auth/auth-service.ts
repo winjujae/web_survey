@@ -60,8 +60,9 @@ export const apiAuthService: ILoginService = {
   },
   async me(_token: string) {
     try {
-      const user = await apiRequest(`/api/auth/profile`, { method: 'GET' });
-      return user as User;
+      const result = await apiRequest(`/api/auth/session`, { method: 'GET' });
+      if (result?.authenticated && result?.user) return result.user as User;
+      return null;
     } catch {
       return null;
     }

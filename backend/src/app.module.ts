@@ -31,6 +31,7 @@ import { CommonModule } from './common/common.module';
 // Tags Module
 import { TagsModule } from './tags/tags.module';
 import { Config } from 'winston/lib/winston/config';
+import { PassportModule } from '@nestjs/passport';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { Config } from 'winston/lib/winston/config';
       inject: [ConfigService],
       useFactory: createTypeORMoptions,
     }),
+    PassportModule.register({session: true}),
 
     AuthModule,
     UsersModule,

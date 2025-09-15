@@ -7,6 +7,8 @@ import helmet from 'helmet';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { WinstonLoggerService } from './common/logger/winston.logger';
 import { HttpLoggingMiddleware } from './common/middleware/http-logging.middleware';
+import session from 'express-session';
+import passport from 'passport';
 
 
 async function bootstrap() {
@@ -56,6 +58,18 @@ async function bootstrap() {
 
   // 글로벌 예외 필터
   app.useGlobalFilters(new GlobalExceptionFilter());
+
+  app.use(session({
+    secret: 'dsfsdfsdfsfsfsf',
+    saveUninitialized: false,
+    resave: false,
+    cookie:{
+      maxAge: 60000,
+      
+    },
+  }))
+  app.use(passport.initialize())
+  app.use(passport.session())
 
   // Swagger 설정
   const config = new DocumentBuilder()

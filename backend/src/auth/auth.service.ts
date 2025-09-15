@@ -191,4 +191,9 @@ export class AuthService {
 
     return this.getProfile(user);
   }
+
+  async findUser(userId:string){
+    const user = await this.userRepository.findOneBy({user_id: userId})
+    return user
+  }
 }

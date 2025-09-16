@@ -1,9 +1,9 @@
 // src/app/api/posts/[id]/route.ts
 import { NextResponse } from "next/server";
-import { getPost } from "@/lib/mock";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'http://localhost:3300';
 
-export async function GET(_: Request, { params }: { params: { id: string } }) {
-  const p = getPost(params.id);
-  if (!p) return NextResponse.json({ message: "Not found" }, { status: 404 });
-  return NextResponse.json(p);
+export async function GET(_req: Request, { params }: { params: { id: string } }) {
+  const res = await fetch(`${API_BASE_URL}/api/posts/${params.id}`, { cache: 'no-store', credentials: 'include' });
+  const data = await res.json();
+  return NextResponse.json(data, { status: res.status });
 }

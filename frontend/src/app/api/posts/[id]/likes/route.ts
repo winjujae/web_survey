@@ -1,10 +1,9 @@
 // src/app/api/posts/[id]/likes/route.ts
 import { NextResponse } from "next/server";
-import { toggleLike } from "@/lib/mock";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'http://localhost:3300';
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
-  const { userId } = await req.json();
-  const r = toggleLike(params.id, userId ?? "anon");
-  if (!r) return NextResponse.json({ message: "post not found" }, { status: 404 });
-  return NextResponse.json(r);
+export async function POST(_req: Request, { params }: { params: { id: string } }) {
+  const res = await fetch(`${API_BASE_URL}/api/posts/${params.id}/like`, { method: 'POST', cache: 'no-store', credentials: 'include' });
+  const data = await res.json();
+  return NextResponse.json(data, { status: res.status });
 }

@@ -66,16 +66,20 @@ export async function apiRequest(endpoint: string, options: RequestInit = {}) {
 // 게시글 목록 조회
 export async function fetchPosts(): Promise<Post[]> {
   try {
+    if (process.env.NODE_ENV !== 'production') console.log('[DBG] fetchPosts: request /api/posts');
     const responseData = await apiRequest('/api/posts');
+    if (process.env.NODE_ENV !== 'production') console.log('[DBG] fetchPosts: response', responseData);
     
     if (!responseData.success || !Array.isArray(responseData.data)) {
       console.warn('API 응답 형식이 올바르지 않습니다:', responseData);
       return [];
     }
     
-    return responseData.data.map(transformPost);
+    const mapped = responseData.data.map(transformPost);
+    if (process.env.NODE_ENV !== 'production') console.log('[DBG] fetchPosts: mapped length', mapped.length);
+    return mapped;
   } catch (error) {
-    console.error('게시글 목록 로딩 실패:', error);
+    console.error('[ERR] fetchPosts failed:', error);
     return [];
   }
 }

@@ -71,7 +71,9 @@ export function PostsProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const loadPosts = async () => {
       setLoading(true);
+      if (process.env.NODE_ENV !== 'production') console.log('[DBG] PostsProvider: loadPosts start');
       const postsData = await fetchPosts();
+      if (process.env.NODE_ENV !== 'production') console.log('[DBG] PostsProvider: loaded', postsData?.length);
       setPosts(postsData);
       setLoading(false);
     };

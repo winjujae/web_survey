@@ -3,7 +3,7 @@
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { Post } from "@/types/post";
-import { transformPost } from "@/lib/api";
+import { transformPost, fetchPosts as fetchPostsApi } from "@/lib/api";
 
 /** 정렬 키 */
 export type SortKey = "new" | "hot";
@@ -46,36 +46,11 @@ type Ctx = {
 
 const PostsCtx = createContext<Ctx | null>(null);
 
-// API 호출 함수
+// API 호출 함수 (공통 클라이언트 사용)
 async function fetchPosts(): Promise<Post[]> {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3300';
-    const response = await fetch(`${apiUrl}/api/posts`, { 
-      cache: 'no-store',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    });
-    
-    if (!response.ok) {
-      throw new Error(`API 호출 실패: ${response.status}`);
-    }
-    
-    const responseData = await response.json();
-    
-    if (!responseData.success || !Array.isArray(responseData.data)) {
-      console.warn('API 응답 형식이 올바르지 않습니다:', responseData);
-      return [];
-    }
-    
-    // 백엔드 데이터를 프런트엔드 Post 타입으로 변환 (공통 함수 사용)
-    return responseData.data.map((post: any) => ({
-      ...transformPost(post),
-      // 컨텍스트 전용 기본값 보정
-      dislikes: 0,
-      disliked: false,
-    }));
+    const data = await fetchPostsApi();
+    return data.map(p => ({ ...p, dislikes: p.dislikes ?? 0, disliked: false }));
   } catch (error) {
     console.error('게시글 데이터 로딩 실패:', error);
     return [];
@@ -214,7 +189,7 @@ export function PostsProvider({ children }: { children: React.ReactNode }) {
         };
 
         setPosts(prev => [newPost, ...prev]);
-        return String(responseData.data.post_id);
+        return String(responseData.data.id);
       } else {
         throw new Error('API 응답이 올바르지 않습니다');
       }

@@ -3,22 +3,23 @@ import type { Post } from "@/types/post";
 import type { components } from "@/types/generated/openapi";
 type CreatePostDto = components["schemas"]["CreatePostDto"];
 type UpdatePostDto = components["schemas"]["UpdatePostDto"];
+type PostViewDto = components["schemas"]["PostViewDto"];
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'http://localhost:3300';
 
 // 백엔드 게시글 데이터를 프론트엔드 타입으로 변환
-export function transformPost(post: any): Post {
+export function transformPost(post: PostViewDto): Post {
   return {
-    id: String(post?.post_id ?? ""),
-    boardId: String(post?.category_id ?? ""),
-    title: String(post?.title ?? "(제목 없음)"),
-    excerpt: String(post?.content?.substring(0, 100) ?? ""),
-    body: String(post?.content ?? ""),
-    author: post?.is_anonymous ? (post?.anonymous_nickname ?? "익명") : (post?.user?.nickname ?? "작성자"),
-    createdAt: String(post?.created_at ?? new Date().toISOString()),
-    tags: Array.isArray(post?.tags) ? post.tags.map((tag: any) => tag.name || tag) : [],
-    likes: Number(post?.likes_count || 0),
-    views: Number(post?.view_count || 0),
+    id: String(post.id ?? ""),
+    boardId: String(post.boardId ?? ""),
+    title: String(post.title ?? "(제목 없음)"),
+    excerpt: String((post.body ?? "").substring(0, 100)),
+    body: String(post.body ?? ""),
+    author: String(post.author ?? "작성자"),
+    createdAt: String(post.createdAt ?? new Date().toISOString()),
+    tags: Array.isArray(post.tags) ? post.tags : [],
+    likes: Number(post.likes ?? 0),
+    views: Number(post.views ?? 0),
     liked: false,
   };
 }

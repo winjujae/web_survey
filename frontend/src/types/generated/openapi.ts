@@ -922,6 +922,191 @@ export interface components {
         };
         CreateUserDto: Record<string, never>;
         UpdateUserDto: Record<string, never>;
+        Category: Record<string, never>;
+        Comment: Record<string, never>;
+        Bookmark: Record<string, never>;
+        Report: Record<string, never>;
+        Like: Record<string, never>;
+        Tag: Record<string, never>;
+        PostTag: Record<string, never>;
+        Post: {
+            /**
+             * @description 게시글 고유 ID
+             * @example 123e4567-e89b-12d3-a456-426614174000
+             */
+            post_id: string;
+            /**
+             * @description 작성자 사용자 ID
+             * @example 123e4567-e89b-12d3-a456-426614174000
+             */
+            user_id: string;
+            /**
+             * @description 게시글 제목
+             * @example 미녹시딜 3개월차 변화 공유합니다
+             */
+            title: string;
+            /**
+             * @description 게시글 본문
+             * @example 미녹시딜 사용 후 3개월간의 변화를 공유합니다.
+             */
+            content: string;
+            /**
+             * @description 이미지 URL 목록
+             * @example [
+             *       "https://example.com/image1.jpg",
+             *       "https://example.com/image2.jpg"
+             *     ]
+             */
+            image_urls?: string[];
+            /**
+             * @description 카테고리 ID
+             * @example 123e4567-e89b-12d3-a456-426614174000
+             */
+            category_id?: string;
+            /**
+             * @description 게시글 상태
+             * @example published
+             * @enum {string}
+             */
+            status: "draft" | "published" | "archived" | "deleted";
+            /**
+             * @description 게시글 유형
+             * @example general
+             * @enum {string}
+             */
+            type: "general" | "anonymous" | "hospital" | "product" | "expert_qna";
+            /**
+             * @description 좋아요 수
+             * @example 15
+             */
+            likes_count: number;
+            /**
+             * @description 싫어요 수
+             * @example 2
+             */
+            dislikes: number;
+            /**
+             * @description 조회수
+             * @example 150
+             */
+            view_count: number;
+            /**
+             * @description 익명 여부
+             * @example false
+             */
+            is_anonymous: boolean;
+            /**
+             * @description 익명 닉네임
+             * @example 익명사용자
+             */
+            anonymous_nickname?: string;
+            /**
+             * Format: date-time
+             * @description 생성일시
+             * @example 2024-01-01T00:00:00.000Z
+             */
+            created_at: string;
+            /**
+             * Format: date-time
+             * @description 수정일시
+             * @example 2024-01-01T00:00:00.000Z
+             */
+            updated_at: string;
+            /** @description 작성자 정보 */
+            user?: components["schemas"]["User"];
+            /** @description 카테고리 정보 */
+            category?: components["schemas"]["Category"];
+            /** @description 댓글 목록 */
+            comments?: components["schemas"]["Comment"][];
+            /** @description 북마크 목록 */
+            bookmarks?: components["schemas"]["Bookmark"][];
+            /** @description 신고 목록 */
+            reports?: components["schemas"]["Report"][];
+            /** @description 좋아요/싫어요 목록 */
+            likes?: components["schemas"]["Like"][];
+            /** @description 태그 목록 */
+            tags?: components["schemas"]["Tag"][];
+            /** @description 게시글-태그 관계 목록 */
+            post_tags?: components["schemas"]["PostTag"][];
+        };
+        PostViewDto: {
+            /**
+             * @description 게시글 고유 ID
+             * @example 123e4567-e89b-12d3-a456-426614174000
+             */
+            id: string;
+            /**
+             * @description 카테고리 ID(UUID v4)
+             * @example 123e4567-e89b-12d3-a456-426614174000
+             */
+            boardId?: string;
+            /**
+             * @description 제목
+             * @example 미녹시딜 3개월차 변화 공유합니다
+             */
+            title: string;
+            /**
+             * @description 본문
+             * @example 미녹시딜 사용 후 3개월간의 변화를 공유합니다.
+             */
+            body: string;
+            /**
+             * @description 작성자 표시명
+             * @example 탈모탈출러
+             */
+            author: string;
+            /**
+             * @description 생성일시(ISO)
+             * @example 2024-01-01T00:00:00.000Z
+             */
+            createdAt: string;
+            /**
+             * @description 태그 목록
+             * @example [
+             *       "#탈모케어",
+             *       "#샴푸"
+             *     ]
+             */
+            tags?: string[];
+            /**
+             * @description 좋아요 수
+             * @example 0
+             */
+            likes: number;
+            /**
+             * @description 조회수
+             * @example 0
+             */
+            views: number;
+            /**
+             * @description 싫어요 수
+             * @example 0
+             */
+            dislikes?: number;
+        };
+        PostSingleResponseDto: {
+            /** @example true */
+            success: boolean;
+            data: components["schemas"]["PostViewDto"];
+            /** @example 게시글이 성공적으로 생성되었습니다. */
+            message?: string;
+        };
+        PaginationDto: {
+            /** @example 1 */
+            currentPage: number;
+            /** @example 10 */
+            totalPages: number;
+            /** @example 100 */
+            totalItems: number;
+            /** @example 10 */
+            itemsPerPage: number;
+        };
+        PostListResponseDto: {
+            /** @example true */
+            success: boolean;
+            data: components["schemas"]["PostViewDto"][];
+            pagination: components["schemas"]["PaginationDto"];
+        };
         CreatePostDto: {
             /**
              * @description 게시글 제목
@@ -1557,7 +1742,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["PostListResponseDto"];
+                };
             };
         };
     };
@@ -1580,7 +1767,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["PostSingleResponseDto"];
+                };
             };
             /** @description 잘못된 입력 데이터 */
             400: {
@@ -1622,7 +1811,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["PostSingleResponseDto"];
+                };
             };
             /** @description 게시글을 찾을 수 없음 */
             404: {

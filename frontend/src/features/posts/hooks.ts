@@ -4,6 +4,7 @@ import type { Post } from "@/types/post";
 import { createPost, deletePost, fetchPost, fetchPosts, toggleLike, updatePost } from "@/lib/api";
 import type { components } from "@/types/generated/openapi";
 type CreatePostDto = components["schemas"]["CreatePostDto"];
+type UpdatePostDto = components["schemas"]["UpdatePostDto"];
 
 export function usePostsQuery() {
   return useQuery({
@@ -33,8 +34,8 @@ export function usePostMutations() {
   });
 
   const update = useMutation({
-    mutationFn: (p: { id: string; data: Partial<Pick<Post, "title" | "body" | "tags">> }) =>
-      updatePost(p.id, { title: p.data.title, content: p.data.body, tags: p.data.tags } as any),
+    mutationFn: (p: { id: string; data: UpdatePostDto }) =>
+      updatePost(p.id, { title: p.data.title, content: p.data.content, tags: p.data.tags }),
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: ["posts"] });
       qc.invalidateQueries({ queryKey: ["posts", variables.id] });

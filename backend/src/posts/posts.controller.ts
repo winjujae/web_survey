@@ -23,12 +23,18 @@ import {
   ApiQuery,
   ApiParam,
   ApiBody,
+  ApiOkResponse,
+  ApiCreatedResponse,
+  ApiExtraModels,
+  getSchemaPath,
 } from '@nestjs/swagger';
 
 import { PostsService, PostFilters, PaginationOptions } from './posts.service';
 import type { PostFilters as IPostFilters } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { Post as PostEntity } from './entities/post.entity';
+import { PostListResponseDto, PostSingleResponseDto, PostViewDto } from './dto/post-view.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { User } from '../users/entities/user.entity';
 // Express Request 타입 확장
@@ -39,8 +45,10 @@ declare module 'express' {
 }
 
 import type { Request } from 'express';
+import { plainToInstance } from 'class-transformer';
 
 @ApiTags('posts')
+@ApiExtraModels(PostEntity, PostViewDto, PostSingleResponseDto, PostListResponseDto)
 @Controller('api/posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
@@ -53,7 +61,7 @@ export class PostsController {
     summary: '게시글 작성',
     description: '새로운 게시글을 작성합니다.',
   })
-  @ApiResponse({ status: 201, description: '게시글 작성 성공' })
+  @ApiCreatedResponse({ description: '게시글 작성 성공', type: PostSingleResponseDto })
   @ApiBody({ type: CreatePostDto, description: '게시글 생성 입력' })
   @ApiResponse({ status: 400, description: '잘못된 입력 데이터' })
   @ApiResponse({ status: 401, description: '인증되지 않은 사용자' })
@@ -61,10 +69,11 @@ export class PostsController {
   async create(@Body() createPostDto: CreatePostDto, @Req() req: any) {
     const user = req.user as User;
     const post = await this.postsService.create(createPostDto, user);
+    const view = plainToInstance(PostViewDto, post, { excludeExtraneousValues: true });
     return {
       success: true,
       message: '게시글이 성공적으로 생성되었습니다.',
-      data: post,
+      data: view,
     };
   }
 
@@ -73,6 +82,7 @@ export class PostsController {
     summary: '게시글 목록 조회',
     description: '게시글 목록을 페이징과 필터링하여 조회합니다.',
   })
+  @ApiOkResponse({ description: '게시글 목록 조회 성공', type: PostListResponseDto })
   @ApiQuery({
     name: 'page',
     required: false,
@@ -130,9 +140,10 @@ export class PostsController {
     }
 
     const result = await this.postsService.findAll(processedFilters, pagination, request.ip);
+    const views = result.posts.map(p => plainToInstance(PostViewDto, p, { excludeExtraneousValues: true }));
     return {
       success: true,
-      data: result.posts,
+      data: views,
       pagination: {
         currentPage: result.page,
         totalPages: result.totalPages,
@@ -152,14 +163,15 @@ export class PostsController {
     summary: '게시글 상세 조회',
     description: '특정 게시글의 상세 정보를 조회합니다.',
   })
-  @ApiResponse({ status: 200, description: '게시글 조회 성공' })
+  @ApiOkResponse({ description: '게시글 조회 성공', type: PostSingleResponseDto })
   @ApiResponse({ status: 404, description: '게시글을 찾을 수 없음' })
   async findOne(@Param('id', ParseUUIDPipe) id: string, @Req() req: any) {
     const user = req.user as User;
     const post = await this.postsService.findOne(id, user);
+    const view = plainToInstance(PostViewDto, post, { excludeExtraneousValues: true });
     return {
       success: true,
-      data: post,
+      data: view,
     };
   }
 
@@ -174,10 +186,11 @@ export class PostsController {
   ) {
     const user = req.user as User;
     const post = await this.postsService.update(id, updatePostDto, user);
+    const view = plainToInstance(PostViewDto, post, { excludeExtraneousValues: true });
     return {
       success: true,
       message: '게시글이 성공적으로 수정되었습니다.',
-      data: post,
+      data: view,
     };
   }
 

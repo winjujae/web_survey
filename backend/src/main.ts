@@ -11,6 +11,7 @@ import session from 'express-session';
 import passport from 'passport';
 import cookieParser from 'cookie-parser';
 import { CsrfMiddleware } from './common/middleware/csrf.middleware';
+import { Post } from './posts/entities/post.entity';
 
 
 async function bootstrap() {
@@ -102,7 +103,9 @@ async function bootstrap() {
     )
     .build();
 
-  const document = SwaggerModule.createDocument(app, config);
+  const document = SwaggerModule.createDocument(app, config, {
+    extraModels: [Post],
+  });
   SwaggerModule.setup('api-docs', app, document, {
     swaggerOptions: {
       persistAuthorization: true,

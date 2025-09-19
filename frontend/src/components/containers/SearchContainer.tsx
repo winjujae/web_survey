@@ -1,29 +1,25 @@
 // src/app/components/SearchContainer.tsx
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { searchPosts } from "@/lib/api";
 import { useDebounce } from "@/lib/hooks/useDebounce";
+import { useURLSync } from "@/lib/hooks/useURLSync";
+import { usePostFiltersStore } from "@/stores/usePostFilters";
 import Feed from "../ui/Feed";
 import type { Post } from "@/types/post";
 
 export default function SearchContainer() {
-  const [query, setQuery] = useState("");
+  const { query, setQuery } = usePostFiltersStore();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
   const debouncedQuery = useDebounce(query, 300);
   const router = useRouter();
-  const searchParams = useSearchParams();
 
-  // URL에서 검색어 가져오기
-  useEffect(() => {
-    const q = searchParams.get("q");
-    if (q) {
-      setQuery(q);
-    }
-  }, [searchParams]);
+  // URL 동기화 활성화
+  useURLSync();
 
   // 검색 실행
   useEffect(() => {
@@ -39,11 +35,6 @@ export default function SearchContainer() {
         const result = await searchPosts(debouncedQuery.trim());
         setPosts(result.posts);
         setTotal(result.total);
-        
-        // URL 업데이트
-        const params = new URLSearchParams();
-        params.set("q", debouncedQuery.trim());
-        router.replace(`/search?${params.toString()}`);
       } catch (error) {
         console.error("검색 실패:", error);
         setPosts([]);
@@ -54,7 +45,7 @@ export default function SearchContainer() {
     };
 
     performSearch();
-  }, [debouncedQuery, router]);
+  }, [debouncedQuery]);
 
   return (
     <div>

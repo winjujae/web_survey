@@ -6,6 +6,7 @@ import Feed from "../ui/Feed";
 import type { Post } from "@/types/post";
 import { usePostsQuery } from "@/features/posts/hooks";
 import { usePostFiltersStore } from "@/stores/usePostFilters";
+import { useURLSync } from "@/lib/hooks/useURLSync";
 
 type SortType = "new" | "hot";
 
@@ -17,6 +18,9 @@ export default function HomeFeedContainer({ initialPosts }: HomeFeedContainerPro
   const { data } = usePostsQuery();
   const posts = (data && data.length ? data : initialPosts) as Post[];
   const sort = usePostFiltersStore(s => s.sort) as SortType;
+  
+  // URL 동기화 활성화
+  useURLSync();
 
   // 인기 점수 계산 (시간 감쇠 포함)
   const hotScore = (p: Post) => {

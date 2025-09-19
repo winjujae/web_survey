@@ -1,10 +1,11 @@
 //src/app/components/SearchBox.tsx
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { usePostFiltersStore } from "@/stores/usePostFilters";
 
 export default function SearchBox() {
-  const [query, setQuery] = useState("");
+  const { query, setQuery } = usePostFiltersStore();
   const ref = useRef<HTMLInputElement>(null);
   const router = useRouter();
 

@@ -50,7 +50,7 @@ const PostsCtx = createContext<Ctx | null>(null);
 async function fetchPosts(): Promise<Post[]> {
   try {
     const data = await fetchPostsApi();
-    return data.map(p => ({ ...p, dislikes: p.dislikes ?? 0, disliked: false }));
+    return data.map(p => ({ ...p, disliked: false }));
   } catch (error) {
     console.error('게시글 데이터 로딩 실패:', error);
     return [];

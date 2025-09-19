@@ -20,7 +20,7 @@ export function transformPost(post: PostViewDto): Post {
     tags: Array.isArray(post.tags) ? post.tags : [],
     likes: Number(post.likes ?? 0),
     views: Number(post.views ?? 0),
-    dislikes: Number((post as any).dislikes ?? 0),
+    dislikes: Number(post.dislikes ?? 0),
     liked: false,
     disliked: false,
   };

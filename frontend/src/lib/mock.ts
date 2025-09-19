@@ -30,6 +30,7 @@ export const posts: Post[] = Array.from({ length: 24 }).map((_, i) => ({
     ? ["피나스테리드", "부작용"]
     : ["모발이식", "후기"],
   likes: Math.floor(Math.random() * 50),
+  dislikes: Math.floor(Math.random() * 10),
   views: 1000 + i * 37,
   body: "오늘 병원 다녀왔는데 ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ \n나는 탈모 걱정없댄다 수고해라 ㅋㅋ",
 }));
@@ -76,6 +77,7 @@ export function addPost(input: {
     createdAt: now,
     tags: input.tags ?? [],
     likes: 0,
+    dislikes: 0,
     views: 0,
     body: input.body ?? "",
     comments: [],
@@ -103,4 +105,12 @@ export function toggleLike(postId: string, _userId: string) {
   if (!p) return null;
   p.likes = Math.max(0, (p.likes ?? 0) + 1);
   return { liked: true, count: p.likes };
+}
+
+export function toggleDislike(postId: string, _userId: string) {
+  // 데모: 사용자별 중복 체크 없이 +1
+  const p = posts.find(p => p.id === postId);
+  if (!p) return null;
+  p.dislikes = Math.max(0, (p.dislikes ?? 0) + 1);
+  return { disliked: true, count: p.dislikes };
 }

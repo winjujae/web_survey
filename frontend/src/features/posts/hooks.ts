@@ -73,13 +73,7 @@ export function usePostMutations() {
   return useMemo(() => ({ create, update, remove, like, dislike, view }), [create, update, remove, like, dislike, view]);
 }
 
-export type SortKey = "new" | "hot";
-export function usePostFilters() {
-  // 간단한 클라이언트 상태 (필요 시 Zustand로 이관)
-  const [state, setState] = useState<{ query: string; sort: SortKey }>({ query: "", sort: "new" });
-  const setQuery = (query: string) => setState((s) => ({ ...s, query }));
-  const setSort = (sort: SortKey) => setState((s) => ({ ...s, sort }));
-  return { ...state, setQuery, setSort };
-}
+// SortKey 타입은 @/stores/usePostFilters에서 import하여 사용
+// 이 훅은 더 이상 사용되지 않음 (Zustand로 대체됨)
 
 

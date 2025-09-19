@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Post } from "@/types/post";
-import { createPost, deletePost, fetchPost, fetchPosts, toggleLike, updatePost } from "@/lib/api";
+import { createPost, deletePost, fetchPost, fetchPosts, toggleLike, updatePost, toggleDislike, incrementView } from "@/lib/api";
 import type { components } from "@/types/generated/openapi";
 type CreatePostDto = components["schemas"]["CreatePostDto"];
 type UpdatePostDto = components["schemas"]["UpdatePostDto"];
@@ -56,7 +56,21 @@ export function usePostMutations() {
     },
   });
 
-  return useMemo(() => ({ create, update, remove, like }), [create, update, remove, like]);
+  const dislike = useMutation({
+    mutationFn: (id: string) => toggleDislike(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["posts"] });
+    },
+  });
+
+  const view = useMutation({
+    mutationFn: (id: string) => incrementView(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["posts"] });
+    },
+  });
+
+  return useMemo(() => ({ create, update, remove, like, dislike, view }), [create, update, remove, like, dislike, view]);
 }
 
 export type SortKey = "new" | "hot";

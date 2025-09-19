@@ -20,7 +20,9 @@ export function transformPost(post: PostViewDto): Post {
     tags: Array.isArray(post.tags) ? post.tags : [],
     likes: Number(post.likes ?? 0),
     views: Number(post.views ?? 0),
+    dislikes: Number((post as any).dislikes ?? 0),
     liked: false,
+    disliked: false,
   };
 }
 
@@ -182,6 +184,33 @@ export async function toggleBookmark(id: string, token?: string): Promise<{ book
   }
 
   return responseData.data;
+}
+
+// 싫어요 토글
+export async function toggleDislike(id: string, token?: string): Promise<{ disliked: boolean; dislikes: number }> {
+  const responseData = await apiRequest(`/api/posts/${id}/dislike`, {
+    method: 'POST',
+    headers: {
+      ...(token && { Authorization: `Bearer ${token}` }),
+    },
+  });
+
+  if (!responseData.success || !responseData.data) {
+    throw new Error('싫어요 처리에 실패했습니다.');
+  }
+
+  return responseData.data;
+}
+
+// 조회수 증가
+export async function incrementView(id: string): Promise<void> {
+  const responseData = await apiRequest(`/api/posts/${id}/view`, {
+    method: 'POST',
+  });
+
+  if (!responseData.success) {
+    throw new Error('조회수 증가에 실패했습니다.');
+  }
 }
 
 // 댓글 생성

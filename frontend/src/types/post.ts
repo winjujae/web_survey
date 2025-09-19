@@ -16,5 +16,6 @@ export type Post = BackendPost & {
   excerpt?: string;
   liked?: boolean;
   disliked?: boolean;
+  dislikes?: number;
   comments?: Comment[];
 };

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import type { Post } from "@/types/post";
 import { useAuthGuard } from "@/features/auth/withAuthGuard";
 import { formatKSTDateTime } from "@/lib/time";
-import { toggleLike as apiToggleLike } from "@/lib/api";
+import { usePostMutations } from "@/features/posts/hooks";
 
 /** 검색어를 <mark>로 하이라이트 */
 function highlight(text: string, q: string) {
@@ -29,13 +29,15 @@ export default function PostCard({ post, searchQuery = "" }: PostCardProps) {
   const [likes, setLikes] = useState(post.likes ?? 0);
   const guard = useAuthGuard();
   const router = useRouter();
+  const { like } = usePostMutations();
 
   const handleToggleLike = async () => {
     try {
-      const result = await apiToggleLike(post.id);
+      const result = await like.mutateAsync(post.id);
       setLiked(result.liked);
       setLikes(result.likes);
-    } catch {
+    } catch (error) {
+      console.error("좋아요 실패:", error);
       // 옵티미스틱 업데이트 (실패 시 토글)
       setLiked(!liked);
       setLikes(likes + (liked ? -1 : 1));

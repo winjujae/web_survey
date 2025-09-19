@@ -1,13 +1,13 @@
 // src/components/containers/PostDetailContainer.tsx
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { formatKSTDateTime } from "@/lib/time";
 import type { Post } from "@/types/post";
 import { useAuth } from "@/features/auth/auth-context";
-import { updatePost, deletePost, toggleLike } from "@/lib/api";
-import { usePostQuery } from "@/features/posts/hooks";
+import { updatePost, deletePost } from "@/lib/api";
+import { usePostQuery, usePostMutations } from "@/features/posts/hooks";
 
 interface PostDetailContainerProps {
   post: Post;
@@ -22,6 +22,19 @@ export default function PostDetailContainer({ post: initialPost }: PostDetailCon
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useAuth();
   const router = useRouter();
+  const { like, view } = usePostMutations();
+
+  // 조회수 증가 (컴포넌트 마운트 시 한 번만)
+  useEffect(() => {
+    view.mutate(post.id, {
+      onSuccess: () => {
+        setPost(prev => ({
+          ...prev,
+          views: (prev.views || 0) + 1,
+        }));
+      },
+    });
+  }, [post.id]); // post.id가 변경될 때만 실행
 
   // 좋아요 토글
   const handleLike = async () => {
@@ -31,13 +44,14 @@ export default function PostDetailContainer({ post: initialPost }: PostDetailCon
     }
 
     try {
-      const result = await toggleLike(post.id /* , user.token */);
+      const result = await like.mutateAsync(post.id);
       setPost(prev => ({
         ...prev,
         liked: result.liked,
         likes: result.likes,
       }));
     } catch (error) {
+      console.error("좋아요 실패:", error);
       // 일시적으로 옵티미스틱 업데이트
       setPost(prev => ({
         ...prev,

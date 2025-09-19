@@ -3,43 +3,64 @@
 import { useState } from "react";
 import { useAuth } from "@/features/auth/auth-context";
 import { useAuthGuard } from "@/features/auth/withAuthGuard";
-import { usePosts } from "@/features/posts/posts-context";
-import { apiReact } from "@/features/posts/posts-service";
+import { usePostMutations } from "@/features/posts/hooks";
+import type { Post } from "@/types/post";
 
-export default function Reactions({ postId }: { postId: string }) {
-  const { token } = useAuth();          // 토큰 필요 시 사용
-  const { posts, toggleLike, vote } = usePosts();
+interface ReactionsProps {
+  post: Post;
+}
+
+export default function Reactions({ post }: ReactionsProps) {
+  const { user } = useAuth();
   const guard = useAuthGuard();
+  const { like, dislike } = usePostMutations();
   const [pending, setPending] = useState<null | "up" | "down">(null);
 
-  const p = posts.find(x => x.id === postId);
-  if (!p) return null;
-
-  const like = guard(async () => {
+  const handleLike = guard(async () => {
+    if (!user) return;
+    
     setPending("up");
-    const prev = { liked: p.liked, likes: p.likes ?? 0 };
-    toggleLike(p.id); // optimistic
-    try { await apiReact(p.id, 1, token ?? undefined); }
-    catch { /* 롤백 */ vote(p.id, -1); (p.liked = prev.liked); (p.likes = prev.likes); }
-    finally { setPending(null); }
+    try {
+      await like.mutateAsync(post.id);
+    } catch (error) {
+      console.error("좋아요 실패:", error);
+    } finally {
+      setPending(null);
+    }
   });
 
-  const dislike = guard(async () => {
+  const handleDislike = guard(async () => {
+    if (!user) return;
+    
     setPending("down");
-    const prev = { dislikes: p.dislikes ?? 0 };
-    vote(p.id, -1); // optimistic
-    try { await apiReact(p.id, -1, token ?? undefined); }
-    catch { vote(p.id, +1); (p.dislikes = prev.dislikes); }
-    finally { setPending(null); }
+    try {
+      await dislike.mutateAsync(post.id);
+    } catch (error) {
+      console.error("싫어요 실패:", error);
+    } finally {
+      setPending(null);
+    }
   });
 
   return (
     <div className="actions">
-      <button className="action" aria-pressed={!!p.liked} onClick={like} disabled={pending==="up"}>
-        👍 좋아요 {p.likes ?? 0}
+      <button 
+        className="action" 
+        aria-pressed={!!post.liked} 
+        onClick={handleLike} 
+        disabled={pending === "up" || like.isPending}
+        title={post.liked ? "좋아요 취소" : "좋아요"}
+      >
+        👍 좋아요 {post.likes ?? 0}
       </button>
-      <button className="action" aria-pressed={!!p.disliked} onClick={dislike} disabled={pending==="down"}>
-        👎 싫어요 {p.dislikes ?? 0}
+      <button 
+        className="action" 
+        aria-pressed={!!post.disliked} 
+        onClick={handleDislike} 
+        disabled={pending === "down" || dislike.isPending}
+        title={post.disliked ? "싫어요 취소" : "싫어요"}
+      >
+        👎 싫어요 {post.dislikes ?? 0}
       </button>
     </div>
   );

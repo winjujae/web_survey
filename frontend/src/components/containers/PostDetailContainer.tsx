@@ -143,8 +143,8 @@ export default function PostDetailContainer({ post: initialPost }: PostDetailCon
   // 작성자 또는 관리자 여부 판단 (백엔드에서 내려오는 author 식별자에 맞춰 보정 필요)
   // 권한 판별: 작성자 또는 관리자
   const canManage = !!user && (
-    user.id === (post as any).user_id ||
     user.id === (post as any).authorId ||
+    user.id === (post as any).user_id ||
     user.role === 'admin'
   );
 

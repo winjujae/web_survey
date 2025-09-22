@@ -17,6 +17,7 @@ export type BackendPost = components["schemas"]["PostViewDto"];
 
 // UI 전용 확장 타입 (클라이언트 상태/표현용 필드만 추가)
 export type Post = BackendPost & {
+  authorId?: string;
   excerpt?: string;
   liked?: boolean;
   disliked?: boolean;

@@ -10,6 +10,10 @@ export class PostViewDto {
   @Expose({ name: 'category_id' })
   boardId?: string;
 
+  @ApiPropertyOptional({ description: '작성자 사용자 ID', example: '123e4567-e89b-12d3-a456-426614174000' })
+  @Expose({ name: 'user_id' })
+  authorId?: string;
+
   @ApiProperty({ description: '제목', example: '미녹시딜 3개월차 변화 공유합니다' })
   @Expose()
   title!: string;

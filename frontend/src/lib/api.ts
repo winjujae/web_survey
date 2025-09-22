@@ -12,6 +12,7 @@ export function transformPost(post: PostViewDto): Post {
   return {
     id: String(post.id ?? ""),
     boardId: String(post.boardId ?? ""),
+    authorId: (post as any).authorId ? String((post as any).authorId) : undefined,
     title: String(post.title ?? "(제목 없음)"),
     excerpt: String((post.body ?? "").substring(0, 100)),
     body: String(post.body ?? ""),

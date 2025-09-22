@@ -294,8 +294,6 @@ export class UsersService {
         title: true,
         content: true,
         image_urls: true,
-        likes: true,
-        dislikes: true,
         view_count: true,
         created_at: true,
         updated_at: true,
@@ -329,7 +327,7 @@ export class UsersService {
       select: {
         comment_id: true,
         content: true,
-        likes: true,
+        likes_count: true,
         created_at: true,
         updated_at: true,
         post: {

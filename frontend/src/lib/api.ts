@@ -365,3 +365,21 @@ export async function fetchMyStats(): Promise<MyStats | null> {
     return null;
   }
 }
+
+export async function fetchMyPosts(page = 1, limit = 10) {
+  const res = await apiRequest(`/api/users/me/posts?page=${page}&limit=${limit}`);
+  if (res?.success) return { items: res.data ?? [], pagination: res.pagination };
+  return { items: [], pagination: null };
+}
+
+export async function fetchMyComments(page = 1, limit = 10) {
+  const res = await apiRequest(`/api/users/me/comments?page=${page}&limit=${limit}`);
+  if (res?.success) return { items: res.data ?? [], pagination: res.pagination };
+  return { items: [], pagination: null };
+}
+
+export async function fetchMyBookmarks(page = 1, limit = 10) {
+  const res = await apiRequest(`/api/users/me/bookmarks?page=${page}&limit=${limit}`);
+  if (res?.success) return { items: res.data ?? [], pagination: res.pagination };
+  return { items: [], pagination: null };
+}

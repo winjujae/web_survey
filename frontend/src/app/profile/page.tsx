@@ -2,12 +2,15 @@
 import { useAuth } from "@/features/auth/auth-context";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { fetchMyStats, type MyStats } from "@/lib/api";
+import { fetchMyStats, fetchMyPosts, fetchMyComments, fetchMyBookmarks, type MyStats } from "@/lib/api";
 
 export default function ProfilePage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [stats, setStats] = useState<MyStats | null>(null);
+  const [activeTab, setActiveTab] = useState<'posts' | 'comments' | 'bookmarks'>('posts');
+  const [list, setList] = useState<any[]>([]);
+  const [loadingList, setLoadingList] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -20,6 +23,32 @@ export default function ProfilePage() {
       fetchMyStats().then(setStats).catch(() => setStats(null));
     }
   }, [loading, user]);
+
+  useEffect(() => {
+    if (!loading || !user) return;
+  }, [loading, user]);
+
+  useEffect(() => {
+    const load = async () => {
+      if (!user) return;
+      setLoadingList(true);
+      try {
+        if (activeTab === 'posts') {
+          const { items } = await fetchMyPosts(1, 10);
+          setList(items);
+        } else if (activeTab === 'comments') {
+          const { items } = await fetchMyComments(1, 10);
+          setList(items);
+        } else {
+          const { items } = await fetchMyBookmarks(1, 10);
+          setList(items);
+        }
+      } finally {
+        setLoadingList(false);
+      }
+    };
+    load();
+  }, [activeTab, user]);
 
   if (loading) {
     return (
@@ -75,21 +104,52 @@ export default function ProfilePage() {
 
         <div className="profile-content">
           <div className="content-tabs">
-            <button className="tab-button active">게시글</button>
-            <button className="tab-button">댓글</button>
-            <button className="tab-button">북마크</button>
+            <button className={`tab-button ${activeTab === 'posts' ? 'active' : ''}`} onClick={() => setActiveTab('posts')}>게시글</button>
+            <button className={`tab-button ${activeTab === 'comments' ? 'active' : ''}`} onClick={() => setActiveTab('comments')}>댓글</button>
+            <button className={`tab-button ${activeTab === 'bookmarks' ? 'active' : ''}`} onClick={() => setActiveTab('bookmarks')}>북마크</button>
           </div>
-          
+
           <div className="content-area">
-            <div className="empty-state">
-              <p>아직 작성한 게시글이 없습니다.</p>
-              <button 
-                className="btn btn-outline"
-                onClick={() => router.push("/posts/new")}
-              >
-                첫 게시글 작성하기
-              </button>
-            </div>
+            {loadingList ? (
+              <div className="loading">로딩 중...</div>
+            ) : list.length === 0 ? (
+              <div className="empty-state">
+                <p>{activeTab === 'posts' ? '아직 작성한 게시글이 없습니다.' : activeTab === 'comments' ? '아직 작성한 댓글이 없습니다.' : '아직 북마크한 게시글이 없습니다.'}</p>
+                {activeTab === 'posts' && (
+                  <button 
+                    className="btn btn-outline"
+                    onClick={() => router.push("/posts/new")}
+                  >
+                    첫 게시글 작성하기
+                  </button>
+                )}
+              </div>
+            ) : (
+              <ul className="list">
+                {list.map((item, idx) => (
+                  <li key={idx} className="list-item">
+                    {activeTab === 'posts' && (
+                      <div>
+                        <div className="title">{item.title}</div>
+                        <div className="meta">{new Date(item.created_at || item.createdAt).toLocaleString('ko-KR', { hour12: false })}</div>
+                      </div>
+                    )}
+                    {activeTab === 'comments' && (
+                      <div>
+                        <div className="body">{item.content}</div>
+                        <div className="meta">{new Date(item.created_at || item.createdAt).toLocaleString('ko-KR', { hour12: false })}</div>
+                      </div>
+                    )}
+                    {activeTab === 'bookmarks' && (
+                      <div>
+                        <div className="title">{item.title}</div>
+                        <div className="meta">{new Date(item.created_at || item.createdAt).toLocaleString('ko-KR', { hour12: false })}</div>
+                      </div>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
       </div>

@@ -6,6 +6,7 @@ export type Comment = {
   userId: string;
   body: string;
   createdAt: string; // ISO
+  ownerId?: string;
 };
 
 // 백엔드 응답 DTO 기반 타입

@@ -4,9 +4,9 @@
 import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { formatKSTDateTime } from "@/lib/time";
-import type { Post } from "@/types/post";
+import type { Post, Comment as UiComment } from "@/types/post";
 import { useAuth } from "@/features/auth/auth-context";
-import { updatePost, deletePost } from "@/lib/api";
+import { updatePost, deletePost, fetchPostComments } from "@/lib/api";
 import CommentForm from "@/components/shared/CommentForm";
 import Comments from "@/components/shared/Comments";
 import { usePostQuery, usePostMutations } from "@/features/posts/hooks";
@@ -41,6 +41,23 @@ export default function PostDetailContainer({ post: initialPost }: PostDetailCon
         console.warn('조회수 증가 실패(서버):', err);
       },
     });
+  }, [post.id]);
+
+  // 댓글 목록 로드
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const list = await fetchPostComments(post.id);
+        if (!mounted) return;
+        setPost(prev => ({ ...prev, comments: list }));
+      } catch (err) {
+        console.warn('댓글 로드 실패:', err);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
   }, [post.id]);
 
   // 좋아요 토글
@@ -246,7 +263,22 @@ export default function PostDetailContainer({ post: initialPost }: PostDetailCon
         />
 
         <h3 style={{ margin: '16px 0 8px' }}>댓글 보기</h3>
-        <Comments postId={post.id} comments={post.comments ?? []} />
+        <Comments
+          postId={post.id}
+          comments={post.comments ?? []}
+          onUpdated={(updated: UiComment) =>
+            setPost(prev => ({
+              ...prev,
+              comments: (prev.comments ?? []).map(c => c.id === updated.id ? updated : c),
+            }))
+          }
+          onDeleted={(id: string) =>
+            setPost(prev => ({
+              ...prev,
+              comments: (prev.comments ?? []).filter(c => c.id !== id),
+            }))
+          }
+        />
       </section>
     </article>
   );

@@ -91,7 +91,8 @@ export class CommentsService {
       { parent_comment_id },
     );
 
-    return savedComment;
+    // 관계 포함하여 다시 조회해서 사용자 정보(닉네임 등)를 포함해 반환
+    return this.findOne(savedComment.comment_id);
   }
 
   async findAll(

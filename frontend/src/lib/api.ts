@@ -1,5 +1,5 @@
 // src/lib/api.ts
-import type { Post } from "@/types/post";
+import type { Post, Comment as UiComment } from "@/types/post";
 import type { components } from "@/types/generated/openapi";
 type CreatePostDto = components["schemas"]["CreatePostDto"];
 type UpdatePostDto = components["schemas"]["UpdatePostDto"];
@@ -23,6 +23,19 @@ export function transformPost(post: PostViewDto): Post {
     dislikes: Number(post.dislikes ?? 0),
     liked: false,
     disliked: false,
+  };
+}
+
+// 백엔드 댓글 → 프론트 댓글 타입으로 변환
+// 백엔드: { comment_id, user_id, content, created_at }
+function transformComment(raw: any): UiComment {
+  return {
+    id: String(raw?.comment_id ?? raw?.id ?? ""),
+    // 닉네임 우선 표시, 없으면 user_id
+    userId: String(raw?.user?.nickname ?? raw?.user_id ?? raw?.userId ?? ""),
+    ownerId: String(raw?.user_id ?? raw?.user?.user_id ?? ""),
+    body: String(raw?.content ?? raw?.body ?? ""),
+    createdAt: String(raw?.created_at ?? raw?.createdAt ?? new Date().toISOString()),
   };
 }
 
@@ -220,7 +233,7 @@ export async function createComment(input: {
   parent_comment_id?: string;
   is_anonymous?: boolean;
   anonymous_nickname?: string;
-}) {
+}): Promise<UiComment> {
   const responseData = await apiRequest(`/api/comments`, {
     method: 'POST',
     body: JSON.stringify(input),
@@ -230,7 +243,46 @@ export async function createComment(input: {
     throw new Error('댓글 등록에 실패했습니다.');
   }
 
-  return responseData.data;
+  return transformComment(responseData.data);
+}
+
+// 댓글 목록 조회 (부모 댓글 + 대댓글 포함 반환 가정)
+export async function fetchPostComments(postId: string): Promise<UiComment[]> {
+  const responseData = await apiRequest(`/api/comments/post/${postId}`);
+
+  if (!responseData.success || !Array.isArray(responseData.data)) {
+    return [];
+  }
+
+  return responseData.data.map(transformComment);
+}
+
+// 댓글 수정
+export async function updateComment(
+  id: string,
+  input: { content: string }
+): Promise<UiComment> {
+  const responseData = await apiRequest(`/api/comments/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(input),
+  });
+
+  if (!responseData.success || !responseData.data) {
+    throw new Error('댓글 수정에 실패했습니다.');
+  }
+
+  return transformComment(responseData.data);
+}
+
+// 댓글 삭제
+export async function deleteComment(id: string): Promise<void> {
+  const responseData = await apiRequest(`/api/comments/${id}`, {
+    method: 'DELETE',
+  });
+
+  if (!responseData.success) {
+    throw new Error('댓글 삭제에 실패했습니다.');
+  }
 }
 
 // 카테고리별 게시글 조회

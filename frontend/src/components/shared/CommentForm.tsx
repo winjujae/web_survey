@@ -8,9 +8,15 @@ import styles from "./CommentForm.module.css";
 export default function CommentForm({
   postId,
   onSubmitted,
+  parentId,
+  placeholder,
+  compact,
 }: {
   postId: string;
   onSubmitted: (c: any) => void;
+  parentId?: string;
+  placeholder?: string;
+  compact?: boolean;
 }) {
   const { user } = useAuth();
   const [body, setBody] = useState("");
@@ -25,7 +31,7 @@ export default function CommentForm({
     setErr("");
     setPending(true);
     try {
-      const c = await createComment({ post_id: postId, content: body });
+      const c = await createComment({ post_id: postId, content: body, parent_comment_id: parentId });
       setBody("");
       requestAnimationFrame(() => {
         if (taRef.current) taRef.current.scrollTop = taRef.current.scrollHeight;
@@ -44,7 +50,7 @@ export default function CommentForm({
         <textarea
           ref={taRef}
           className={styles.textarea}
-          placeholder="댓글을 입력하세요"
+          placeholder={placeholder || (parentId ? "답글을 입력하세요" : "댓글을 입력하세요")}
           value={body}
           onChange={(e) => {
             setBody(e.target.value);
@@ -61,7 +67,7 @@ export default function CommentForm({
 
       <div className={styles.actions}>
         <button type="submit" className={styles.submit} disabled={pending}>
-          등록
+          {parentId ? "답글 등록" : "등록"}
         </button>
       </div>
 

@@ -29,14 +29,18 @@ export function transformPost(post: PostViewDto): Post {
 // 백엔드 댓글 → 프론트 댓글 타입으로 변환
 // 백엔드: { comment_id, user_id, content, created_at }
 function transformComment(raw: any): UiComment {
-  return {
+  const c: UiComment = {
     id: String(raw?.comment_id ?? raw?.id ?? ""),
     // 닉네임 우선 표시, 없으면 user_id
     userId: String(raw?.user?.nickname ?? raw?.user_id ?? raw?.userId ?? ""),
     ownerId: String(raw?.user_id ?? raw?.user?.user_id ?? ""),
     body: String(raw?.content ?? raw?.body ?? ""),
     createdAt: String(raw?.created_at ?? raw?.createdAt ?? new Date().toISOString()),
+    status: String(raw?.status ?? "active").toLowerCase() === 'deleted' ? 'deleted' : 'active',
+    parentId: raw?.parent_comment_id ? String(raw.parent_comment_id) : undefined,
+    replies: Array.isArray(raw?.replies) ? raw.replies.map(transformComment) : undefined,
   };
+  return c;
 }
 
 // 공통 fetch 함수 (Next.js 15 캐싱 정책 적용)

@@ -7,6 +7,9 @@ export type Comment = {
   body: string;
   createdAt: string; // ISO
   ownerId?: string;
+  status?: "active" | "deleted";
+  parentId?: string;
+  replies?: Comment[];
 };
 
 // 백엔드 응답 DTO 기반 타입

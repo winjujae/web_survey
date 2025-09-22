@@ -118,7 +118,7 @@ export class CommentsService {
       .leftJoinAndSelect('comment.post', 'post')
       .leftJoinAndSelect('comment.replies', 'replies')
       .leftJoinAndSelect('replies.user', 'replyUser')
-      .where('comment.status = :status', { status: CommentStatus.ACTIVE });
+      .where('comment.status IN (:...statuses)', { statuses: [CommentStatus.ACTIVE, CommentStatus.DELETED] });
 
     // 필터 적용
     if (filters.post_id) {

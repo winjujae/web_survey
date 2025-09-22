@@ -275,7 +275,7 @@ export default function PostDetailContainer({ post: initialPost }: PostDetailCon
           onDeleted={(id: string) =>
             setPost(prev => ({
               ...prev,
-              comments: (prev.comments ?? []).filter(c => c.id !== id),
+              comments: (prev.comments ?? []).map(c => c.id === id ? { ...c, status: 'deleted', body: '' } as UiComment : c),
             }))
           }
         />

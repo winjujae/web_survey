@@ -99,29 +99,7 @@ export class UsersController {
   }
 
   // 프로필 관련 API
-  @Get(':id/profile')
-  async getProfile(@Param('id', ParseUUIDPipe) id: string): Promise<{
-    success: boolean;
-    data: UserProfile;
-  }> {
-    const profile = await this.usersService.getProfile(id);
-    return {
-      success: true,
-      data: profile,
-    };
-  }
-
-  @Get(':id/stats')
-  async getUserStats(@Param('id', ParseUUIDPipe) id: string): Promise<{
-    success: boolean;
-    data: UserStats;
-  }> {
-    const stats = await this.usersService.getUserStats(id);
-    return {
-      success: true,
-      data: stats,
-    };
-  }
+  // NOTE: 'me/*' 라우트가 동적 ':id/*' 보다 먼저 선언되어야 '/me/..' 경로가 올바르게 매칭됩니다.
 
   // 마이페이지 관련 API
   @Get('me/profile')

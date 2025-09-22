@@ -1,7 +1,8 @@
 "use client";
 import { useAuth } from "@/features/auth/auth-context";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { fetchMyStats, fetchMyPosts, fetchMyComments, fetchMyBookmarks, type MyStats } from "@/lib/api";
 
 export default function ProfilePage() {
@@ -11,6 +12,16 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<'posts' | 'comments' | 'bookmarks'>('posts');
   const [list, setList] = useState<any[]>([]);
   const [loadingList, setLoadingList] = useState(false);
+
+  const formatDate = (d?: any) => {
+    try {
+      return new Date(d ?? new Date()).toLocaleString('ko-KR', { hour12: false });
+    } catch {
+      return '';
+    }
+  };
+
+  const getPostId = (item: any): string => String(item?.post_id ?? item?.id ?? item?.post?.post_id ?? "");
 
   useEffect(() => {
     if (!loading && !user) {
@@ -126,28 +137,46 @@ export default function ProfilePage() {
               </div>
             ) : (
               <ul className="list">
-                {list.map((item, idx) => (
-                  <li key={idx} className="list-item">
-                    {activeTab === 'posts' && (
-                      <div>
-                        <div className="title">{item.title}</div>
-                        <div className="meta">{new Date(item.created_at || item.createdAt).toLocaleString('ko-KR', { hour12: false })}</div>
-                      </div>
-                    )}
-                    {activeTab === 'comments' && (
-                      <div>
-                        <div className="body">{item.content}</div>
-                        <div className="meta">{new Date(item.created_at || item.createdAt).toLocaleString('ko-KR', { hour12: false })}</div>
-                      </div>
-                    )}
-                    {activeTab === 'bookmarks' && (
-                      <div>
-                        <div className="title">{item.title}</div>
-                        <div className="meta">{new Date(item.created_at || item.createdAt).toLocaleString('ko-KR', { hour12: false })}</div>
-                      </div>
-                    )}
-                  </li>
-                ))}
+                {list.map((item, idx) => {
+                  const postId = getPostId(item);
+                  if (activeTab === 'posts' || activeTab === 'bookmarks') {
+                    return (
+                      <li key={idx} className="list-item">
+                        <Link href={postId ? `/posts/${postId}` : '#'} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
+                          <div className="title" style={{ fontWeight: 600 }}>{item.title ?? '(제목 없음)'}</div>
+                          <div className="meta" style={{ color: 'var(--muted)' }}>
+                            {formatDate(item.created_at || item.createdAt)}
+                            {typeof item.view_count === 'number' && (
+                              <>
+                                <span className="dot" style={{ margin: '0 6px' }}>·</span>
+                                조회 {item.view_count}
+                              </>
+                            )}
+                          </div>
+                        </Link>
+                      </li>
+                    );
+                  }
+                  // comments
+                  return (
+                    <li key={idx} className="list-item">
+                      <Link href={postId ? `/posts/${postId}` : '#'} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
+                        <div className="body" style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                          {item.content ?? item.body ?? ''}
+                        </div>
+                        <div className="meta" style={{ color: 'var(--muted)' }}>
+                          {formatDate(item.created_at || item.createdAt)}
+                          {item?.post?.title && (
+                            <>
+                              <span className="dot" style={{ margin: '0 6px' }}>·</span>
+                              원문: {item.post.title}
+                            </>
+                          )}
+                        </div>
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </div>

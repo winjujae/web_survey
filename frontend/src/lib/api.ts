@@ -344,3 +344,24 @@ export async function searchPosts(
     return { posts: [], total: 0, totalPages: 0 };
   }
 }
+
+// ===== 프로필/마이페이지 API =====
+export type MyStats = {
+  total_posts: number;
+  total_comments: number;
+  total_bookmarks: number;
+  posts_this_month: number;
+  comments_this_month: number;
+  likes_received: number;
+};
+
+export async function fetchMyStats(): Promise<MyStats | null> {
+  try {
+    const res = await apiRequest('/api/users/me/stats');
+    if (res?.success && res?.data) return res.data as MyStats;
+    return null;
+  } catch (e) {
+    console.warn('fetchMyStats 실패:', e);
+    return null;
+  }
+}

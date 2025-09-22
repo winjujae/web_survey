@@ -6,11 +6,12 @@ import { User } from './entities/user.entity';
 import { Post } from '../posts/entities/post.entity';
 import { Comment } from '../comments/entities/comment.entity';
 import { Bookmark } from '../bookmarks/entities/bookmark.entity';
+import { Like } from '../posts/entities/like.entity';
 import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Post, Comment, Bookmark]),
+    TypeOrmModule.forFeature([User, Post, Comment, Bookmark, Like]),
     AuthModule,
   ],
   controllers: [UsersController],

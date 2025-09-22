@@ -1,17 +1,25 @@
 "use client";
 import { useAuth } from "@/features/auth/auth-context";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { fetchMyStats, type MyStats } from "@/lib/api";
 
 export default function ProfilePage() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const [stats, setStats] = useState<MyStats | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
       router.push("/");
     }
   }, [user, loading, router]);
+
+  useEffect(() => {
+    if (!loading && user) {
+      fetchMyStats().then(setStats).catch(() => setStats(null));
+    }
+  }, [loading, user]);
 
   if (loading) {
     return (
@@ -43,15 +51,15 @@ export default function ProfilePage() {
 
         <div className="profile-stats">
           <div className="stat-item">
-            <div className="stat-number">0</div>
+            <div className="stat-number">{stats?.total_posts ?? 0}</div>
             <div className="stat-label">게시글</div>
           </div>
           <div className="stat-item">
-            <div className="stat-number">0</div>
+            <div className="stat-number">{stats?.total_comments ?? 0}</div>
             <div className="stat-label">댓글</div>
           </div>
           <div className="stat-item">
-            <div className="stat-number">0</div>
+            <div className="stat-number">{stats?.likes_received ?? 0}</div>
             <div className="stat-label">좋아요</div>
           </div>
         </div>

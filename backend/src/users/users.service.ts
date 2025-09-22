@@ -5,11 +5,12 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { MoreThanOrEqual, Repository } from 'typeorm';
 import { User, UserRole } from './entities/user.entity';
 import { Post, PostStatus } from '../posts/entities/post.entity';
 import { Comment, CommentStatus } from '../comments/entities/comment.entity';
 import { Bookmark } from '../bookmarks/entities/bookmark.entity';
+import { Like, LikeType, LikeValue } from '../posts/entities/like.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
@@ -50,6 +51,8 @@ export class UsersService {
     private commentRepository: Repository<Comment>,
     @InjectRepository(Bookmark)
     private bookmarkRepository: Repository<Bookmark>,
+    @InjectRepository(Like)
+    private likeRepository: Repository<Like>,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -238,37 +241,37 @@ export class UsersService {
         where: {
           user_id: userId,
           status: PostStatus.PUBLISHED,
-          created_at: { $gte: startOfMonth } as any,
+          created_at: MoreThanOrEqual(startOfMonth),
         },
       }),
       this.commentRepository.count({
         where: {
           user_id: userId,
           status: CommentStatus.ACTIVE,
-          created_at: { $gte: startOfMonth } as any,
+          created_at: MoreThanOrEqual(startOfMonth),
         },
       }),
     ]);
 
     // 받은 좋아요 수 계산
-    const [postLikes, commentLikes] = await Promise.all([
-      this.postRepository
-        .createQueryBuilder('post')
-        .select('SUM(post.likes)', 'total')
+    const [postLikesCount, commentLikesCount] = await Promise.all([
+      this.likeRepository
+        .createQueryBuilder('like')
+        .innerJoin(Post, 'post', 'post.post_id = like.post_id')
         .where('post.user_id = :userId', { userId })
-        .andWhere('post.status = :status', { status: PostStatus.PUBLISHED })
-        .getRawOne(),
-      this.commentRepository
-        .createQueryBuilder('comment')
-        .select('SUM(comment.likes)', 'total')
+        .andWhere('like.type = :type', { type: LikeType.POST })
+        .andWhere('like.value = :value', { value: LikeValue.LIKE })
+        .getCount(),
+      this.likeRepository
+        .createQueryBuilder('like')
+        .innerJoin(Comment, 'comment', 'comment.comment_id = like.comment_id')
         .where('comment.user_id = :userId', { userId })
-        .andWhere('comment.status = :status', { status: CommentStatus.ACTIVE })
-        .getRawOne(),
+        .andWhere('like.type = :type', { type: LikeType.COMMENT })
+        .andWhere('like.value = :value', { value: LikeValue.LIKE })
+        .getCount(),
     ]);
 
-    const likesReceived =
-      (parseInt(postLikes?.total || '0', 10) || 0) +
-      (parseInt(commentLikes?.total || '0', 10) || 0);
+    const likesReceived = postLikesCount + commentLikesCount;
 
     return {
       total_posts: totalPosts,

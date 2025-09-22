@@ -7,6 +7,8 @@ import { formatKSTDateTime } from "@/lib/time";
 import type { Post } from "@/types/post";
 import { useAuth } from "@/features/auth/auth-context";
 import { updatePost, deletePost } from "@/lib/api";
+import CommentForm from "@/components/shared/CommentForm";
+import Comments from "@/components/shared/Comments";
 import { usePostQuery, usePostMutations } from "@/features/posts/hooks";
 
 interface PostDetailContainerProps {
@@ -121,6 +123,10 @@ export default function PostDetailContainer({ post: initialPost }: PostDetailCon
     }
   };
 
+  // 작성자 또는 관리자 여부 판단 (백엔드에서 내려오는 author 식별자에 맞춰 보정 필요)
+  // 권한 판별: 현재 User 타입에 role이 없어, 관리자 여부는 서버 응답 확장 전까지 제외
+  const canManage = !!user && (user.id === (post as any).user_id || user.id === (post as any).authorId);
+
   if (isEditing) {
     return (
       <div className="card" style={{ padding: 16 }}>
@@ -199,7 +205,7 @@ export default function PostDetailContainer({ post: initialPost }: PostDetailCon
       </div>
 
       {/* 작성자 또는 관리자만 수정/삭제 버튼 표시 */}
-      {user && (
+      {canManage && (
         <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
           <button onClick={() => setIsEditing(true)} className="btn">
             수정
@@ -223,6 +229,21 @@ export default function PostDetailContainer({ post: initialPost }: PostDetailCon
           ))}
         </div>
       )}
+
+      {/* 댓글 섹션: 작성 + 목록 */}
+      <hr style={{ borderColor: "var(--border)", margin: "16px 0" }} />
+      <section aria-label="댓글 섹션" style={{ marginTop: 8 }}>
+        <h3 style={{ margin: '8px 0' }}>댓글 쓰기</h3>
+        <CommentForm
+          postId={post.id}
+          onSubmitted={(c) =>
+            setPost((prev) => ({ ...prev, comments: [ ...(prev.comments ?? []), c ] }))
+          }
+        />
+
+        <h3 style={{ margin: '16px 0 8px' }}>댓글 보기</h3>
+        <Comments postId={post.id} comments={post.comments ?? []} />
+      </section>
     </article>
   );
 }

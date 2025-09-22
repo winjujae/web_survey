@@ -24,17 +24,22 @@ export default function PostDetailContainer({ post: initialPost }: PostDetailCon
   const router = useRouter();
   const { like, view } = usePostMutations();
 
-  // 조회수 증가 (컴포넌트 마운트 시 한 번만)
+  // 조회수 증가 (하이브리드: 즉시 UI 반영 + 백그라운드 서버 반영)
   useEffect(() => {
+    // 1) 즉시 UI 반영 (낙관적 증가)
+    setPost(prev => ({
+      ...prev,
+      views: (prev.views || 0) + 1,
+    }));
+
+    // 2) 서버 반영 (실패해도 UI는 유지)
     view.mutate(post.id, {
-      onSuccess: () => {
-        setPost(prev => ({
-          ...prev,
-          views: (prev.views || 0) + 1,
-        }));
+      // 실패 시 별도 롤백은 하지 않음 (간단한 UX 유지)
+      onError: (err) => {
+        console.warn('조회수 증가 실패(서버):', err);
       },
     });
-  }, [post.id]); // post.id가 변경될 때만 실행
+  }, [post.id]);
 
   // 좋아요 토글
   const handleLike = async () => {

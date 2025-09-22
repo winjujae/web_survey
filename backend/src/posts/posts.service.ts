@@ -348,6 +348,20 @@ export class PostsService {
     };
   }
 
+  /**
+   * 게시글 조회수 증가
+   * 존재하지 않는 게시글이면 404를 던집니다.
+   */
+  async incrementView(id: string): Promise<void> {
+    const post = await this.postRepository.findOne({ where: { post_id: id } });
+    if (!post) {
+      throw new NotFoundException('게시글을 찾을 수 없습니다.');
+    }
+
+    post.view_count = (post.view_count ?? 0) + 1;
+    await this.postRepository.save(post);
+  }
+
   async getUserPosts(userId: string, pagination: PaginationOptions = {}): Promise<{
     posts: Post[];
     total: number;

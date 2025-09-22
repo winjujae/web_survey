@@ -240,6 +240,27 @@ export class PostsController {
     };
   }
 
+  @Post(':id/view')
+  @ApiParam({
+    name: 'id',
+    description: '게시글 ID',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiOperation({
+    summary: '게시글 조회수 증가',
+    description: '특정 게시글의 조회수를 1 증가시킵니다.',
+  })
+  @ApiOkResponse({ description: '조회수 증가 성공' })
+  async incrementView(
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    await this.postsService.incrementView(id);
+    return {
+      success: true,
+      message: '조회수가 증가되었습니다.',
+    };
+  }
+
   @Get('user/:userId')
   async getUserPosts(
     @Param('userId', ParseUUIDPipe) userId: string,

@@ -124,8 +124,12 @@ export default function PostDetailContainer({ post: initialPost }: PostDetailCon
   };
 
   // 작성자 또는 관리자 여부 판단 (백엔드에서 내려오는 author 식별자에 맞춰 보정 필요)
-  // 권한 판별: 현재 User 타입에 role이 없어, 관리자 여부는 서버 응답 확장 전까지 제외
-  const canManage = !!user && (user.id === (post as any).user_id || user.id === (post as any).authorId);
+  // 권한 판별: 작성자 또는 관리자
+  const canManage = !!user && (
+    user.id === (post as any).user_id ||
+    user.id === (post as any).authorId ||
+    user.role === 'admin'
+  );
 
   if (isEditing) {
     return (

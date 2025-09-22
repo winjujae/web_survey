@@ -8,4 +8,5 @@ export type User = {
   provider?: "email" | "google";
   nickname?: string;
   bio?: string; // 자기소개
+  role?: "user" | "admin" | "expert"; // 권한 (백엔드 스키마에 맞춤)
 };

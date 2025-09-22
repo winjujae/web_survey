@@ -46,6 +46,7 @@ function transformUser(u: any): User {
     provider: (bu as any)?.provider as any,
     nickname: (bu as any)?.nickname,
     bio: (bu as any)?.bio,
+    role: (bu as any)?.role as any,
   };
 }
 

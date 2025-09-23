@@ -24,7 +24,7 @@ NestJS + TypeScript + TypeORM + Neon 기반의 종합적인 탈모 커뮤니티 
 
 - **Backend**: NestJS, TypeScript
 - **Database**: PostgreSQL (Neon), TypeORM
-- **Authentication**: JWT, Passport.js
+- **Authentication**: JWT, Passport.js (Google, Kakao)
 - **Validation**: class-validator, class-transformer
 - **Documentation**: Swagger 
 
@@ -60,11 +60,18 @@ NestJS + TypeScript + TypeORM + Neon 기반의 종합적인 탈모 커뮤니티 
 
    # Application
    NODE_ENV=development
-   PORT=3000
+   PORT=3300
+   FRONTEND_URL=http://localhost:3000
 
-   # File Upload
-   MAX_FILE_SIZE=5242880
-   UPLOAD_DEST=./uploads
+   # Google OAuth
+   GOOGLE_CLIENT_ID=...
+   GOOGLE_CLIENT_SECRET=...
+   GOOGLE_CALLBACK_URL=http://localhost:3300/api/auth/google/callback
+
+   # Kakao OAuth
+   KAKAO_CLIENT_ID=Kakao_REST_API_KEY
+   # 선택값(활성화한 경우만): KAKAO_CLIENT_SECRET=...
+   KAKAO_CALLBACK_URL=http://localhost:3300/api/auth/kakao/callback
    ```
 
 3. **데이터베이스 마이그레이션**
@@ -86,7 +93,7 @@ npm run start:prod
 npm run build
 ```
 
-서버가 `http://localhost:3000`에서 실행됩니다.
+서버가 `http://localhost:3300`에서 실행됩니다.
 
 ## 📚 API 문서
 
@@ -100,6 +107,13 @@ npm run build
 | POST | `/api/auth/refresh` | 토큰 갱신 | ✅ |
 | GET | `/api/auth/profile` | 프로필 조회 | ✅ |
 | PUT | `/api/auth/profile` | 프로필 수정 | ✅ |
+| GET | `/api/auth/session` | 세션 상태 조회 | ❌ |
+| GET | `/api/auth/google/login` | 구글 로그인 시작 | ❌ |
+| GET | `/api/auth/google/callback` | 구글 콜백 | ❌ |
+| GET | `/api/auth/kakao/login` | 카카오 로그인 시작 | ❌ |
+| GET | `/api/auth/kakao/callback` | 카카오 콜백 | ❌ |
+
+- 소셜 로그인 성공 시 백엔드는 쿠키(`access_token`, `refresh_token`)만 설정하고, 토큰은 응답 본문에 포함하지 않습니다. 이후 프론트는 `/api/auth/session`으로 사용자 정보를 조회합니다.
 
 ### 📝 게시글 API
 
@@ -145,9 +159,14 @@ npm run build
 
 ## 🔍 API 사용 예시
 
+### 소셜 로그인(프런트)
+- 구글: `GET ${FRONTEND_URL}/auth/login → 백엔드에서 ${BACKEND}/api/auth/google/login 로 리다이렉트`
+- 카카오: `GET ${FRONTEND_URL}/auth/login → 백엔드에서 ${BACKEND}/api/auth/kakao/login 로 리다이렉트`
+- 콜백 성공 시: 백엔드가 쿠키 설정 후 `${FRONTEND_URL}/auth/callback`으로 리다이렉트
+
 ### 회원가입
 ```bash
-curl -X POST http://localhost:3000/api/auth/register \
+curl -X POST http://localhost:3300/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "email": "user@example.com",
@@ -158,7 +177,7 @@ curl -X POST http://localhost:3000/api/auth/register \
 
 ### 게시글 작성
 ```bash
-curl -X POST http://localhost:3000/api/posts \
+curl -X POST http://localhost:3300/api/posts \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -226,7 +245,7 @@ src/
 ├── auth/                    # 인증 모듈
 │   ├── dto/                # DTO
 │   ├── guards/             # 가드
-│   ├── strategies/         # 전략
+│   ├── strategies/         # 전략 (google, kakao)
 │   └── ...
 ├── users/                  # 사용자 모듈
 ├── posts/                  # 게시글 모듈
@@ -264,3 +283,4 @@ src/
 - **Railway**: 풀스택 배포
 - **AWS**: 확장성 있는 배포
 - **Docker**: 컨테이너화 배포
+

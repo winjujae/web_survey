@@ -11,8 +11,22 @@ import { RefreshTokenStrategy } from './strategies/refresh-token.strategy';
 import { JwtAuthGuard } from './guards/jwt.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { GoogleStrategy } from './strategies/google.strategy';
+import { NestKakaoStrategy } from './strategies/kakao.strategy';
 
 import { SessionSerializer } from './serializer/serializer';
+
+// Kakao 전략을 ConfigService 초기화 이후에 조건부로 인스턴스화
+const KakaoStrategyProvider = {
+  provide: NestKakaoStrategy,
+  inject: [ConfigService],
+  useFactory: (configService: ConfigService) => {
+    const clientId = configService.get<string>('KAKAO_CLIENT_ID');
+    if (!clientId) {
+      return undefined as unknown as NestKakaoStrategy;
+    }
+    return new NestKakaoStrategy();
+  },
+};
 
 @Module({
   imports: [
@@ -38,6 +52,7 @@ import { SessionSerializer } from './serializer/serializer';
     JwtAuthGuard,
     RolesGuard,
     GoogleStrategy,
+    KakaoStrategyProvider,
     SessionSerializer,
   ],
   exports: [AuthService, JwtAuthGuard, RolesGuard, PassportModule, JwtModule, GoogleStrategy],

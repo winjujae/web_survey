@@ -255,6 +255,58 @@ export class AuthService {
     }
   }
 
+  async findOrCreateKakaoUser(kakaoUserInfo: any): Promise<User> {
+    const { kakaoId, email, name, picture, emailVerified } = kakaoUserInfo;
+
+    try {
+      // 1. Kakao ID로 기존 사용자 찾기
+      let user = await this.userRepository.findOne({
+        where: { kakao_id: kakaoId }
+      });
+
+      if (user) {
+        if (user.avatar_url !== picture && picture) {
+          user.avatar_url = picture;
+          await this.userRepository.save(user);
+        }
+        return user;
+      }
+
+      // 2. 이메일이 있는 경우 이메일로 기존 사용자 찾기 (계정 연결)
+      if (email) {
+        user = await this.userRepository.findOne({ where: { email } });
+        if (user) {
+          user.kakao_id = kakaoId;
+          user.provider = 'kakao';
+          user.email_verified = emailVerified || true;
+          if (picture) user.avatar_url = picture;
+          return await this.userRepository.save(user);
+        }
+      }
+
+      // 3. 새 사용자 생성 (이메일이 없을 수도 있음)
+      const baseNickname = name || (email ? email.split('@')[0] : `kakao${kakaoId.slice(-6)}`);
+      const uniqueNickname = await this.generateUniqueNickname(baseNickname);
+
+      const newUser = this.userRepository.create({
+        email: email || `kakao_${kakaoId}@placeholder.local`,
+        name: name,
+        nickname: uniqueNickname,
+        kakao_id: kakaoId,
+        provider: 'kakao',
+        email_verified: Boolean(emailVerified),
+        avatar_url: picture,
+        password: await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 12),
+        role: UserRole.USER,
+      });
+
+      return await this.userRepository.save(newUser);
+    } catch (error) {
+      console.error('Kakao 사용자 생성/찾기 실패:', error);
+      throw new BadRequestException('카카오 계정 처리 중 오류가 발생했습니다.');
+    }
+  }
+
   private async generateUniqueNickname(baseName: string): Promise<string> {
     // 특수문자 제거 및 기본 정리
     let cleanName = baseName

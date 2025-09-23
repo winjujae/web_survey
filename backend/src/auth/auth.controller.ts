@@ -25,6 +25,7 @@ import { GoogleLoginDto } from './dto/google-login.dto';
 import { JwtAuthGuard } from './guards/jwt.guard';
 import { User } from '../users/entities/user.entity';
 import { GoogleAuthGuard } from './guards/Google.auth.guard';
+import { KakaoAuthGuard } from './guards/Kakao.auth.guard';
 import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('auth')
@@ -195,6 +196,43 @@ export class AuthController {
       return res.redirect(`${frontendUrl}/auth/callback`);
     } catch (error) {
       console.error('구글 콜백 처리 실패:', error);
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      return res.redirect(`${frontendUrl}/auth/error?message=로그인 처리 중 오류가 발생했습니다.`);
+    }
+  }
+
+  @Get('kakao/login')
+  @UseGuards(KakaoAuthGuard)
+  @ApiOperation({
+    summary: '카카오 로그인',
+    description: '카카오 OAuth 로그인을 시작합니다.',
+  })
+  async handleKakaoLogin() {
+    // KakaoAuthGuard가 리다이렉션 처리
+    return { message: '카카오 로그인 페이지로 리다이렉트합니다.' };
+  }
+
+  @Get('kakao/callback')
+  @UseGuards(KakaoAuthGuard)
+  @ApiOperation({
+    summary: '카카오 로그인 콜백',
+    description: '카카오 OAuth 콜백을 처리하고 JWT 토큰을 발급합니다.',
+  })
+  async handleKakaoCallback(@Request() req: any, @Response() res: any) {
+    try {
+      const kakaoUserInfo = req.user;
+      if (!kakaoUserInfo) {
+        return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/error?message=카카오 인증에 실패했습니다.`);
+      }
+
+      const user = await this.authService.findOrCreateKakaoUser(kakaoUserInfo);
+      const tokens = await this.authService.generateTokens(user);
+      this.setAuthCookies(res, tokens);
+
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      return res.redirect(`${frontendUrl}/auth/callback`);
+    } catch (error) {
+      console.error('카카오 콜백 처리 실패:', error);
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
       return res.redirect(`${frontendUrl}/auth/error?message=로그인 처리 중 오류가 발생했습니다.`);
     }

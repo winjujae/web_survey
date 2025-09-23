@@ -75,6 +75,11 @@ export default function LoginModal({ open, onClose }: { open: boolean; onClose: 
     window.location.href = `${apiUrl}/api/auth/google/login`;
   };
 
+  const handleKakaoLogin = () => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3300';
+    window.location.href = `${apiUrl}/api/auth/kakao/login`;
+  };
+
   const getTitle = () => {
     switch (mode) {
       case "login": return "로그인";
@@ -259,6 +264,29 @@ export default function LoginModal({ open, onClose }: { open: boolean; onClose: 
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
               </svg>
               Google로 로그인
+            </button>
+
+            <button
+              type="button"
+              onClick={handleKakaoLogin}
+              className="btn"
+              style={{
+                width: "100%",
+                marginBottom: 4,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+                background: "#FEE500",
+                color: "#191600",
+                border: "1px solid #e5e7eb"
+              }}
+            >
+              {/* 간단한 말풍선 아이콘 */}
+              <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden>
+                <path fill="#191600" d="M12 3C6.477 3 2 6.686 2 11c0 2.208 1.148 4.2 2.996 5.62-.121 1.106-.56 2.53-1.72 3.705-.218.221-.057.603.247.603 1.66-.06 3.073-.59 4.112-1.13C9.03 20.268 10.48 20.5 12 20.5c5.523 0 10-3.686 10-8.5S17.523 3 12 3Z"/>
+              </svg>
+              카카오로 로그인
             </button>
           </>
         )}

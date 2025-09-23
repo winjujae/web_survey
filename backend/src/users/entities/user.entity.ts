@@ -100,13 +100,20 @@ export class User {
   @Column({ nullable: true, unique: true })
   google_id?: string;
 
+  @ApiPropertyOptional({
+    description: '카카오 고유 ID',
+    example: '9876543210',
+  })
+  @Column({ nullable: true, unique: true })
+  kakao_id?: string;
+
   @ApiProperty({
     description: '로그인 제공자',
     example: 'email',
-    enum: ['email', 'google'],
+    enum: ['email', 'google', 'kakao'],
   })
   @Column({ default: 'email' })
-  provider: 'email' | 'google';
+  provider: 'email' | 'google' | 'kakao';
 
   @ApiProperty({
     description: '이메일 인증 상태',
